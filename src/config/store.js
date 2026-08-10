@@ -5,7 +5,7 @@
 export const STORE_CONFIG = {
   name: 'Essence Polar',
   tagline: 'Perfumería de lujo',
-  whatsappNumber: '573000000000', // reemplazar por el número real, formato internacional sin '+' ni espacios
+  whatsappNumber: '573227330401', // formato internacional sin '+' ni espacios (57 = Colombia)
   currency: 'COP',
   locale: 'es-CO',
   email: 'contacto@essence.com',

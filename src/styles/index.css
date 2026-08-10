@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Tema oscuro (por defecto). El tema claro sobreescribe estas variables
+     en :root[data-theme="light"] más abajo — los componentes no cambian,
+     solo el valor de la variable. */
+  --color-ink: #0d0c0b;
+  --color-charcoal: #171513;
+  --color-surface: #1f1c1a;
+  --color-ivory: #f6f2ea;
+  --color-ivory-dim: #ddd6c8;
+  --color-gold: #c8a45c;
+  --color-gold-light: #e4c988;
+  --color-gold-dark: #9c7c3d;
+
+  /* Texto sobre fondo dorado (botones primarios): siempre oscuro, en
+     ambos temas, porque el dorado no cambia de brillo entre tema claro/oscuro. */
+  --color-on-gold: #0d0c0b;
+}
+
+:root[data-theme="light"] {
+  --color-ink: #f7f2e6;
+  --color-charcoal: #fffdf9;
+  --color-surface: #efe6d2;
+  --color-ivory: #1c1912;
+  --color-ivory-dim: #6b6153;
+  --color-gold: #a9822f;
+  --color-gold-light: #c8a45c;
+  --color-gold-dark: #7d5f22;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-ink);
+    color: var(--color-ivory);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .tracking-widest-plus {
+    letter-spacing: 0.28em;
+  }
+
+  .bg-noise {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out both;
+}

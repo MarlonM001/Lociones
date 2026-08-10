@@ -80,6 +80,13 @@ export async function getOrders() {
   return readOrders()
 }
 
+export async function getOrdersByUser(userId) {
+  await delay()
+  return readOrders()
+    .filter((order) => order.userId === userId)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+}
+
 export async function getOrderById(id) {
   await delay()
   return readOrders().find((order) => order.id === Number(id)) ?? null

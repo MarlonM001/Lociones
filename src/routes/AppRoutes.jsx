@@ -10,6 +10,7 @@ import { CartPage } from '@/pages/CartPage'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { References } from '@/pages/References'
+import { Profile } from '@/pages/Profile'
 import { ComingSoon } from '@/pages/ComingSoon'
 import { AdminDashboard } from '@/pages/admin/Dashboard'
 import { AdminProducts } from '@/pages/admin/Products'
@@ -55,7 +56,7 @@ export function AppRoutes() {
           path="/perfil"
           element={
             <RequireAuth>
-              <ComingSoon title="Tu perfil" message="El detalle de perfil y pedidos anteriores llega en la próxima fase." />
+              <Profile />
             </RequireAuth>
           }
         />

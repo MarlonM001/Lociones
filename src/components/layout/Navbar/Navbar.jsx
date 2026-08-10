@@ -103,9 +103,9 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <div className="hidden items-center gap-3 sm:flex">
-              <span className="text-sm text-ivory-dim">
+              <NavLink to="/perfil" className="text-sm text-ivory-dim hover:text-ivory">
                 Hola, <span className="text-ivory">{user.name.split(' ')[0]}</span>
-              </span>
+              </NavLink>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -174,9 +174,9 @@ export function Navbar() {
             ))}
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-ivory-dim">
+                <NavLink to="/perfil" onClick={() => setMobileOpen(false)} className="text-sm text-ivory-dim hover:text-ivory">
                   Hola, <span className="text-ivory">{user.name.split(' ')[0]}</span>
-                </span>
+                </NavLink>
                 <button type="button" onClick={handleLogout} className="text-left text-sm text-ivory-dim hover:text-gold">
                   Cerrar sesión
                 </button>

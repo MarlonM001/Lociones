@@ -20,8 +20,8 @@ npm run dev
 
 Se crea automáticamente la primera vez que corre la app:
 
-- Email: `admin@essencepolar.com`
-- Contraseña: `Admin123!`
+- Email: `marlon@essencepolar.com`
+- Contraseña: `2026`
 
 **Importante:** esta contraseña queda visible en el código fuente (`src/services/auth/index.js`) porque todavía no hay backend. Antes de usar esta tienda en producción con datos reales, cambia esas credenciales o reemplaza el mecanismo de login por uno con backend real.
 

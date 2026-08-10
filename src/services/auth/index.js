@@ -10,10 +10,12 @@ const SESSION_KEY = 'essence_session'
 const SIMULATED_LATENCY_MS = 300
 
 // Credenciales de la cuenta admin sembrada automáticamente (ver ensureAdminSeed).
+// El login exige formato de email, por eso "marlon" se guarda como
+// marlon@essencepolar.com — usa ese email completo para iniciar sesión.
 // Solo para esta fase sin backend: en producción el admin se crea desde el
 // servidor, nunca hardcodeado en el cliente.
-export const SEEDED_ADMIN_EMAIL = 'admin@essencepolar.com'
-export const SEEDED_ADMIN_PASSWORD = 'Admin123!'
+export const SEEDED_ADMIN_EMAIL = 'marlon@essencepolar.com'
+export const SEEDED_ADMIN_PASSWORD = '2026'
 
 function delay(ms = SIMULATED_LATENCY_MS) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -102,27 +104,43 @@ export function getSession() {
 
 /**
  * Crea la cuenta admin si todavía no existe ninguna. Se llama una vez al
- * cargar la app (ver AuthContext). Idempotente: no hace nada si ya hay admin.
+ * cargar la app (ver AuthContext). Si ya existe un admin pero con un email
+ * distinto al configurado arriba (por ejemplo, quedó sembrado con las
+ * credenciales anteriores en este navegador), lo actualiza al nuevo
+ * email/contraseña en vez de dejarlo desactualizado.
  */
 export async function ensureAdminSeed() {
   const users = readUsers()
-  if (users.some((user) => user.role === 'admin')) return
+  const existingAdmin = users.find((user) => user.role === 'admin')
 
-  const now = new Date().toISOString()
-  const admin = {
-    id: users.reduce((max, existing) => Math.max(max, existing.id), 0) + 1,
-    name: 'Administrador',
-    email: SEEDED_ADMIN_EMAIL,
-    phone: '3000000000',
-    passwordHash: await hashPassword(SEEDED_ADMIN_PASSWORD),
-    role: 'admin',
-    city: '',
-    address: '',
-    createdAt: now,
-    updatedAt: now,
+  if (!existingAdmin) {
+    const now = new Date().toISOString()
+    const admin = {
+      id: users.reduce((max, existing) => Math.max(max, existing.id), 0) + 1,
+      name: 'Marlon',
+      email: SEEDED_ADMIN_EMAIL,
+      phone: '3000000000',
+      passwordHash: await hashPassword(SEEDED_ADMIN_PASSWORD),
+      role: 'admin',
+      city: '',
+      address: '',
+      createdAt: now,
+      updatedAt: now,
+    }
+    writeUsers([...users, admin])
+    return
   }
 
-  writeUsers([...users, admin])
+  if (existingAdmin.email !== SEEDED_ADMIN_EMAIL) {
+    const updatedAdmin = {
+      ...existingAdmin,
+      name: 'Marlon',
+      email: SEEDED_ADMIN_EMAIL,
+      passwordHash: await hashPassword(SEEDED_ADMIN_PASSWORD),
+      updatedAt: new Date().toISOString(),
+    }
+    writeUsers(users.map((user) => (user.id === existingAdmin.id ? updatedAdmin : user)))
+  }
 }
 
 export async function getAllUsers() {

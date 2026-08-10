@@ -4,6 +4,15 @@ import { HERO_SLIDES } from './heroSlides'
 
 const AUTO_ADVANCE_MS = 6000
 
+const SPARKLES = [
+  { top: '16%', left: '8%', size: 6, delay: '0s' },
+  { top: '30%', left: '44%', size: 4, delay: '1.4s' },
+  { top: '70%', left: '13%', size: 5, delay: '2.6s' },
+  { top: '80%', left: '55%', size: 3, delay: '0.8s' },
+  { top: '12%', left: '60%', size: 4, delay: '3.4s' },
+  { top: '52%', left: '5%', size: 3, delay: '2s' },
+]
+
 function ArrowIcon({ direction }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -48,6 +57,44 @@ function HeroBottle({ colors, label }) {
   )
 }
 
+/** Silueta grande de botella detrás de todo, para anclar el tema de perfumería sin competir con el contenido. */
+function HeroBackdropBottle() {
+  return (
+    <svg
+      viewBox="0 0 320 420"
+      className="pointer-events-none absolute -left-28 bottom-0 h-[95%] w-auto text-gold opacity-[0.05] sm:-left-16 lg:left-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+    >
+      <rect x="130" y="55" width="60" height="48" rx="6" />
+      <rect x="108" y="103" width="104" height="280" rx="22" />
+      <line x1="108" y1="182" x2="212" y2="182" />
+    </svg>
+  )
+}
+
+/** Motas doradas flotando, como la bruma de un atomizador de perfume. */
+function FloatingSparkles() {
+  return (
+    <div className="pointer-events-none absolute inset-0 hidden sm:block">
+      {SPARKLES.map((sparkle, i) => (
+        <span
+          key={i}
+          className="animate-sparkle absolute rounded-full bg-gold"
+          style={{
+            top: sparkle.top,
+            left: sparkle.left,
+            width: sparkle.size,
+            height: sparkle.size,
+            animationDelay: sparkle.delay,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 export function HeroSection() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -64,6 +111,8 @@ export function HeroSection() {
     setIndex((nextIndex + HERO_SLIDES.length) % HERO_SLIDES.length)
   }
 
+  const activeColors = HERO_SLIDES[index].bottleColors
+
   return (
     <section
       className="relative overflow-hidden bg-ink bg-noise"
@@ -71,7 +120,16 @@ export function HeroSection() {
       onMouseLeave={() => setPaused(false)}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-transparent" />
-      <div className="pointer-events-none absolute -right-24 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-gold/10 blur-3xl" />
+      <div
+        className="pointer-events-none absolute -right-24 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full blur-3xl transition-colors duration-1000"
+        style={{ backgroundColor: `${activeColors.from}26` }}
+      />
+      <div
+        className="pointer-events-none absolute -left-16 bottom-0 h-[280px] w-[280px] rounded-full blur-3xl transition-colors duration-1000"
+        style={{ backgroundColor: `${activeColors.to}1f` }}
+      />
+      <HeroBackdropBottle />
+      <FloatingSparkles />
 
       <div className="relative mx-auto min-h-[600px] max-w-7xl px-4 py-20 sm:px-6 lg:min-h-[620px] lg:px-8 lg:py-28">
         {HERO_SLIDES.map((slide, slideIndex) => {
@@ -86,6 +144,11 @@ export function HeroSection() {
             >
               <div className={isActive ? 'animate-fade-up' : ''}>
                 <span className="text-xs uppercase tracking-widest-plus text-gold">{slide.eyebrow}</span>
+                <div className="mt-3 flex items-center gap-3">
+                  <span className="h-px w-8 bg-gold/50" />
+                  <span className="h-1.5 w-1.5 rotate-45 bg-gold" />
+                  <span className="h-px w-8 bg-gold/50" />
+                </div>
                 <h1 className="mt-4 font-display text-4xl leading-tight text-ivory text-balance sm:text-5xl lg:text-6xl">
                   {slide.titleBefore} <span className="text-gold">{slide.titleHighlight}</span> {slide.titleAfter}
                 </h1>

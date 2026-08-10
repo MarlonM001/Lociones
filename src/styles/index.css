@@ -95,3 +95,12 @@
 .animate-truck-drive {
   animation: truck-drive 1s ease-in-out infinite;
 }
+
+@keyframes sparkle-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.25; }
+  50% { transform: translateY(-16px) scale(1.2); opacity: 0.65; }
+}
+
+.animate-sparkle {
+  animation: sparkle-float 6s ease-in-out infinite;
+}

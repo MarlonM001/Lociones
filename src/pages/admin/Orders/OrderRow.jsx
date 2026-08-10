@@ -11,7 +11,7 @@ const STATUS_BADGE_CLASSES = {
   ENTREGADO: 'bg-emerald-500/10 text-emerald-400',
 }
 
-export function OrderRow({ order, onStatusChanged }) {
+export function OrderRow({ order, onStatusChanged, onDelete }) {
   const { showToast } = useToast()
   const [updating, setUpdating] = useState(false)
 
@@ -60,6 +60,15 @@ export function OrderRow({ order, onStatusChanged }) {
             </option>
           ))}
         </select>
+      </td>
+      <td className="px-4 py-3 text-right">
+        <button
+          type="button"
+          onClick={() => onDelete(order)}
+          className="text-sm text-ivory-dim hover:text-red-400"
+        >
+          Eliminar
+        </button>
       </td>
     </tr>
   )

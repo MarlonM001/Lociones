@@ -101,3 +101,8 @@ export async function updateOrderStatus(id, status) {
   writeOrders(updated)
   return updated.find((order) => order.id === Number(id)) ?? null
 }
+
+export async function deleteOrder(id) {
+  await delay()
+  writeOrders(readOrders().filter((order) => order.id !== Number(id)))
+}

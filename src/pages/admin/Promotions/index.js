@@ -1,0 +1,1 @@
+export { AdminPromotions } from './AdminPromotions'

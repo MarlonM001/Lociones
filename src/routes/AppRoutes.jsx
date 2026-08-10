@@ -16,6 +16,7 @@ import { AdminDashboard } from '@/pages/admin/Dashboard'
 import { AdminProducts } from '@/pages/admin/Products'
 import { AdminOrders } from '@/pages/admin/Orders'
 import { AdminReferences } from '@/pages/admin/References'
+import { AdminPromotions } from '@/pages/admin/Promotions'
 import { AdminReports } from '@/pages/admin/Reports'
 
 export function AppRoutes() {
@@ -33,6 +34,7 @@ export function AppRoutes() {
         <Route path="productos" element={<AdminProducts />} />
         <Route path="pedidos" element={<AdminOrders />} />
         <Route path="referencias" element={<AdminReferences />} />
+        <Route path="promociones" element={<AdminPromotions />} />
         <Route path="reportes" element={<AdminReports />} />
       </Route>
 

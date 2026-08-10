@@ -1,20 +1,28 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { getOrdersByUser } from '@/services/orders'
+import { getReferencesByUser } from '@/services/references'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
 import { OrderCard } from './OrderCard'
+import { MyReferenceCard } from './MyReferenceCard'
 
 export function Profile() {
   const { user } = useAuth()
   const [orders, setOrders] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [references, setReferences] = useState([])
+  const [loadingOrders, setLoadingOrders] = useState(true)
+  const [loadingReferences, setLoadingReferences] = useState(true)
 
   useEffect(() => {
     getOrdersByUser(user.id).then((items) => {
       setOrders(items)
-      setLoading(false)
+      setLoadingOrders(false)
+    })
+    getReferencesByUser(user.id).then((items) => {
+      setReferences(items)
+      setLoadingReferences(false)
     })
   }, [user.id])
 
@@ -43,7 +51,7 @@ export function Profile() {
 
       <h2 className="mb-4 mt-10 font-display text-2xl text-ivory">Mis pedidos</h2>
 
-      {loading ? (
+      {loadingOrders ? (
         <Loading label="Cargando tus pedidos..." />
       ) : orders.length === 0 ? (
         <EmptyState
@@ -55,6 +63,24 @@ export function Profile() {
         <div className="flex flex-col gap-6">
           {orders.map((order) => (
             <OrderCard key={order.id} order={order} />
+          ))}
+        </div>
+      )}
+
+      <h2 className="mb-4 mt-10 font-display text-2xl text-ivory">Mis referencias</h2>
+
+      {loadingReferences ? (
+        <Loading label="Cargando tus videos..." />
+      ) : references.length === 0 ? (
+        <EmptyState
+          title="Todavía no has subido videos"
+          message="Comparte el video de tu entrega en la página de Referencias."
+          action={<Button to="/referencias">Subir un video</Button>}
+        />
+      ) : (
+        <div className="flex flex-col gap-4">
+          {references.map((reference) => (
+            <MyReferenceCard key={reference.id} reference={reference} />
           ))}
         </div>
       )}

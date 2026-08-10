@@ -62,6 +62,15 @@ export async function getAllReferencesAdmin() {
     .map(toPublicReference)
 }
 
+/** Videos subidos por un cliente en particular, en cualquier estado — para que pueda ver qué pasó con lo que subió. */
+export async function getReferencesByUser(userId) {
+  const records = await getAllReferenceRecords()
+  return records
+    .filter((record) => record.createdBy === userId)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .map(toPublicReference)
+}
+
 export async function updateReferenceStatus(id, status) {
   const records = await getAllReferenceRecords()
   const record = records.find((item) => item.id === Number(id))

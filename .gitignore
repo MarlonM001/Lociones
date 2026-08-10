@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Notas internas de trabajo (solo local, no se sube al repo)
+docs/BACKEND_MIGRATION_PLAN.md

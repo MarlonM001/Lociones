@@ -68,8 +68,8 @@ export function AdminReports() {
                 {summary.productsRanking.length === 0 ? (
                   <p className="text-sm text-ivory-dim">Sin ventas registradas en este mes.</p>
                 ) : (
-                  <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-                    <table className="w-full border-collapse text-sm">
+                  <div className="overflow-x-auto rounded-2xl border border-ivory/5 bg-charcoal">
+                    <table className="w-full min-w-[420px] border-collapse text-sm">
                       <thead>
                         <tr className="border-b border-ivory/10 text-left text-xs uppercase text-ivory-dim">
                           <th className="px-4 py-2">Producto</th>
@@ -93,8 +93,8 @@ export function AdminReports() {
 
               <div>
                 <h2 className="mb-4 font-display text-xl text-ivory">Ventas por categoría</h2>
-                <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-                  <table className="w-full border-collapse text-sm">
+                <div className="overflow-x-auto rounded-2xl border border-ivory/5 bg-charcoal">
+                  <table className="w-full min-w-[320px] border-collapse text-sm">
                     <thead>
                       <tr className="border-b border-ivory/10 text-left text-xs uppercase text-ivory-dim">
                         <th className="px-4 py-2">Categoría</th>

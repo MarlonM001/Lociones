@@ -12,11 +12,13 @@ import {
 const MAX_IMAGE_SIZE_MB = 8
 
 // Migración de una sola vez: reemplaza el catálogo de ejemplo (nombres
-// genéricos) por el catálogo real de XPERFUMS (araba + dama) la primera vez
-// que corre en cada navegador. Después de marcarse, no vuelve a tocar el
-// catálogo aunque se despliegue código nuevo, para no pisar ediciones del admin.
+// genéricos) por el catálogo real de XPERFUMS (araba + dama + caballero) la
+// primera vez que corre en cada navegador. Después de marcarse, no vuelve a
+// tocar el catálogo aunque se despliegue código nuevo, para no pisar
+// ediciones del admin. Subir esta versión fuerza una nueva migración única
+// (p. ej. al agregar el catálogo de caballero después del de araba/dama).
 const CATALOG_MIGRATION_KEY = 'essence_catalog_migration'
-const CATALOG_MIGRATION_VERSION = 'xperfums-2026-08'
+const CATALOG_MIGRATION_VERSION = 'xperfums-2026-08-caballero'
 
 /**
  * Siembra el catálogo la primera vez que corre la app en un navegador.

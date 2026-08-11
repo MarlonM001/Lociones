@@ -79,10 +79,6 @@ export function CartPage() {
 
         <div className="mt-8 rounded-2xl border border-ivory/5 bg-charcoal p-6 text-left">
           <div className="flex justify-between text-sm">
-            <span className="text-ivory-dim">Número de pedido</span>
-            <span className="text-ivory">#{completedOrder.id}</span>
-          </div>
-          <div className="mt-3 flex justify-between border-t border-ivory/10 pt-3 text-sm">
             <span className="text-ivory-dim">Total</span>
             <span className="font-display text-lg text-gold">{formatCurrency(completedOrder.total)}</span>
           </div>

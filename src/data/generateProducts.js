@@ -1,7 +1,9 @@
 import { CATEGORIES } from '@/config/categories'
 import { slugify } from '@/utils/slugify'
+import { ARABA_CATALOG } from './catalogAraba'
+import { DAMA_CATALOG } from './catalogDama'
 
-// PRNG con semilla fija: los 380 productos deben ser siempre los mismos entre
+// PRNG con semilla fija: los productos deben ser siempre los mismos entre
 // recargas de la app (el carrito guarda referencias por id/slug en localStorage).
 function mulberry32(seed) {
   return function random() {
@@ -13,15 +15,9 @@ function mulberry32(seed) {
   }
 }
 
+// "Caballero" todavía no tiene catálogo real (solo se recibieron los PDF de
+// ARABA y DAMA), así que sigue con nombres generados hasta que se agregue uno.
 const NAME_PARTS = {
-  araba: {
-    prefix: ['Oud', 'Bakhoor', 'Ámbar', 'Almizcle', 'Incienso', 'Azaad', 'Sultana', 'Dahn', 'Rasha', 'Zafir'],
-    suffix: ['Real', 'Dorado', 'de Oriente', 'Noir', 'Intenso', 'Al Sultan', 'Imperial', 'Místico', 'Royale', 'Bakhoor'],
-  },
-  mujeres: {
-    prefix: ['Jardín de', 'Flor de', 'Esencia de', 'Pétalo de', 'Aroma de', 'Bouquet de', 'Suspiro de', 'Brisa de'],
-    suffix: ['Rosas', 'Jazmín', 'Loto Blanco', 'Peonía', 'Vainilla', 'Gardenia', 'Magnolia', 'Cerezo', 'Iris', 'Orquídea'],
-  },
   caballero: {
     prefix: ['Roble', 'Cedro', 'Vetiver', 'Cuero', 'Tabaco', 'Bergamota', 'Sándalo', 'Acero', 'Whisky', 'Ébano'],
     suffix: ['Nórdico', 'Salvaje', 'Intenso', 'de Medianoche', 'Clásico', 'Urbano', 'Reserva', 'Black', 'Elite', 'Extreme'],
@@ -29,19 +25,31 @@ const NAME_PARTS = {
 }
 
 const CATEGORY_PRICE_RANGE = {
-  araba: [89900, 259900],
-  mujeres: [79900, 219900],
   caballero: [79900, 229900],
 }
 
 const SIZES_ML = [30, 50, 75, 100]
 
-function buildDescription(name, categoryName, ml) {
+const CATALOG_BY_CATEGORY = {
+  araba: ARABA_CATALOG,
+  mujeres: DAMA_CATALOG,
+}
+
+function buildCatalogDescription(name, categoryName, ml, notes) {
+  return `${name} es una fragancia de la línea ${categoryName} presentada en frasco de ${ml}ml. ` +
+    `Notas destacadas: ${notes.join(', ')}. Alta fijación y larga duración, ideal para uso diario o momentos especiales.`
+}
+
+function buildCatalogShortDescription(ml, notes) {
+  return `${ml}ml — ${notes.slice(0, 3).join(', ')}.`
+}
+
+function buildGenericDescription(name, categoryName, ml) {
   return `${name} es una fragancia de la línea ${categoryName} presentada en frasco de ${ml}ml. ` +
     `Combina notas de salida frescas con un fondo envolvente de larga duración, ideal para uso diario o momentos especiales.`
 }
 
-function buildShortDescription(categoryName, ml) {
+function buildGenericShortDescription(categoryName, ml) {
   return `Loción ${categoryName.toLowerCase()} de ${ml}ml con fijación prolongada.`
 }
 
@@ -49,14 +57,57 @@ export function generateProducts() {
   const random = mulberry32(20260809)
   const products = []
   let autoIncrement = 1
+  // Global para toda la tienda: dos productos de catálogos distintos pueden
+  // compartir nombre+tamaño (p. ej. "Bianco Latte" aparece en ARABA y en DAMA),
+  // y el slug es la clave de la ruta /producto/:slug en toda la app.
+  const usedSlugs = new Set()
 
-  const counts = { araba: 120, mujeres: 120, caballero: 140 }
+  function nextSlug(base, id) {
+    let slug = slugify(base)
+    if (usedSlugs.has(slug)) slug = `${slug}-${id}`
+    usedSlugs.add(slug)
+    return slug
+  }
 
   for (const category of CATEGORIES) {
-    const total = counts[category.id] ?? 0
+    const catalog = CATALOG_BY_CATEGORY[category.id]
+
+    if (catalog) {
+      for (const entry of catalog) {
+        const { name, ml, price, notes } = entry
+        const stock = Math.floor(random() * 40)
+        const id = autoIncrement
+        autoIncrement += 1
+        const slug = nextSlug(`${name}-${ml}ml`, id)
+        const sku = `${category.id.slice(0, 3).toUpperCase()}-${String(id).padStart(4, '0')}`
+
+        products.push({
+          id,
+          name: `${name} ${ml}ml`,
+          slug,
+          categoryId: category.id,
+          sku,
+          price,
+          description: buildCatalogDescription(name, category.name, ml, notes),
+          shortDescription: buildCatalogShortDescription(ml, notes),
+          image: `/images/products/${category.id}.svg`,
+          images: [
+            `/images/products/${category.id}.svg`,
+            `/images/products/${category.id}.svg`,
+          ],
+          stock,
+          active: true,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        })
+      }
+      continue
+    }
+
+    // Categorías sin catálogo real todavía (caballero): generación procedural.
+    const total = 140
     const { prefix, suffix } = NAME_PARTS[category.id]
     const [minPrice, maxPrice] = CATEGORY_PRICE_RANGE[category.id]
-    const usedSlugs = new Set()
 
     for (let i = 0; i < total; i += 1) {
       const prefixWord = prefix[i % prefix.length]
@@ -71,11 +122,7 @@ export function generateProducts() {
       const stock = Math.floor(random() * 40)
       const id = autoIncrement
       autoIncrement += 1
-
-      let slug = slugify(`${name}-${ml}ml`)
-      if (usedSlugs.has(slug)) slug = `${slug}-${id}`
-      usedSlugs.add(slug)
-
+      const slug = nextSlug(`${name}-${ml}ml`, id)
       const sku = `${category.id.slice(0, 3).toUpperCase()}-${String(id).padStart(4, '0')}`
 
       products.push({
@@ -85,8 +132,8 @@ export function generateProducts() {
         categoryId: category.id,
         sku,
         price,
-        description: buildDescription(name, category.name, ml),
-        shortDescription: buildShortDescription(category.name, ml),
+        description: buildGenericDescription(name, category.name, ml),
+        shortDescription: buildGenericShortDescription(category.name, ml),
         image: `/images/products/${category.id}.svg`,
         images: [
           `/images/products/${category.id}.svg`,

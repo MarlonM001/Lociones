@@ -52,6 +52,16 @@ export async function putProductRecords(records) {
   })
 }
 
+export async function clearProductRecords() {
+  const db = await openDb()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    tx.objectStore(STORE_NAME).clear()
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+}
+
 export async function getAllProductRecords() {
   const db = await openDb()
   return new Promise((resolve, reject) => {

@@ -4,22 +4,37 @@ import {
   countProductRecords,
   putProductRecord,
   putProductRecords,
+  clearProductRecords,
   getAllProductRecords,
   deleteProductRecord,
 } from './db'
 
 const MAX_IMAGE_SIZE_MB = 8
 
+// Migración de una sola vez: reemplaza el catálogo de ejemplo (nombres
+// genéricos) por el catálogo real de XPERFUMS (araba + dama) la primera vez
+// que corre en cada navegador. Después de marcarse, no vuelve a tocar el
+// catálogo aunque se despliegue código nuevo, para no pisar ediciones del admin.
+const CATALOG_MIGRATION_KEY = 'essence_catalog_migration'
+const CATALOG_MIGRATION_VERSION = 'xperfums-2026-08'
+
 /**
- * Siembra el catálogo una sola vez (primer arranque) con los 380 productos
- * generados. Comparte la promesa entre llamadas concurrentes para no sembrar
- * dos veces si varias páginas piden productos al mismo tiempo.
+ * Siembra el catálogo la primera vez que corre la app en un navegador.
+ * Comparte la promesa entre llamadas concurrentes para no sembrar dos veces
+ * si varias páginas piden productos al mismo tiempo.
  */
 let seedPromise = null
 function ensureSeeded() {
   if (!seedPromise) {
-    seedPromise = countProductRecords().then((count) => {
-      if (count === 0) return putProductRecords(generateProducts())
+    seedPromise = countProductRecords().then(async (count) => {
+      const migrated = localStorage.getItem(CATALOG_MIGRATION_KEY)
+      if (count === 0) {
+        await putProductRecords(generateProducts())
+      } else if (migrated !== CATALOG_MIGRATION_VERSION) {
+        await clearProductRecords()
+        await putProductRecords(generateProducts())
+      }
+      localStorage.setItem(CATALOG_MIGRATION_KEY, CATALOG_MIGRATION_VERSION)
     })
   }
   return seedPromise

@@ -31,8 +31,9 @@ export function AdminCelebration() {
     <div>
       <h1 className="font-display text-3xl text-ivory">Celebración</h1>
       <p className="mt-1 text-sm text-ivory-dim">
-        Confeti que cae desde ambos lados de la pantalla durante unos 2 minutos cada vez que alguien entra a la
-        tienda. Es puramente decorativo y no se puede cerrar desde la tienda.
+        Confeti que cae desde ambos lados de la pantalla durante 1 minuto y 30 segundos cada vez que alguien entra
+        a la tienda. Cada visitante corre su propio temporizador, así que puedes dejarlo encendido sin que se vuelva
+        molesto. Es puramente decorativo y no se puede cerrar desde la tienda.
       </p>
 
       <form onSubmit={handleSave} className="mt-8 max-w-xl rounded-2xl border border-ivory/5 bg-charcoal p-6">

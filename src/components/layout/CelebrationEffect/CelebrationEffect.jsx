@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { getCelebrationConfig } from '@/services/celebration'
 
-const TOTAL_DURATION_MS = 2 * 60 * 1000
+const TOTAL_DURATION_MS = 90 * 1000
 const SPAWN_INTERVAL_MS = 250
-const COLORS = ['#c8a45c', '#e4c988', '#f6f2ea', '#9c7c3d', '#ffffff']
+// Colores festivos con contraste deliberado frente a la paleta dorada/marfil
+// del sitio, para que el confeti se note en vez de camuflarse con el fondo.
+const COLORS = ['#ff5c7a', '#ffd23f', '#4ade80', '#38bdf8', '#c084fc', '#ffffff']
 
 function makeParticle(side, id) {
   return {
@@ -65,6 +67,7 @@ export function CelebrationEffect() {
             width: particle.size,
             height: particle.size * 1.6,
             backgroundColor: particle.color,
+            boxShadow: `0 0 6px 0 ${particle.color}`,
             animation: `confetti-fall ${particle.duration}s linear forwards`,
             '--confetti-drift': particle.drift,
             '--confetti-spin': particle.spin,

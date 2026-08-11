@@ -104,3 +104,8 @@
 .animate-sparkle {
   animation: sparkle-float 6s ease-in-out infinite;
 }
+
+@keyframes confetti-fall {
+  from { transform: translate(0, -10px) rotate(0deg); opacity: 1; }
+  to { transform: translate(var(--confetti-drift), 100vh) rotate(var(--confetti-spin)); opacity: 0; }
+}

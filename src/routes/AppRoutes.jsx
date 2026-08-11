@@ -17,6 +17,7 @@ import { AdminProducts } from '@/pages/admin/Products'
 import { AdminOrders } from '@/pages/admin/Orders'
 import { AdminReferences } from '@/pages/admin/References'
 import { AdminPromotions } from '@/pages/admin/Promotions'
+import { AdminCelebration } from '@/pages/admin/Celebration'
 import { AdminReports } from '@/pages/admin/Reports'
 
 export function AppRoutes() {
@@ -35,6 +36,7 @@ export function AppRoutes() {
         <Route path="pedidos" element={<AdminOrders />} />
         <Route path="referencias" element={<AdminReferences />} />
         <Route path="promociones" element={<AdminPromotions />} />
+        <Route path="celebracion" element={<AdminCelebration />} />
         <Route path="reportes" element={<AdminReports />} />
       </Route>
 

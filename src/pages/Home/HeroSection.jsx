@@ -144,7 +144,28 @@ export function HeroSection() {
         {/* Un solo canvas 3D persistente: cambia de color según la colección activa en
             lugar de reiniciarse en cada avance del carrusel, para no perder la rotación
             que el visitante haya dejado con el mouse. */}
-        <div className="hidden justify-center lg:flex">
+        <div className="relative hidden justify-center lg:flex">
+          {/* Círculo grande tipo espejo de agua detrás de la botella, como si flotara sobre él. */}
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-md transition-colors duration-1000"
+            style={{
+              background: `radial-gradient(circle at 50% 42%, ${activeColors.from}3d 0%, #1b6f8c26 45%, transparent 72%)`,
+            }}
+          />
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/15"
+            aria-hidden="true"
+          />
+          <div
+            className="animate-ripple pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40"
+            aria-hidden="true"
+          />
+          <div
+            className="animate-ripple pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40"
+            style={{ animationDelay: '2.2s' }}
+            aria-hidden="true"
+          />
+
           {isLargeScreen && (
             <Suspense fallback={<div className="h-[420px] w-[320px]" />}>
               <Bottle3D colors={activeColors} label={activeSlide.bottleLabel} />

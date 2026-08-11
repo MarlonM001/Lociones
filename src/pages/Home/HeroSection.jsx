@@ -1,6 +1,11 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { HERO_SLIDES } from './heroSlides'
+
+// three.js solo se descarga cuando hace falta (pantallas lg+, ver más abajo),
+// para no inflar el bundle inicial de todos los visitantes.
+const Bottle3D = lazy(() => import('@/components/three/Bottle3D').then((m) => ({ default: m.Bottle3D })))
 
 const AUTO_ADVANCE_MS = 6000
 
@@ -22,95 +27,6 @@ function ArrowIcon({ direction }) {
         strokeLinejoin="round"
       />
     </svg>
-  )
-}
-
-/** Botella con apariencia 3D: gradientes que simulan el cilindro de vidrio,
- * tapón con relieve metálico, reflejo de luz y sombra de contacto en el piso. */
-function HeroBottle({ colors, label }) {
-  const glassId = `heroGlass-${label}`
-  const shadeId = `heroShade-${label}`
-  const capId = `heroCap-${label}`
-  const shineId = `heroShine-${label}`
-  const groundId = `heroGround-${label}`
-
-  return (
-    <div className="[perspective:1200px]">
-      <svg
-        width="320"
-        height="440"
-        viewBox="0 0 320 440"
-        className="drop-shadow-2xl"
-        style={{ transform: 'rotateY(-10deg) rotateX(2deg)', transformStyle: 'preserve-3d' }}
-      >
-        <defs>
-          {/* Sombreado horizontal: borde-oscuro > luz > borde-oscuro, simula el cilindro del vidrio. */}
-          <linearGradient id={glassId} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={colors.to} />
-            <stop offset="20%" stopColor={colors.from} />
-            <stop offset="52%" stopColor={colors.from} />
-            <stop offset="84%" stopColor={colors.from} />
-            <stop offset="100%" stopColor={colors.to} />
-          </linearGradient>
-          {/* Caída de luz vertical: brillo arriba, sombra abajo, da sensación de volumen. */}
-          <linearGradient id={shadeId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.3" />
-            <stop offset="28%" stopColor="#ffffff" stopOpacity="0" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
-          </linearGradient>
-          <linearGradient id={capId} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#7d5f22" />
-            <stop offset="25%" stopColor="#e4c988" />
-            <stop offset="50%" stopColor="#c8a45c" />
-            <stop offset="75%" stopColor="#e4c988" />
-            <stop offset="100%" stopColor="#7d5f22" />
-          </linearGradient>
-          <linearGradient id={shineId} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0" />
-            <stop offset="50%" stopColor="#ffffff" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-          </linearGradient>
-          <radialGradient id={`heroGlow-${label}`} cx="50%" cy="35%" r="60%">
-            <stop offset="0%" stopColor="#c8a45c" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#c8a45c" stopOpacity="0" />
-          </radialGradient>
-          <radialGradient id={groundId} cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#000000" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-
-        <circle cx="160" cy="180" r="180" fill={`url(#heroGlow-${label})`} />
-
-        {/* Sombra de contacto: ancla la botella al piso en vez de flotar. */}
-        <ellipse cx="160" cy="400" rx="80" ry="16" fill={`url(#${groundId})`} />
-
-        {/* Tapón: cuerpo + aro superior con relieve metálico. */}
-        <rect x="128" y="52" width="64" height="50" rx="8" fill={`url(#${capId})`} />
-        <ellipse cx="160" cy="52" rx="32" ry="7" fill="#e4c988" />
-        <ellipse cx="160" cy="52" rx="32" ry="7" fill="none" stroke="#0d0c0b" strokeOpacity="0.12" />
-        <rect x="144" y="96" width="32" height="16" fill={colors.to} />
-
-        {/* Cuerpo de vidrio: gradiente cilíndrico + caída de luz superpuesta. */}
-        <rect x="108" y="108" width="104" height="278" rx="22" fill={`url(#${glassId})`} />
-        <rect x="108" y="108" width="104" height="278" rx="22" fill={`url(#${shadeId})`} />
-
-        {/* Reflejo de luz: franja vertical que simula el brillo del vidrio curvo. */}
-        <rect x="124" y="122" width="13" height="246" rx="6.5" fill={`url(#${shineId})`} opacity="0.55" />
-
-        <text
-          x="160"
-          y="270"
-          textAnchor="middle"
-          fontFamily="Cormorant Garamond, serif"
-          fontSize="20"
-          fill="#0d0c0b"
-          opacity="0.6"
-        >
-          {label}
-        </text>
-      </svg>
-    </div>
   )
 }
 
@@ -168,7 +84,9 @@ export function HeroSection() {
     setIndex((nextIndex + HERO_SLIDES.length) % HERO_SLIDES.length)
   }
 
-  const activeColors = HERO_SLIDES[index].bottleColors
+  const isLargeScreen = useMediaQuery('(min-width: 1024px)')
+  const activeSlide = HERO_SLIDES[index]
+  const activeColors = activeSlide.bottleColors
 
   return (
     <section
@@ -188,18 +106,18 @@ export function HeroSection() {
       <HeroBackdropBottle />
       <FloatingSparkles />
 
-      <div className="relative mx-auto min-h-[600px] max-w-7xl px-4 py-20 sm:px-6 lg:min-h-[620px] lg:px-8 lg:py-28">
-        {HERO_SLIDES.map((slide, slideIndex) => {
-          const isActive = slideIndex === index
-          return (
-            <div
-              key={slide.id}
-              aria-hidden={!isActive}
-              className={`grid items-center gap-12 transition-opacity duration-700 ease-out lg:grid-cols-2 ${
-                isActive ? 'relative opacity-100' : 'pointer-events-none absolute inset-0 opacity-0'
-              }`}
-            >
-              <div className={isActive ? 'animate-fade-up' : ''}>
+      <div className="relative mx-auto grid min-h-[600px] max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:min-h-[620px] lg:grid-cols-2 lg:px-8 lg:py-28">
+        <div className="relative">
+          {HERO_SLIDES.map((slide, slideIndex) => {
+            const isActive = slideIndex === index
+            return (
+              <div
+                key={slide.id}
+                aria-hidden={!isActive}
+                className={`transition-opacity duration-700 ease-out ${
+                  isActive ? 'relative opacity-100 animate-fade-up' : 'pointer-events-none absolute inset-0 opacity-0'
+                }`}
+              >
                 <span className="text-xs uppercase tracking-widest-plus text-gold">{slide.eyebrow}</span>
                 <div className="mt-3 flex items-center gap-3">
                   <span className="h-px w-8 bg-gold/50" />
@@ -219,13 +137,20 @@ export function HeroSection() {
                   </Button>
                 </div>
               </div>
+            )
+          })}
+        </div>
 
-              <div className="relative hidden justify-center lg:flex">
-                <HeroBottle colors={slide.bottleColors} label={slide.bottleLabel} />
-              </div>
-            </div>
-          )
-        })}
+        {/* Un solo canvas 3D persistente: cambia de color según la colección activa en
+            lugar de reiniciarse en cada avance del carrusel, para no perder la rotación
+            que el visitante haya dejado con el mouse. */}
+        <div className="hidden justify-center lg:flex">
+          {isLargeScreen && (
+            <Suspense fallback={<div className="h-[420px] w-[320px]" />}>
+              <Bottle3D colors={activeColors} label={activeSlide.bottleLabel} />
+            </Suspense>
+          )}
+        </div>
       </div>
 
       {/* Controles agrupados abajo (no a los lados) para que nunca choquen con

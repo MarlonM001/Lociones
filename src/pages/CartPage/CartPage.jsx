@@ -6,10 +6,19 @@ import { createOrder } from '@/services/orders'
 import { generateWhatsAppOrder } from '@/services/whatsapp'
 import { isCityAvailable } from '@/config/shipping'
 import { formatCurrency } from '@/utils/formatCurrency'
+import { toTitleCase } from '@/utils/formatName'
 import { CartItem } from '@/components/cart/CartItem'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { CheckoutForm } from './CheckoutForm'
+
+function SuccessIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
 
 export function CartPage() {
   const { items, subtotal, clearCart } = useCart()
@@ -56,14 +65,29 @@ export function CartPage() {
   if (completedOrder) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center">
-        <span className="text-xs uppercase tracking-widest-plus text-gold">Pedido registrado</span>
-        <h1 className="mt-2 font-display text-3xl text-ivory">
-          ¡Gracias, {completedOrder.customerName}!
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 text-gold">
+          <SuccessIcon />
+        </div>
+        <span className="mt-6 block text-xs uppercase tracking-widest-plus text-gold">Pedido registrado</span>
+        <h1 className="mt-2 font-display text-3xl text-ivory text-balance">
+          Gracias por tu compra, {toTitleCase(completedOrder.customerName)}
         </h1>
         <p className="mt-4 text-ivory-dim">
-          Tu pedido No. {completedOrder.id} por {formatCurrency(completedOrder.total)} fue registrado.
-          Se abrió una ventana de WhatsApp para confirmar los detalles con nosotros.
+          Hemos registrado tu pedido correctamente. Abrimos una ventana de WhatsApp para confirmar contigo los
+          últimos detalles de la entrega.
         </p>
+
+        <div className="mt-8 rounded-2xl border border-ivory/5 bg-charcoal p-6 text-left">
+          <div className="flex justify-between text-sm">
+            <span className="text-ivory-dim">Número de pedido</span>
+            <span className="text-ivory">#{completedOrder.id}</span>
+          </div>
+          <div className="mt-3 flex justify-between border-t border-ivory/10 pt-3 text-sm">
+            <span className="text-ivory-dim">Total</span>
+            <span className="font-display text-lg text-gold">{formatCurrency(completedOrder.total)}</span>
+          </div>
+        </div>
+
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Button href={whatsappLink} variant="whatsapp" target="_blank" rel="noreferrer">
             Abrir WhatsApp de nuevo

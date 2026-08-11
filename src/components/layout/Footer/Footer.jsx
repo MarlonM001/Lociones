@@ -38,7 +38,6 @@ export function Footer() {
                 </Link>
               </li>
             ))}
-            <li><Link to="/seguimiento" className="hover:text-ivory">Seguimiento de pedido</Link></li>
             <li><Link to="/referencias" className="hover:text-ivory">Referencias de entrega</Link></li>
           </ul>
         </div>

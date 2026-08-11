@@ -65,10 +65,6 @@ export function AppRoutes() {
           }
         />
         <Route
-          path="/seguimiento"
-          element={<ComingSoon title="Seguimiento de pedido" message="La consulta de estado de pedidos llega en la próxima fase." />}
-        />
-        <Route
           path="*"
           element={<ComingSoon title="Página no encontrada" message="El contenido que buscas no existe o fue movido." />}
         />

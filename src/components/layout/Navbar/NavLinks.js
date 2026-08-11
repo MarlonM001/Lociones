@@ -7,6 +7,5 @@ export const NAV_LINKS = [
     label: category.name,
     to: `/productos/${category.slug}`,
   })),
-  { label: 'Seguimiento', to: '/seguimiento' },
   { label: 'Referencias', to: '/referencias' },
 ]

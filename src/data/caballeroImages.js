@@ -116,4 +116,9 @@ export const CABALLERO_IMAGES = {
   'Mont Blanc Legend': 'mont-blanc-legend.jpg',
   'M.B Legend Spirit': 'mb-legend-spirit.webp',
   'Starwalker': 'starwalker.jpg',
+
+  'Creed Aventus': 'creed-aventus.jpg',
+  'Creed Silver': 'creed-silver.png',
+  'Creed Santal': 'creed-santal.png',
+  'CK One Calvin Klein': 'ck-one.jpg',
 }

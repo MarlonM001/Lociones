@@ -93,4 +93,10 @@ export const CABALLERO_IMAGES = {
   'Boss Night': 'boss-night.jpg',
   'Boss Unlimited': 'boss-unlimited.jpg',
   'Boss Tonic': 'boss-tonic.jpg',
+
+  'Versace Eros': 'versace-eros.jpg',
+  'Versace Eros Flame': 'versace-eros-flame.jpg',
+  'Versace Eros Energy': 'versace-eros-energy.webp',
+  'Versace Fraiche': 'versace-fraiche.jpg',
+  'Versace Pour Homme': 'versace-pour-homme.jpg',
 }

@@ -128,4 +128,8 @@ export const CABALLERO_IMAGES = {
   'Diesel Only The Brave': 'diesel-only-the-brave.jpg',
   'Light Blue Men': 'light-blue-men.jpg',
   'The One Men': 'the-one-men.jpg',
+  'K Dolce & Gabbana': 'k-dolce-gabbana.jpg',
+  'Man In Black': 'man-in-black.png',
+  'Bvlgari Aqua': 'bvlgari-aqua.jpg',
+  'Armani Code': 'armani-code.jpg',
 }

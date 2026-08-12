@@ -139,4 +139,8 @@ export const CABALLERO_IMAGES = {
   'Carolina Herrera Men': 'carolina-herrera-men.jpg',
   '360 Red Men': '360-red-men.jpg',
   '360 Men': '360-men.jpg',
+  'Mont Blanc Emblem': 'mont-blanc-emblem.jpg',
+  'Lacoste Yellow Power': 'lacoste-yellow-power.jpg',
+  'Lacoste Levert': 'lacoste-levert.webp',
+  'Arsenal Gilles Cantuel': 'arsenal-gilles-cantuel.jpg',
 }

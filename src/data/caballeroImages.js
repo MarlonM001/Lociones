@@ -125,4 +125,7 @@ export const CABALLERO_IMAGES = {
   'Eternity For Men': 'eternity-for-men.jpg',
   'Nautica Voyage': 'nautica-voyage.jpg',
   'Blue Label Givenchy': 'blue-label-givenchy.jpg',
+  'Diesel Only The Brave': 'diesel-only-the-brave.jpg',
+  'Light Blue Men': 'light-blue-men.jpg',
+  'The One Men': 'the-one-men.jpg',
 }

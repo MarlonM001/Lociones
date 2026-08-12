@@ -136,4 +136,7 @@ export const CABALLERO_IMAGES = {
   'Nuit Issey Miyake': 'nuit-issey-miyake.jpg',
   'Tommy Men': 'tommy-men.jpg',
   'Green Irish Tweet': 'green-irish-tweet.jpg',
+  'Carolina Herrera Men': 'carolina-herrera-men.jpg',
+  '360 Red Men': '360-red-men.jpg',
+  '360 Men': '360-men.jpg',
 }

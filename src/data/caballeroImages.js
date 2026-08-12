@@ -79,4 +79,9 @@ export const CABALLERO_IMAGES = {
   '212 Vip Red Men CH': '212-vip-red-men-ch.jpg',
   '212 Heroes Men': '212-heroes-men.jpg',
   '212 Sexy Men': '212-sexy-men.jpg',
+
+  'Bad Boy Cobalt': 'bad-boy-cobalt.jpg',
+  'Bad Boy CH': 'bad-boy-ch.png',
+  'Arabians Tonka': 'arabians-tonka.jpg',
+  'Starry Night Montale': 'starry-night-montale.jpg',
 }

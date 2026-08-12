@@ -132,4 +132,8 @@ export const CABALLERO_IMAGES = {
   'Man In Black': 'man-in-black.png',
   'Bvlgari Aqua': 'bvlgari-aqua.jpg',
   'Armani Code': 'armani-code.jpg',
+  'Issey Miyake': 'issey-miyake.jpg',
+  'Nuit Issey Miyake': 'nuit-issey-miyake.jpg',
+  'Tommy Men': 'tommy-men.jpg',
+  'Green Irish Tweet': 'green-irish-tweet.jpg',
 }

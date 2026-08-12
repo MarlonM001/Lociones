@@ -111,4 +111,9 @@ export const CABALLERO_IMAGES = {
   'Lacoste Le Noir': 'lacoste-le-noir.webp',
   'Lacoste Rouge': 'lacoste-rouge.jpg',
   'Lacoste Red': 'lacoste-red.jpg',
+
+  'Mont Blanc Explorer': 'mont-blanc-explorer.jpg',
+  'Mont Blanc Legend': 'mont-blanc-legend.jpg',
+  'M.B Legend Spirit': 'mb-legend-spirit.webp',
+  'Starwalker': 'starwalker.jpg',
 }

@@ -99,4 +99,9 @@ export const CABALLERO_IMAGES = {
   'Versace Eros Energy': 'versace-eros-energy.webp',
   'Versace Fraiche': 'versace-fraiche.jpg',
   'Versace Pour Homme': 'versace-pour-homme.jpg',
+  'Dylan Blue': 'dylan-blue.jpg',
+
+  'Acqua Di Gio': 'acqua-di-gio.jpg',
+  'Acqua Di Gio Profumo': 'acqua-di-gio-profumo.jpg',
+  'Acqua Di Gio Profondo': 'acqua-di-gio-profondo.jpg',
 }

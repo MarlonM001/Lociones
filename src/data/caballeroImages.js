@@ -121,4 +121,8 @@ export const CABALLERO_IMAGES = {
   'Creed Silver': 'creed-silver.png',
   'Creed Santal': 'creed-santal.png',
   'CK One Calvin Klein': 'ck-one.jpg',
+  'CK In2U Men': 'ck-in2u-men.jpg',
+  'Eternity For Men': 'eternity-for-men.jpg',
+  'Nautica Voyage': 'nautica-voyage.jpg',
+  'Blue Label Givenchy': 'blue-label-givenchy.jpg',
 }

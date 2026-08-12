@@ -104,4 +104,11 @@ export const CABALLERO_IMAGES = {
   'Acqua Di Gio': 'acqua-di-gio.jpg',
   'Acqua Di Gio Profumo': 'acqua-di-gio-profumo.jpg',
   'Acqua Di Gio Profondo': 'acqua-di-gio-profondo.jpg',
+
+  'Lacoste Essential': 'lacoste-essential.jpg',
+  'Lacoste Blanc': 'lacoste-blanc.webp',
+  'Lacoste Blue': 'lacoste-blue.jpg',
+  'Lacoste Le Noir': 'lacoste-le-noir.webp',
+  'Lacoste Rouge': 'lacoste-rouge.jpg',
+  'Lacoste Red': 'lacoste-red.jpg',
 }

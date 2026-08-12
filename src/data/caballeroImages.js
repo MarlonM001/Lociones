@@ -36,4 +36,24 @@ export const CABALLERO_IMAGES = {
   'Hugo Just Diferent': 'hugo-just-diferent.jpg',
   'Hugo Red': 'hugo-red.jpg',
   'Hugo By Hugo Boss': 'hugo-by-hugo-boss.jpg',
+
+  'Invictus': 'invictus.jpg',
+  'Invictus Legend': 'invictus-legend.jpg',
+  'Invictus Intense': 'invictus-intense.jpg',
+  'Invictus Victory Elixir': 'invictus-victory-elixir.png',
+  'Invictus Victory': 'invictus-victory.png',
+  'Invictus Parfum': 'invictus-parfum.jpg',
+  'Invictus Aqua': 'invictus-aqua.jpg',
+  'Invictus Platinum': 'invictus-platinum.jpg',
+  'Invictus Onyx': 'invictus-onyx.jpg',
+
+  'Phantom Intense': 'phantom-intense.jpg',
+  'Phantom': 'phantom.jpg',
+  'Phantom Parfum': 'phantom-parfum.jpg',
+  'Phantom Legion': 'phantom-legion.jpg',
+
+  'Pure XS': 'pure-xs.jpg',
+  'Black XS': 'black-xs.jpg',
+  'Moschino Toy Boy': 'moschino-toy-boy.jpg',
+  'Santal 33': 'santal-33.jpg',
 }

@@ -56,4 +56,11 @@ export const CABALLERO_IMAGES = {
   'Black XS': 'black-xs.jpg',
   'Moschino Toy Boy': 'moschino-toy-boy.jpg',
   'Santal 33': 'santal-33.jpg',
+  'Marly Kalan': 'marly-kalan.jpg',
+  'Valentino B.R Intense': 'valentino-br-intense.jpg',
+  'Valentino Born In Roma': 'valentino-born-in-roma.png',
+  'Valentino Uomo': 'valentino-uomo.jpg',
+  'Layton Royal': 'layton-royal.jpg',
+  'Xerjoff Erba Pura Caja': 'xerjoff-erba-pura-caja.png',
+  'Xerjoff Erba Pura': 'xerjoff-erba-pura.png',
 }

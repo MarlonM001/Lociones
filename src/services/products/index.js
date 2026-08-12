@@ -18,7 +18,7 @@ const MAX_IMAGE_SIZE_MB = 8
 // ediciones del admin. Subir esta versión fuerza una nueva migración única
 // (p. ej. al agregar el catálogo de caballero después del de araba/dama).
 const CATALOG_MIGRATION_KEY = 'essence_catalog_migration'
-const CATALOG_MIGRATION_VERSION = 'xperfums-2026-08-caballero'
+const CATALOG_MIGRATION_VERSION = 'xperfums-2026-08-caballero-fotos'
 
 /**
  * Siembra el catálogo la primera vez que corre la app en un navegador.

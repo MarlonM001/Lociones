@@ -3,6 +3,7 @@ import { slugify } from '@/utils/slugify'
 import { ARABA_CATALOG } from './catalogAraba'
 import { DAMA_CATALOG } from './catalogDama'
 import { CABALLERO_CATALOG } from './catalogCaballero'
+import { CABALLERO_IMAGES } from './caballeroImages'
 
 // PRNG con semilla fija: los productos deben ser siempre los mismos entre
 // recargas de la app (el carrito guarda referencias por id/slug en localStorage).
@@ -31,6 +32,18 @@ function buildCatalogShortDescription(ml, notes) {
   return `${ml}ml — ${notes.slice(0, 3).join(', ')}.`
 }
 
+// Fotos reales por producto, cuando existen (por ahora solo CABALLERO); el
+// resto sigue con el ícono genérico de la categoría hasta que se les
+// consiga una foto real.
+const REAL_IMAGES_BY_CATEGORY = {
+  caballero: CABALLERO_IMAGES,
+}
+
+function resolveProductImage(categoryId, name) {
+  const fileName = REAL_IMAGES_BY_CATEGORY[categoryId]?.[name]
+  return fileName ? `/images/products/${categoryId}/${fileName}` : `/images/products/${categoryId}.svg`
+}
+
 export function generateProducts() {
   const random = mulberry32(20260809)
   const products = []
@@ -57,6 +70,7 @@ export function generateProducts() {
       autoIncrement += 1
       const slug = nextSlug(`${name}-${ml}ml`, id)
       const sku = `${category.id.slice(0, 3).toUpperCase()}-${String(id).padStart(4, '0')}`
+      const image = resolveProductImage(category.id, name)
 
       products.push({
         id,
@@ -67,11 +81,8 @@ export function generateProducts() {
         price,
         description: buildCatalogDescription(name, category.name, ml, notes),
         shortDescription: buildCatalogShortDescription(ml, notes),
-        image: `/images/products/${category.id}.svg`,
-        images: [
-          `/images/products/${category.id}.svg`,
-          `/images/products/${category.id}.svg`,
-        ],
+        image,
+        images: [image, image],
         stock,
         active: true,
         createdAt: '2026-01-01T00:00:00.000Z',

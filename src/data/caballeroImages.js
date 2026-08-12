@@ -143,4 +143,7 @@ export const CABALLERO_IMAGES = {
   'Lacoste Yellow Power': 'lacoste-yellow-power.jpg',
   'Lacoste Levert': 'lacoste-levert.webp',
   'Arsenal Gilles Cantuel': 'arsenal-gilles-cantuel.jpg',
+  'Jean Pascal': 'jean-pascal.png',
+  'Milesimé Imperial': 'milesime-imperial.png',
+  'Toy 2 Perol': 'toy-2-perol.jpg',
 }

@@ -74,4 +74,9 @@ export const CABALLERO_IMAGES = {
   'Clinique Happy Men': 'clinique-happy-men.jpg',
   '212 Men NYC CH': '212-men-nyc-ch.jpg',
   '212 Vip Men CH': '212-vip-men-ch.png',
+  '212 Vip Black CH': '212-vip-black-ch.jpg',
+  '212 Vip Wins Men CH': '212-vip-wins-men-ch.jpg',
+  '212 Vip Red Men CH': '212-vip-red-men-ch.jpg',
+  '212 Heroes Men': '212-heroes-men.jpg',
+  '212 Sexy Men': '212-sexy-men.jpg',
 }

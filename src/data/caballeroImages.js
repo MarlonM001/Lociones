@@ -84,4 +84,13 @@ export const CABALLERO_IMAGES = {
   'Bad Boy CH': 'bad-boy-ch.png',
   'Arabians Tonka': 'arabians-tonka.jpg',
   'Starry Night Montale': 'starry-night-montale.jpg',
+  'Mancera Cedrat Boise': 'mancera-cedrat-boise.jpg',
+  'Mancera Instant Crush': 'mancera-instant-crush.jpg',
+
+  'Boss Bottled': 'boss-bottled.png',
+  'Boss Orange': 'boss-orange.jpg',
+  'Boss In Motion': 'boss-in-motion.jpg',
+  'Boss Night': 'boss-night.jpg',
+  'Boss Unlimited': 'boss-unlimited.jpg',
+  'Boss Tonic': 'boss-tonic.jpg',
 }

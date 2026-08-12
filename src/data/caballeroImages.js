@@ -63,4 +63,15 @@ export const CABALLERO_IMAGES = {
   'Layton Royal': 'layton-royal.jpg',
   'Xerjoff Erba Pura Caja': 'xerjoff-erba-pura-caja.png',
   'Xerjoff Erba Pura': 'xerjoff-erba-pura.png',
+
+  'Scandal Men JPG': 'scandal-men-jpg.jpg',
+  'Scandal Le Parfum': 'scandal-le-parfum.jpg',
+  'Le Male Elixir JPG': 'le-male-elixir-jpg.jpg',
+  'Fahrenheit Dior': 'fahrenheit-dior.jpg',
+  'Sauvage Elixir Dior': 'sauvage-elixir-dior.jpg',
+
+  'CH Men': 'ch-men.png',
+  'Clinique Happy Men': 'clinique-happy-men.jpg',
+  '212 Men NYC CH': '212-men-nyc-ch.jpg',
+  '212 Vip Men CH': '212-vip-men-ch.png',
 }

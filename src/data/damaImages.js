@@ -128,4 +128,13 @@ export const DAMA_IMAGES = {
   'Valentino Donna B.R Pink': 'valentino-donna-br-pink.jpg',
   'Can Can Burlesque': 'can-can-burlesque.jpg',
   'Clinique Happy': 'clinique-happy.jpg',
+
+  'Versace Eros Pour Femme': 'versace-eros-pour-femme.jpg',
+  'CK One Shock': 'ck-one-shock.jpg',
+  'Sofia Vergara': 'sofia-vergara.jpg',
+  'Bianco Latte Dama': 'bianco-latte-dama.jpg',
+  'Marshmallow Blush Paris Corner': 'marshmallow-blush-paris-corner.jpg',
+  'CK Eternity': 'ck-eternity.jpg',
+  'Starry Night Montale': 'starry-night-montale-dama.jpg',
+  'My Burberry': 'my-burberry.jpg',
 }

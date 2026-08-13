@@ -75,4 +75,13 @@ export const DAMA_IMAGES = {
   'Omnia Pink': 'omnia-pink.jpg',
   'La Vida Es Bella': 'la-vida-es-bella.jpg',
   'Chanel No. 5': 'chanel-no-5.jpg',
+
+  'Chance Chanel': 'chance-chanel.jpg',
+  'Chance Chanel Tendre': 'chance-chanel-tendre.jpg',
+  'Chance Chanel Fraiche': 'chance-chanel-fraiche.jpg',
+  'Black Opium': 'black-opium.jpg',
+  'Fantasy': 'fantasy.jpg',
+  'Fantasy Midnight': 'fantasy-midnight.jpg',
+  'Light Blue': 'light-blue.jpg',
+  'Devotion D&G': 'devotion-dg.jpg',
 }

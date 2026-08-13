@@ -13,4 +13,13 @@ export const DAMA_IMAGES = {
   'Halloween': 'halloween.jpg',
   'Flower By Kenzo': 'flower-by-kenzo.jpg',
   'Dior Addict': 'dior-addict.jpg',
+
+  'Can Can': 'can-can.jpg',
+  'Paris Hilton': 'paris-hilton.jpg',
+  'Heiress': 'heiress.jpg',
+  'Dazzle': 'dazzle.jpg',
+  'Meow Katy Perry': 'meow-katy-perry.jpg',
+  'Purr Katy Perry': 'purr-katy-perry.jpg',
+  'Acqua Di Giola': 'acqua-di-giola.jpg',
+  'My Way': 'my-way.jpg',
 }

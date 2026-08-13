@@ -101,4 +101,13 @@ export const DAMA_IMAGES = {
   'Bright Crystal': 'bright-crystal.jpg',
   'Yellow Diamond': 'yellow-diamond.jpg',
   'Dylan Blue Woman': 'dylan-blue-woman.jpg',
+
+  'Dylan Purple': 'dylan-purple.jpg',
+  'Dylan Turquoise': 'dylan-turquoise.jpg',
+  'Creed Love In White': 'creed-love-in-white.jpg',
+  'Creed Love In Black': 'creed-love-in-black.jpg',
+  'Bombshell': 'bombshell.jpg',
+  'Issey Miyake Woman': 'issey-miyake-woman.jpg',
+  'Tommy Girl': 'tommy-girl.jpg',
+  'Jadore': 'jadore.jpg',
 }

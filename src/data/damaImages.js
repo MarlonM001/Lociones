@@ -110,4 +110,13 @@ export const DAMA_IMAGES = {
   'Issey Miyake Woman': 'issey-miyake-woman.jpg',
   'Tommy Girl': 'tommy-girl.jpg',
   'Jadore': 'jadore.jpg',
+
+  'Q Dolce Gabbana': 'q-dolce-gabbana.jpg',
+  'Touch Fred Hayman': 'touch-fred-hayman.jpg',
+  '360 Red Women': '360-red-women.jpg',
+  'DKNY Be Delicious': 'dkny-be-delicious.jpg',
+  'Organza Givenchy': 'organza-givenchy.jpg',
+  'La Belle Le Parfum': 'la-belle-le-parfum.jpg',
+  'Divine JPG': 'divine-jpg.jpg',
+  'La Belle Paradise Garden': 'la-belle-paradise-garden.jpg',
 }

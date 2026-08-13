@@ -92,4 +92,13 @@ export const DAMA_IMAGES = {
   'Lacoste Natural': 'lacoste-natural.jpg',
   'Lacoste Touch Of Pink': 'lacoste-touch-of-pink.jpg',
   'Lady Million': 'lady-million.jpg',
+
+  'Lady Million Lucky': 'lady-million-lucky.jpg',
+  'Lady Million Prive': 'lady-million-prive.jpg',
+  'Olympéa': 'olympea.jpg',
+  'Pure XS': 'pure-xs.jpg',
+  'Ralph Lauren': 'ralph-lauren.jpg',
+  'Bright Crystal': 'bright-crystal.jpg',
+  'Yellow Diamond': 'yellow-diamond.jpg',
+  'Dylan Blue Woman': 'dylan-blue-woman.jpg',
 }

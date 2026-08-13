@@ -1,6 +1,6 @@
 # Essence Polar — Tienda online de lociones
 
-Tienda de perfumería (ARABA, Mujeres, Caballero) construida con React + Vite + Tailwind CSS. El flujo de compra se confirma por WhatsApp; incluye cuentas de cliente, panel de administración, moderación de referencias en video y reportes de ventas en PDF.
+Tienda de perfumería (ARABIA, Mujeres, Caballero) construida con React + Vite + Tailwind CSS. El flujo de compra se confirma por WhatsApp; incluye cuentas de cliente, panel de administración, moderación de referencias en video y reportes de ventas en PDF.
 
 ## Stack
 

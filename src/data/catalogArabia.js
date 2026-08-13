@@ -2,9 +2,9 @@
  * Catálogo real de lociones árabes, transcrito del PDF "CATALOGO ARABE
  * XPERFUMS" (proveedor mayorista). Precio = precio mayorista del catálogo,
  * tal como se pidió usar. Reemplaza los nombres genéricos que generaba
- * generateProducts.js para la categoría "araba".
+ * generateProducts.js para la categoría "arabia".
  */
-export const ARABA_CATALOG = [
+export const ARABIA_CATALOG = [
   { name: 'Choco Overdose', ml: 75, price: 95000, notes: ['cacao', 'dulce', 'cálido especiado', 'avainillado', 'caramelo', 'ámbar', 'balsámico'] },
   { name: 'Whipped Pleasure', ml: 75, price: 95000, notes: ['lactónico', 'caramelo', 'dulce', 'ámbar', 'almizclado', 'avainillado'] },
   { name: 'Cookie Crave', ml: 75, price: 95000, notes: ['dulce', 'lactónico', 'avainillado', 'cacao', 'cálido especiado'] },

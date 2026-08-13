@@ -20,7 +20,7 @@ export function Footer() {
             <span className="ml-1 text-gold">.</span>
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-ivory-dim">
-            Perfumería especializada en lociones ARABA, para mujer y para caballero.
+            Perfumería especializada en lociones ARABIA, para mujer y para caballero.
             Selección curada, calidad garantizada y atención personalizada por WhatsApp.
           </p>
           <p className="mt-4 text-sm text-ivory-dim">{STORE_CONFIG.email}</p>

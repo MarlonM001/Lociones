@@ -1,7 +1,7 @@
 /**
  * Catálogo real de lociones de caballero, transcrito del PDF "CATALOGO
  * CABALLEROS XPERFUMS" (proveedor mayorista). Precio = precio mayorista del
- * catálogo, igual que ARABA y DAMA. Reemplaza los nombres genéricos que
+ * catálogo, igual que ARABIA y DAMA. Reemplaza los nombres genéricos que
  * generaba generateProducts.js para la categoría "caballero".
  */
 export const CABALLERO_CATALOG = [

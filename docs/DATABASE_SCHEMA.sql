@@ -24,7 +24,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE categories (
-    id          TEXT PRIMARY KEY,          -- slug estable, ej. 'araba', 'mujeres', 'caballero'
+    id          TEXT PRIMARY KEY,          -- slug estable, ej. 'arabia', 'mujeres', 'caballero'
     name        TEXT NOT NULL,
     slug        TEXT NOT NULL UNIQUE,
     description TEXT,

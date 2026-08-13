@@ -54,7 +54,7 @@ export function AdminPromotions() {
             type="text"
             value={values.message}
             onChange={handleChange('message')}
-            placeholder="Ej. 20% de descuento en toda la colección ARABA esta semana"
+            placeholder="Ej. 20% de descuento en toda la colección ARABIA esta semana"
             maxLength={140}
             className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
           />
@@ -77,7 +77,7 @@ export function AdminPromotions() {
               type="text"
               value={values.linkTo}
               onChange={handleChange('linkTo')}
-              placeholder="/productos/araba"
+              placeholder="/productos/arabia"
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
             />
           </div>

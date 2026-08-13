@@ -5,11 +5,11 @@
  */
 export const CATEGORIES = [
   {
-    id: 'araba',
-    slug: 'araba',
-    name: 'ARABA',
+    id: 'arabia',
+    slug: 'arabia',
+    name: 'ARABIA',
     shortDescription: 'Esencias árabes intensas y duraderas, inspiradas en el oud y el ámbar.',
-    image: '/images/categories/araba.svg',
+    image: '/images/categories/arabia.svg',
     accent: 'from-amber-500/20 to-transparent',
   },
   {

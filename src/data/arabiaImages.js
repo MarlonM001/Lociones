@@ -1,10 +1,10 @@
 /**
- * Fotos reales por producto para la categoría araba, buscadas en internet
+ * Fotos reales por producto para la categoría arabia, buscadas en internet
  * (no las del PDF del proveedor). Clave = nombre exacto tal como aparece en
- * catalogAraba.js. Los productos sin entrada acá siguen usando el ícono
+ * catalogArabia.js. Los productos sin entrada acá siguen usando el ícono
  * genérico de la categoría hasta que se les consiga foto.
  */
-export const ARABA_IMAGES = {
+export const ARABIA_IMAGES = {
   'Choco Overdose': 'choco-overdose.png',
   'Whipped Pleasure': 'whipped-pleasure.png',
   'Cookie Crave': 'cookie-crave.png',

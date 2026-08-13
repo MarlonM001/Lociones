@@ -1,11 +1,11 @@
 import { CATEGORIES } from '@/config/categories'
 import { slugify } from '@/utils/slugify'
-import { ARABA_CATALOG } from './catalogAraba'
+import { ARABIA_CATALOG } from './catalogArabia'
 import { DAMA_CATALOG } from './catalogDama'
 import { CABALLERO_CATALOG } from './catalogCaballero'
 import { CABALLERO_IMAGES } from './caballeroImages'
 import { DAMA_IMAGES } from './damaImages'
-import { ARABA_IMAGES } from './arabaImages'
+import { ARABIA_IMAGES } from './arabiaImages'
 
 // PRNG con semilla fija: los productos deben ser siempre los mismos entre
 // recargas de la app (el carrito guarda referencias por id/slug en localStorage).
@@ -20,7 +20,7 @@ function mulberry32(seed) {
 }
 
 const CATALOG_BY_CATEGORY = {
-  araba: ARABA_CATALOG,
+  arabia: ARABIA_CATALOG,
   mujeres: DAMA_CATALOG,
   caballero: CABALLERO_CATALOG,
 }
@@ -39,7 +39,7 @@ function buildCatalogShortDescription(ml, notes) {
 const REAL_IMAGES_BY_CATEGORY = {
   caballero: CABALLERO_IMAGES,
   mujeres: DAMA_IMAGES,
-  araba: ARABA_IMAGES,
+  arabia: ARABIA_IMAGES,
 }
 
 function resolveProductImage(categoryId, name) {

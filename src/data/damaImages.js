@@ -49,4 +49,13 @@ export const DAMA_IMAGES = {
   'Cloud Pink A.G': 'cloud-pink-ag.jpg',
   'Thank U Next 2.0 A.G': 'thank-u-next-2-ag.jpg',
   'Thank U Next A.G': 'thank-u-next-ag.jpg',
+
+  'Moonlight A.G': 'moonlight-ag.jpg',
+  'Sweet Like Candy': 'sweet-like-candy.jpg',
+  'Mod Vanilla': 'mod-vanilla.jpg',
+  'Mod Blush': 'mod-blush.jpg',
+  'Ari Ariana Grande': 'ari-ariana-grande.jpg',
+  'R.E.M Ariana Grande': 'rem-ariana-grande.jpg',
+  'Toy 2 Moschino': 'toy-2-moschino.jpg',
+  'Toy 2 Bubble Gum': 'toy-2-bubble-gum.jpg',
 }

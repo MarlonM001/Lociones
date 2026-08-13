@@ -9,7 +9,7 @@ export const CATEGORIES = [
     slug: 'arabia',
     name: 'ARABIA',
     shortDescription: 'Esencias árabes intensas y duraderas, inspiradas en el oud y el ámbar.',
-    image: '/images/categories/arabia.svg',
+    image: '/images/categories/arabia.jpg',
     accent: 'from-amber-500/20 to-transparent',
   },
   {
@@ -17,7 +17,7 @@ export const CATEGORIES = [
     slug: 'mujeres',
     name: 'Mujeres',
     shortDescription: 'Fragancias florales y envolventes para cada momento del día.',
-    image: '/images/categories/mujeres.svg',
+    image: '/images/categories/mujeres.jpg',
     accent: 'from-rose-400/20 to-transparent',
   },
   {
@@ -25,7 +25,7 @@ export const CATEGORIES = [
     slug: 'caballero',
     name: 'Caballero',
     shortDescription: 'Notas amaderadas y frescas con carácter y sofisticación.',
-    image: '/images/categories/caballero.svg',
+    image: '/images/categories/caballero.jpg',
     accent: 'from-sky-400/15 to-transparent',
   },
 ]

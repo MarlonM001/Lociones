@@ -57,7 +57,7 @@
   }
 
   #root {
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
   }
@@ -117,5 +117,5 @@
 
 @keyframes confetti-fall {
   from { transform: translate(0, -10px) rotate(0deg); opacity: 1; }
-  to { transform: translate(var(--confetti-drift), 100vh) rotate(var(--confetti-spin)); opacity: 0; }
+  to { transform: translate(var(--confetti-drift), 100dvh) rotate(var(--confetti-spin)); opacity: 0; }
 }

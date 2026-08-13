@@ -7,7 +7,7 @@ export function Loading({ label = 'Cargando...', fullScreen = false }) {
   )
 
   if (fullScreen) {
-    return <div className="flex min-h-[60vh] items-center justify-center">{content}</div>
+    return <div className="flex min-h-[60dvh] items-center justify-center">{content}</div>
   }
 
   return content

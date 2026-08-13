@@ -49,7 +49,7 @@ export function Login() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16">
+    <div className="mx-auto flex min-h-[70dvh] max-w-md flex-col justify-center px-4 py-16">
       <span className="text-xs uppercase tracking-widest-plus text-gold">Bienvenido de nuevo</span>
       <h1 className="mt-2 font-display text-3xl text-ivory">Iniciar sesión</h1>
       <p className="mt-2 text-sm text-ivory-dim">

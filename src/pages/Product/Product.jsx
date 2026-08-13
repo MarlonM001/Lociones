@@ -96,13 +96,13 @@ export function Product() {
             />
           </div>
           {product.images.length > 1 && (
-            <div className="mt-4 flex gap-3">
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
               {product.images.map((image, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => setActiveImage(index)}
-                  className={`h-20 w-20 overflow-hidden rounded-xl border transition-colors ${
+                  className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border transition-colors ${
                     activeImage === index ? 'border-gold' : 'border-ivory/10'
                   }`}
                 >

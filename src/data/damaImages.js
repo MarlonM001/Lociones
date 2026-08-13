@@ -137,4 +137,7 @@ export const DAMA_IMAGES = {
   'CK Eternity': 'ck-eternity.jpg',
   'Starry Night Montale': 'starry-night-montale-dama.jpg',
   'My Burberry': 'my-burberry.jpg',
+
+  'Famme': 'fame.jpg',
+  'Good Mademoiselle': 'coco-mademoiselle.jpg',
 }

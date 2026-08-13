@@ -150,4 +150,11 @@ export const CABALLERO_IMAGES = {
   'Imagination LV': 'imagination-lv.jpg',
   'Ombre Nomade': 'ombre-nomade.jpg',
   "L'Immensite": 'limmensite.jpg',
+
+  "Black XS L'Exces": 'black-xs-l-exces.jpg',
+  "Black XS L'Aphrodisiaque": 'black-xs-l-aphrodisiaque.jpg',
+  '212 Vip Wild Party Men': '212-vip-wild-party-men.jpg',
+  '212 Vip Black I Love NY': '212-vip-black-i-love-ny.jpg',
+  '212 Men Aqua': '212-men-aqua.jpg',
+  'Diesel Tattoo': 'diesel-tattoo.jpg',
 }

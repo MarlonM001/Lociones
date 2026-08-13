@@ -58,4 +58,13 @@ export const DAMA_IMAGES = {
   'R.E.M Ariana Grande': 'rem-ariana-grande.jpg',
   'Toy 2 Moschino': 'toy-2-moschino.jpg',
   'Toy 2 Bubble Gum': 'toy-2-bubble-gum.jpg',
+
+  'Toy 2 Perla': 'toy-2-perla.jpg',
+  'Moschino Funny': 'moschino-funny.jpg',
+  'Moschino I Love I Love': 'moschino-i-love-i-love.jpg',
+  'Moschino Fresh': 'moschino-fresh.jpg',
+  'Fresh Gold': 'fresh-gold.jpg',
+  'Burberry Her': 'burberry-her.jpg',
+  'Good Girl': 'good-girl.jpg',
+  'Good Girl Blush': 'good-girl-blush.jpg',
 }

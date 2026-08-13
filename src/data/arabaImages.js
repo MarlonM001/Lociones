@@ -132,4 +132,10 @@ export const ARABA_IMAGES = {
   'Vulcan Sable': 'vulcan-sable.jpg',
   'Vulcan Baie': 'vulcan-baie.jpg',
   'Vulcan Feu': 'vulcan-feu.jpg',
+
+  'Ahli Corvus': 'ahli-corvus.jpg',
+  'Ahli Vega': 'ahli-vega.jpg',
+  'Ahli Karpos': 'ahli-karpos.jpg',
+  'Ilmin Monastery': 'ilmin-monastery.png',
+  'Intio': 'intio.png',
 }

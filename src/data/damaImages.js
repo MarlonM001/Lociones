@@ -40,4 +40,13 @@ export const DAMA_IMAGES = {
   '212 Vip Wins': '212-vip-wins.jpg',
   '212 Vip Wild Party': '212-vip-wild-party.jpg',
   'CH Woman': 'ch-woman.jpg',
+
+  'Omnia Coral': 'omnia-coral.jpg',
+  'Omnia Amethyste': 'omnia-amethyste.jpg',
+  'Omnia Crystalline': 'omnia-crystalline.jpg',
+  'Omnia Paraiba': 'omnia-paraiba.jpg',
+  'Cloud A.G': 'cloud-ag.jpg',
+  'Cloud Pink A.G': 'cloud-pink-ag.jpg',
+  'Thank U Next 2.0 A.G': 'thank-u-next-2-ag.jpg',
+  'Thank U Next A.G': 'thank-u-next-ag.jpg',
 }

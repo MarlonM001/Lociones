@@ -31,4 +31,13 @@ export const DAMA_IMAGES = {
   'La Bomba': 'la-bomba.jpg',
   'Joy By Dior': 'joy-by-dior.jpg',
   'Prada Paradoxe': 'prada-paradoxe.jpg',
+
+  '212 Vip Rose': '212-vip-rose.jpg',
+  '212 Vip Dama': '212-vip-dama.jpg',
+  '212 NYC Dama': '212-nyc-dama.jpg',
+  '212 Sexy': '212-sexy.jpg',
+  '212 Vip Red Rose': '212-vip-red-rose.jpg',
+  '212 Vip Wins': '212-vip-wins.jpg',
+  '212 Vip Wild Party': '212-vip-wild-party.jpg',
+  'CH Woman': 'ch-woman.jpg',
 }

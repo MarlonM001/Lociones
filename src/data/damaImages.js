@@ -22,4 +22,13 @@ export const DAMA_IMAGES = {
   'Purr Katy Perry': 'purr-katy-perry.jpg',
   'Acqua Di Giola': 'acqua-di-giola.jpg',
   'My Way': 'my-way.jpg',
+
+  'Delina Royal': 'delina-royal.jpg',
+  'Valentino Donna': 'valentino-donna.jpg',
+  'Bond Bleecker Street': 'bond-bleecker-street.jpg',
+  'Daisy Marc-Jacobs': 'daisy-marc-jacobs.jpg',
+  'Viva La Juicy': 'viva-la-juicy.jpg',
+  'La Bomba': 'la-bomba.jpg',
+  'Joy By Dior': 'joy-by-dior.jpg',
+  'Prada Paradoxe': 'prada-paradoxe.jpg',
 }

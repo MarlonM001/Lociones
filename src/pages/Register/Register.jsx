@@ -19,7 +19,7 @@ const RULES = {
   name: (value) => (!isNonEmpty(value) ? 'Ingresa tu nombre completo' : null),
   email: (value) => (!isValidEmail(value) ? 'Ingresa un email válido' : null),
   phone: (value) => (!isValidPhone(value) ? 'Ingresa un teléfono válido' : null),
-  password: (value) => (!minLength(value, 6) ? 'La contraseña debe tener al menos 6 caracteres' : null),
+  password: (value) => (!minLength(value, 8) ? 'La contraseña debe tener al menos 8 caracteres' : null),
   city: (value) => (!isNonEmpty(value) ? 'Ingresa tu ciudad' : null),
   address: (value) => (!isNonEmpty(value) ? 'Ingresa tu dirección de entrega' : null),
 }

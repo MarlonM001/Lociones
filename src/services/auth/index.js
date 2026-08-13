@@ -112,6 +112,7 @@ export function getSession() {
 export async function ensureAdminSeed() {
   const users = readUsers()
   const existingAdmin = users.find((user) => user.role === 'admin')
+  const seededPasswordHash = await hashPassword(SEEDED_ADMIN_PASSWORD)
 
   if (!existingAdmin) {
     const now = new Date().toISOString()
@@ -120,7 +121,7 @@ export async function ensureAdminSeed() {
       name: 'Marlon',
       email: SEEDED_ADMIN_EMAIL,
       phone: '3000000000',
-      passwordHash: await hashPassword(SEEDED_ADMIN_PASSWORD),
+      passwordHash: seededPasswordHash,
       role: 'admin',
       city: '',
       address: '',
@@ -131,12 +132,16 @@ export async function ensureAdminSeed() {
     return
   }
 
-  if (existingAdmin.email !== SEEDED_ADMIN_EMAIL) {
+  // Comparar también el hash de contraseña (no solo el email) para que subir
+  // SEEDED_ADMIN_PASSWORD la propague a navegadores que ya tenían el admin
+  // sembrado con la contraseña anterior — antes solo se detectaba el cambio
+  // de email y una contraseña nueva se quedaba sin aplicar silenciosamente.
+  if (existingAdmin.email !== SEEDED_ADMIN_EMAIL || existingAdmin.passwordHash !== seededPasswordHash) {
     const updatedAdmin = {
       ...existingAdmin,
       name: 'Marlon',
       email: SEEDED_ADMIN_EMAIL,
-      passwordHash: await hashPassword(SEEDED_ADMIN_PASSWORD),
+      passwordHash: seededPasswordHash,
       updatedAt: new Date().toISOString(),
     }
     writeUsers(users.map((user) => (user.id === existingAdmin.id ? updatedAdmin : user)))

@@ -119,4 +119,13 @@ export const DAMA_IMAGES = {
   'La Belle Le Parfum': 'la-belle-le-parfum.jpg',
   'Divine JPG': 'divine-jpg.jpg',
   'La Belle Paradise Garden': 'la-belle-paradise-garden.jpg',
+
+  'Escada': 'escada.jpg',
+  'Gold Rush': 'gold-rush.jpg',
+  'Gold Rush Rosa': 'gold-rush-rosa.jpg',
+  'Rose Rush': 'rose-rush.jpg',
+  'Olympéa Parfum': 'olympea-parfum.jpg',
+  'Valentino Donna B.R Pink': 'valentino-donna-br-pink.jpg',
+  'Can Can Burlesque': 'can-can-burlesque.jpg',
+  'Clinique Happy': 'clinique-happy.jpg',
 }

@@ -67,4 +67,12 @@ export const DAMA_IMAGES = {
   'Burberry Her': 'burberry-her.jpg',
   'Good Girl': 'good-girl.jpg',
   'Good Girl Blush': 'good-girl-blush.jpg',
+
+  'Good Girl So Very': 'good-girl-so-very.jpg',
+  'Good Girl Fantastic Pink': 'good-girl-fantastic-pink.jpg',
+  'Dazzling Garden': 'dazzling-garden.jpg',
+  '212 Heroes Woman': '212-heroes-woman.jpg',
+  'Omnia Pink': 'omnia-pink.jpg',
+  'La Vida Es Bella': 'la-vida-es-bella.jpg',
+  'Chanel No. 5': 'chanel-no-5.jpg',
 }

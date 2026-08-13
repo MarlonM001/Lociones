@@ -4,6 +4,8 @@ import { ARABA_CATALOG } from './catalogAraba'
 import { DAMA_CATALOG } from './catalogDama'
 import { CABALLERO_CATALOG } from './catalogCaballero'
 import { CABALLERO_IMAGES } from './caballeroImages'
+import { DAMA_IMAGES } from './damaImages'
+import { ARABA_IMAGES } from './arabaImages'
 
 // PRNG con semilla fija: los productos deben ser siempre los mismos entre
 // recargas de la app (el carrito guarda referencias por id/slug en localStorage).
@@ -32,11 +34,12 @@ function buildCatalogShortDescription(ml, notes) {
   return `${ml}ml — ${notes.slice(0, 3).join(', ')}.`
 }
 
-// Fotos reales por producto, cuando existen (por ahora solo CABALLERO); el
-// resto sigue con el ícono genérico de la categoría hasta que se les
-// consiga una foto real.
+// Fotos reales por producto, cuando existen; el resto sigue con el ícono
+// genérico de la categoría hasta que se les consiga una foto real.
 const REAL_IMAGES_BY_CATEGORY = {
   caballero: CABALLERO_IMAGES,
+  mujeres: DAMA_IMAGES,
+  araba: ARABA_IMAGES,
 }
 
 function resolveProductImage(categoryId, name) {

@@ -84,4 +84,12 @@ export const DAMA_IMAGES = {
   'Fantasy Midnight': 'fantasy-midnight.jpg',
   'Light Blue': 'light-blue.jpg',
   'Devotion D&G': 'devotion-dg.jpg',
+
+  'The One Woman': 'the-one-woman.jpg',
+  'Angel & Demond': 'angel-demond.jpg',
+  'Boss The Scent For Her': 'boss-scent-for-her.jpg',
+  'Lacoste Sparkling': 'lacoste-sparkling.jpg',
+  'Lacoste Natural': 'lacoste-natural.jpg',
+  'Lacoste Touch Of Pink': 'lacoste-touch-of-pink.jpg',
+  'Lady Million': 'lady-million.jpg',
 }

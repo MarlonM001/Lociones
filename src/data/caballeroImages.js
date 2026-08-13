@@ -146,4 +146,8 @@ export const CABALLERO_IMAGES = {
   'Jean Pascal': 'jean-pascal.png',
   'Milesimé Imperial': 'milesime-imperial.png',
   'Toy 2 Perol': 'toy-2-perol.jpg',
+  'California Dream': 'california-dream.jpg',
+  'Imagination LV': 'imagination-lv.jpg',
+  'Ombre Nomade': 'ombre-nomade.jpg',
+  "L'Immensite": 'limmensite.jpg',
 }

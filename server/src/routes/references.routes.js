@@ -3,6 +3,7 @@ import { asyncHandler } from '../middleware/errorHandler.js'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
 import { uploadReferenceVideo, publicUploadUrl } from '../middleware/upload.js'
 import { ApiError } from '../utils/ApiError.js'
+import { transcodeToH264 } from '../utils/transcodeVideo.js'
 import * as referencesService from '../services/references.service.js'
 
 const router = Router()
@@ -37,7 +38,8 @@ router.post(
   uploadReferenceVideo.single('video'),
   asyncHandler(async (req, res) => {
     if (!req.file) throw ApiError.badRequest('Selecciona un video para subir.')
-    const videoUrl = publicUploadUrl('references', req.file.filename)
+    const transcodedFilename = await transcodeToH264(req.file.path)
+    const videoUrl = publicUploadUrl('references', transcodedFilename)
     const reference = await referencesService.addReference({
       ...req.body,
       videoUrl,

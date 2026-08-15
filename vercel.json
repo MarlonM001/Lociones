@@ -12,7 +12,7 @@
         { "key": "Permissions-Policy", "value": "geolocation=(self), camera=(), microphone=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://maps.googleapis.com https://*.google.com https://*.trycloudflare.com; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://maps.googleapis.com https://*.google.com https://*.trycloudflare.com; media-src 'self' https://*.trycloudflare.com; frame-ancestors 'none'"
         }
       ]
     }

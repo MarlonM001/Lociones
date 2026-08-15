@@ -31,21 +31,28 @@ export function CelebrationEffect() {
   const idRef = useRef(0)
 
   useEffect(() => {
-    if (!getCelebrationConfig().enabled) return
+    let spawnTimer
+    let stopTimer
 
-    setRunning(true)
-    const spawnTimer = setInterval(() => {
-      idRef.current += 1
-      const left = makeParticle('left', idRef.current)
-      idRef.current += 1
-      const right = makeParticle('right', idRef.current)
-      setParticles((current) => [...current.slice(-120), left, right])
-    }, SPAWN_INTERVAL_MS)
+    getCelebrationConfig()
+      .then((config) => {
+        if (!config.enabled) return
 
-    const stopTimer = setTimeout(() => {
-      clearInterval(spawnTimer)
-      setRunning(false)
-    }, TOTAL_DURATION_MS)
+        setRunning(true)
+        spawnTimer = setInterval(() => {
+          idRef.current += 1
+          const left = makeParticle('left', idRef.current)
+          idRef.current += 1
+          const right = makeParticle('right', idRef.current)
+          setParticles((current) => [...current.slice(-120), left, right])
+        }, SPAWN_INTERVAL_MS)
+
+        stopTimer = setTimeout(() => {
+          clearInterval(spawnTimer)
+          setRunning(false)
+        }, TOTAL_DURATION_MS)
+      })
+      .catch(() => {})
 
     return () => {
       clearInterval(spawnTimer)

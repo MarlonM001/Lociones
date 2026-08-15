@@ -25,7 +25,7 @@ export function Bottle3D({ colors, label }) {
 
   return (
     <div
-      className="h-[420px] w-[320px] cursor-grab active:cursor-grabbing"
+      className="h-[280px] w-[220px] cursor-grab active:cursor-grabbing sm:h-[420px] sm:w-[320px]"
       role="img"
       aria-label={`Frasco de perfume ${label} en 3D, arrastra para rotarlo`}
     >

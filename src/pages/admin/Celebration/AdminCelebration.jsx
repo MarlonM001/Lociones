@@ -10,7 +10,7 @@ export function AdminCelebration() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    setValues(getCelebrationConfig())
+    getCelebrationConfig().then(setValues)
   }, [])
 
   if (!values) return <Loading label="Cargando..." />
@@ -19,12 +19,17 @@ export function AdminCelebration() {
     setValues((current) => ({ ...current, enabled: event.target.checked }))
   }
 
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault()
     setSaving(true)
-    saveCelebrationConfig(values)
-    showToast('Efecto de celebración guardado')
-    setSaving(false)
+    try {
+      await saveCelebrationConfig(values)
+      showToast('Efecto de celebración guardado')
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (

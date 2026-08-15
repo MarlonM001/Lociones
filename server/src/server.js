@@ -10,6 +10,7 @@ import productsRoutes from './routes/products.routes.js'
 import ordersRoutes from './routes/orders.routes.js'
 import referencesRoutes from './routes/references.routes.js'
 import promotionsRoutes from './routes/promotions.routes.js'
+import celebrationRoutes from './routes/celebration.routes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -42,6 +43,7 @@ export function createApp() {
   app.use('/api/orders', ordersRoutes)
   app.use('/api/references', referencesRoutes)
   app.use('/api/promotions', promotionsRoutes)
+  app.use('/api/celebration', celebrationRoutes)
 
   app.use(notFoundHandler)
   app.use(errorHandler)

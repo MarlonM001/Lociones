@@ -1,10 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { HERO_SLIDES } from './heroSlides'
 
-// three.js solo se descarga cuando hace falta (pantallas lg+, ver más abajo),
-// para no inflar el bundle inicial de todos los visitantes.
+// three.js se carga en un chunk aparte (lazy), para no inflar el bundle
+// inicial que descarga cada visitante antes de que la página sea interactiva.
 const Bottle3D = lazy(() => import('@/components/three/Bottle3D').then((m) => ({ default: m.Bottle3D })))
 
 const AUTO_ADVANCE_MS = 6000
@@ -84,7 +83,6 @@ export function HeroSection() {
     setIndex((nextIndex + HERO_SLIDES.length) % HERO_SLIDES.length)
   }
 
-  const isLargeScreen = useMediaQuery('(min-width: 1024px)')
   const activeSlide = HERO_SLIDES[index]
   const activeColors = activeSlide.bottleColors
 
@@ -144,33 +142,31 @@ export function HeroSection() {
         {/* Un solo canvas 3D persistente: cambia de color según la colección activa en
             lugar de reiniciarse en cada avance del carrusel, para no perder la rotación
             que el visitante haya dejado con el mouse. */}
-        <div className="relative hidden justify-center lg:flex">
+        <div className="relative flex justify-center">
           {/* Círculo grande tipo espejo de agua detrás de la botella, como si flotara sobre él. */}
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-md transition-colors duration-1000"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-md transition-colors duration-1000 sm:h-[500px] sm:w-[500px]"
             style={{
               background: `radial-gradient(circle at 50% 42%, ${activeColors.from}3d 0%, #1b6f8c26 45%, transparent 72%)`,
             }}
           />
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/15"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/15 sm:h-[440px] sm:w-[440px]"
             aria-hidden="true"
           />
           <div
-            className="animate-ripple pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40"
+            className="animate-ripple pointer-events-none absolute left-1/2 top-1/2 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40 sm:h-[440px] sm:w-[440px]"
             aria-hidden="true"
           />
           <div
-            className="animate-ripple pointer-events-none absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40"
+            className="animate-ripple pointer-events-none absolute left-1/2 top-1/2 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/40 sm:h-[440px] sm:w-[440px]"
             style={{ animationDelay: '2.2s' }}
             aria-hidden="true"
           />
 
-          {isLargeScreen && (
-            <Suspense fallback={<div className="h-[420px] w-[320px]" />}>
-              <Bottle3D colors={activeColors} label={activeSlide.bottleLabel} />
-            </Suspense>
-          )}
+          <Suspense fallback={<div className="h-[280px] w-[220px] sm:h-[420px] sm:w-[320px]" />}>
+            <Bottle3D colors={activeColors} label={activeSlide.bottleLabel} />
+          </Suspense>
         </div>
       </div>
 

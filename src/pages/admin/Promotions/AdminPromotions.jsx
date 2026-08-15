@@ -10,7 +10,7 @@ export function AdminPromotions() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    setValues(getPromoBanner())
+    getPromoBanner().then(setValues)
   }, [])
 
   if (!values) return <Loading label="Cargando..." />
@@ -20,12 +20,17 @@ export function AdminPromotions() {
     setValues((current) => ({ ...current, [field]: value }))
   }
 
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault()
     setSaving(true)
-    savePromoBanner(values)
-    showToast('Aviso de promoción guardado')
-    setSaving(false)
+    try {
+      await savePromoBanner(values)
+      showToast('Aviso de promoción guardado')
+    } catch (error) {
+      showToast(error.message, 'error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const previewActive = isPromoBannerActive(values)

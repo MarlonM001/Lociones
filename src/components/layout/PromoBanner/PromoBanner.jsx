@@ -1,19 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getPromoBanner, isPromoBannerActive } from '@/services/promotions'
+import { getPromoBanner, isPromoBannerActive, DEFAULT_BANNER } from '@/services/promotions'
 
 export function PromoBanner() {
-  const [banner, setBanner] = useState(getPromoBanner)
+  const [banner, setBanner] = useState(DEFAULT_BANNER)
 
   useEffect(() => {
-    // Si el admin cambia el banner en otra pestaña del mismo navegador, se refleja sin recargar.
-    const handleStorage = (event) => {
-      if (event.key === null || event.key === 'essence_promo_banner') {
-        setBanner(getPromoBanner())
-      }
-    }
-    window.addEventListener('storage', handleStorage)
-    return () => window.removeEventListener('storage', handleStorage)
+    getPromoBanner()
+      .then(setBanner)
+      .catch(() => {})
   }, [])
 
   const isActive = isPromoBannerActive(banner)

@@ -10,10 +10,9 @@ export function ReferencesTeaser() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getReferences().then((items) => {
-      setReferences(items.slice(0, REFERENCES_LIMIT))
-      setLoading(false)
-    })
+    getReferences()
+      .then((items) => setReferences(items.slice(0, REFERENCES_LIMIT)))
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) return null

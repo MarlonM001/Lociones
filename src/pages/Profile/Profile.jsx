@@ -16,14 +16,12 @@ export function Profile() {
   const [loadingReferences, setLoadingReferences] = useState(true)
 
   useEffect(() => {
-    getOrdersByUser(user.id).then((items) => {
-      setOrders(items)
-      setLoadingOrders(false)
-    })
-    getReferencesByUser(user.id).then((items) => {
-      setReferences(items)
-      setLoadingReferences(false)
-    })
+    getOrdersByUser(user.id)
+      .then(setOrders)
+      .finally(() => setLoadingOrders(false))
+    getReferencesByUser(user.id)
+      .then(setReferences)
+      .finally(() => setLoadingReferences(false))
   }, [user.id])
 
   return (

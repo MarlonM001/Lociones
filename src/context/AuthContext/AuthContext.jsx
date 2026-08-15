@@ -1,13 +1,16 @@
 import { createContext, useEffect, useState } from 'react'
-import { ensureAdminSeed, getSession, loginUser, logoutUser, registerUser } from '@/services/auth'
+import { getSession, loginUser, logoutUser, registerUser } from '@/services/auth'
 
 export const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(getSession)
+  const [user, setUser] = useState(null)
+  const [initializing, setInitializing] = useState(true)
 
   useEffect(() => {
-    ensureAdminSeed()
+    getSession()
+      .then(setUser)
+      .finally(() => setInitializing(false))
   }, [])
 
   const login = async (credentials) => {
@@ -29,6 +32,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    initializing,
     isAuthenticated: Boolean(user),
     isAdmin: user?.role === 'admin',
     login,

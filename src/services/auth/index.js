@@ -1,154 +1,44 @@
-import { hashPassword } from './crypto'
+import { apiFetch, setToken, clearToken, getToken } from '../api/client'
 
 /**
- * Capa de autenticación. Hoy persiste en localStorage con la misma forma que
- * la tabla `users` (ver docs/DATABASE_SCHEMA.sql); cuando exista backend,
- * estas funciones pasan a llamar la API y dejan de tocar localStorage.
+ * Capa de autenticación. Habla con la API real (`server/`): JWT guardado en
+ * localStorage, adjuntado como `Authorization: Bearer` en cada request por
+ * `apiFetch`. Ver docs/DATABASE_SCHEMA.sql para la forma de `users`.
  */
-const USERS_KEY = 'essence_users'
-const SESSION_KEY = 'essence_session'
-const SIMULATED_LATENCY_MS = 300
-
-// Credenciales de la cuenta admin sembrada automáticamente (ver ensureAdminSeed).
-// El login exige formato de email, por eso "marlon" se guarda como
-// marlon@essencepolar.com — usa ese email completo para iniciar sesión.
-// Solo para esta fase sin backend: en producción el admin se crea desde el
-// servidor, nunca hardcodeado en el cliente.
-export const SEEDED_ADMIN_EMAIL = 'marlon@essencepolar.com'
-export const SEEDED_ADMIN_PASSWORD = '2026'
-
-function delay(ms = SIMULATED_LATENCY_MS) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-function readUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-function writeUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
-}
-
-function toPublicUser(user) {
-  const { passwordHash, ...publicUser } = user
-  return publicUser
-}
-
-function setSession(user) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(user))
-}
 
 export async function registerUser({ name, email, phone, password, city, address }) {
-  await delay()
-  const users = readUsers()
-  const alreadyExists = users.some((user) => user.email.toLowerCase() === email.trim().toLowerCase())
-  if (alreadyExists) {
-    throw new Error('Ya existe una cuenta registrada con este email.')
-  }
-
-  const now = new Date().toISOString()
-  const user = {
-    id: users.reduce((max, existing) => Math.max(max, existing.id), 0) + 1,
-    name: name.trim(),
-    email: email.trim().toLowerCase(),
-    phone: phone.trim(),
-    passwordHash: await hashPassword(password),
-    role: 'customer',
-    city: city.trim(),
-    address: address.trim(),
-    createdAt: now,
-    updatedAt: now,
-  }
-
-  writeUsers([...users, user])
-  const publicUser = toPublicUser(user)
-  setSession(publicUser)
-  return publicUser
+  const { user, token } = await apiFetch('/api/auth/register', {
+    method: 'POST',
+    body: { name, email, phone, password, city, address },
+  })
+  setToken(token)
+  return user
 }
 
 export async function loginUser({ email, password }) {
-  await delay()
-  const users = readUsers()
-  const user = users.find((existing) => existing.email === email.trim().toLowerCase())
-  if (!user) {
-    throw new Error('No existe una cuenta con este email.')
-  }
-
-  const passwordHash = await hashPassword(password)
-  if (passwordHash !== user.passwordHash) {
-    throw new Error('Contraseña incorrecta.')
-  }
-
-  const publicUser = toPublicUser(user)
-  setSession(publicUser)
-  return publicUser
+  const { user, token } = await apiFetch('/api/auth/login', {
+    method: 'POST',
+    body: { email, password },
+  })
+  setToken(token)
+  return user
 }
 
 export function logoutUser() {
-  localStorage.removeItem(SESSION_KEY)
+  clearToken()
 }
 
-export function getSession() {
+/** Devuelve el usuario de la sesión actual, o null si no hay token o ya no es válido. */
+export async function getSession() {
+  if (!getToken()) return null
   try {
-    const raw = localStorage.getItem(SESSION_KEY)
-    return raw ? JSON.parse(raw) : null
+    return await apiFetch('/api/auth/me')
   } catch {
+    clearToken()
     return null
   }
 }
 
-/**
- * Crea la cuenta admin si todavía no existe ninguna. Se llama una vez al
- * cargar la app (ver AuthContext). Si ya existe un admin pero con un email
- * distinto al configurado arriba (por ejemplo, quedó sembrado con las
- * credenciales anteriores en este navegador), lo actualiza al nuevo
- * email/contraseña en vez de dejarlo desactualizado.
- */
-export async function ensureAdminSeed() {
-  const users = readUsers()
-  const existingAdmin = users.find((user) => user.role === 'admin')
-  const seededPasswordHash = await hashPassword(SEEDED_ADMIN_PASSWORD)
-
-  if (!existingAdmin) {
-    const now = new Date().toISOString()
-    const admin = {
-      id: users.reduce((max, existing) => Math.max(max, existing.id), 0) + 1,
-      name: 'Marlon',
-      email: SEEDED_ADMIN_EMAIL,
-      phone: '3000000000',
-      passwordHash: seededPasswordHash,
-      role: 'admin',
-      city: '',
-      address: '',
-      createdAt: now,
-      updatedAt: now,
-    }
-    writeUsers([...users, admin])
-    return
-  }
-
-  // Comparar también el hash de contraseña (no solo el email) para que subir
-  // SEEDED_ADMIN_PASSWORD la propague a navegadores que ya tenían el admin
-  // sembrado con la contraseña anterior — antes solo se detectaba el cambio
-  // de email y una contraseña nueva se quedaba sin aplicar silenciosamente.
-  if (existingAdmin.email !== SEEDED_ADMIN_EMAIL || existingAdmin.passwordHash !== seededPasswordHash) {
-    const updatedAdmin = {
-      ...existingAdmin,
-      name: 'Marlon',
-      email: SEEDED_ADMIN_EMAIL,
-      passwordHash: seededPasswordHash,
-      updatedAt: new Date().toISOString(),
-    }
-    writeUsers(users.map((user) => (user.id === existingAdmin.id ? updatedAdmin : user)))
-  }
-}
-
 export async function getAllUsers() {
-  await delay(0)
-  return readUsers().map(toPublicUser)
+  return apiFetch('/api/auth/users')
 }

@@ -55,8 +55,8 @@ export function CartPage() {
       clearCart()
       showToast('Pedido creado. Continúa la confirmación en WhatsApp.')
       window.open(link, '_blank', 'noopener')
-    } catch {
-      showToast('No pudimos crear el pedido, intenta de nuevo.', 'error')
+    } catch (error) {
+      showToast(error.message || 'No pudimos crear el pedido, intenta de nuevo.', 'error')
     } finally {
       setSubmitting(false)
     }

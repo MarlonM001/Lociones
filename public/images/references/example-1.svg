@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="bgEx1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2a2118"/>
+      <stop offset="100%" stop-color="#0d0c0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bgEx1)"/>
+  <circle cx="200" cy="130" r="130" fill="#c8a45c" opacity="0.08"/>
+  <g transform="translate(150,80)">
+    <rect x="0" y="30" width="100" height="70" rx="4" fill="#c8a45c" opacity="0.85"/>
+    <rect x="0" y="30" width="100" height="18" fill="#9c7c3d" opacity="0.9"/>
+    <rect x="44" y="30" width="12" height="70" fill="#0d0c0b" opacity="0.25"/>
+  </g>
+  <circle cx="200" cy="150" r="34" fill="#0d0c0b" opacity="0.55"/>
+  <path d="M190 150 l8 8 16 -18" fill="none" stroke="#e4c988" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="200" y="230" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#e4c988" letter-spacing="2">Entrega en Bogotá</text>
+  <text x="200" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#e4c988" letter-spacing="4" opacity="0.85">EJEMPLO</text>
+</svg>

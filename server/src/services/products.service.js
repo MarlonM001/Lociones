@@ -19,6 +19,9 @@ function toPublicProduct(row) {
     images: row.images ?? [],
     stock: row.stock,
     active: row.active,
+    isBestseller: row.is_bestseller,
+    bestsellerRank: row.bestseller_rank,
+    bestsellerImage: row.bestseller_image,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -60,6 +63,17 @@ export async function getFeaturedProducts(limit = 8) {
   return rows.map(toPublicProduct)
 }
 
+export async function getBestsellerProducts(limit = 8) {
+  const { rows } = await pool.query(
+    `SELECT * FROM products
+     WHERE active = TRUE AND is_bestseller = TRUE
+     ORDER BY bestseller_rank ASC NULLS LAST, id ASC
+     LIMIT $1`,
+    [limit],
+  )
+  return rows.map(toPublicProduct)
+}
+
 export async function getProductCountByCategory(categoryId) {
   const { rows } = await pool.query(
     'SELECT COUNT(*) FROM products WHERE category_id = $1 AND active = TRUE',
@@ -87,14 +101,17 @@ export async function createProduct({
   shortDescription,
   description,
   imageUrl,
+  isBestseller,
+  bestsellerRank,
+  bestsellerImageUrl,
 }) {
   const trimmedName = name?.trim()
   if (!trimmedName) throw ApiError.badRequest('El nombre es obligatorio.')
   if (!categoryId) throw ApiError.badRequest('La categoría es obligatoria.')
 
   const { rows: idRows } = await pool.query(
-    `INSERT INTO products (name, slug, category_id, sku, price, description, short_description, image, images, stock, active)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE)
+    `INSERT INTO products (name, slug, category_id, sku, price, description, short_description, image, images, stock, active, is_bestseller, bestseller_rank, bestseller_image)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE, $11, $12, $13)
      RETURNING id`,
     [
       trimmedName,
@@ -107,6 +124,9 @@ export async function createProduct({
       imageUrl ?? PLACEHOLDER_IMAGE,
       JSON.stringify(imageUrl ? [imageUrl] : [PLACEHOLDER_IMAGE]),
       Number(stock) || 0,
+      Boolean(isBestseller),
+      bestsellerRank ? Number(bestsellerRank) : null,
+      bestsellerImageUrl ?? null,
     ],
   )
   const id = idRows[0].id
@@ -143,6 +163,13 @@ export async function updateProduct(id, updates) {
   if ('imageUrl' in updates && updates.imageUrl) {
     set('image', updates.imageUrl)
     set('images', JSON.stringify([updates.imageUrl]))
+  }
+  if ('isBestseller' in updates) set('is_bestseller', Boolean(updates.isBestseller))
+  if ('bestsellerRank' in updates) {
+    set('bestseller_rank', updates.bestsellerRank === '' || updates.bestsellerRank === null ? null : Number(updates.bestsellerRank))
+  }
+  if ('bestsellerImageUrl' in updates && updates.bestsellerImageUrl) {
+    set('bestseller_image', updates.bestsellerImageUrl)
   }
 
   if (fields.length === 0) return existing

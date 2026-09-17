@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/useToast'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/Button'
 
-export function ProductCard({ product }) {
+export function ProductCard({ product, image }) {
   const { addItem } = useCart()
   const { showToast } = useToast()
   const requireAuth = useRequireAuth()
@@ -22,13 +22,13 @@ export function ProductCard({ product }) {
   }
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:shadow-xl hover:shadow-black/40">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal transition-all duration-300 hover:-translate-y-1 hover:border-gold/30 hover:shadow-xl hover:shadow-black/40">
       <Link to={`/producto/${product.slug}`} className="block aspect-[4/5] w-full overflow-hidden bg-ink">
         <img
-          src={product.image}
+          src={image ?? product.image}
           alt={product.name}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full scale-125 object-cover object-center transition-transform duration-500 group-hover:scale-[1.35]"
         />
       </Link>
 

@@ -38,7 +38,6 @@ export const CABALLERO_CATALOG = [
   { name: 'Valentino Born In Roma', ml: 100, price: 80000, notes: ['mineral', 'amaderado', 'ozónico', 'aromático', 'acuático', 'cálido especiado', 'salado', 'herbal', 'verde', 'terrosos'] },
   { name: 'Valentino Uomo', ml: 100, price: 75000, notes: ['amaderado', 'atalcado', 'cálido especiado', 'chocolate', 'cuero', 'café', 'dulce', 'aromático', 'fresco especiado', 'cítrico'] },
   { name: 'Layton Royal', ml: 100, price: 75000, notes: ['cálido especiado', 'fresco especiado', 'amaderado', 'avainillado', 'aromático', 'afrutados', 'atalcado', 'lavanda', 'fresco', 'cítrico'] },
-  { name: 'Xerjoff Erba Pura Caja', ml: 100, price: 88000, notes: ['afrutados', 'cítrico', 'dulce', 'almizclado', 'atalcado', 'avainillado', 'ámbar', 'fresco especiado'] },
   { name: 'Xerjoff Erba Pura', ml: 100, price: 119000, notes: ['afrutados', 'cítrico', 'dulce', 'almizclado', 'atalcado', 'avainillado', 'ámbar', 'fresco especiado'] },
 
   { name: 'Scandal Men JPG', ml: 100, price: 65000, notes: ['caramelo', 'aromático', 'dulce', 'cítrico', 'avainillado', 'ámbar', 'especiado suave', 'amaderado'] },

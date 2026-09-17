@@ -14,6 +14,8 @@ const EMPTY_VALUES = {
   stock: '',
   shortDescription: '',
   description: '',
+  isBestseller: false,
+  bestsellerRank: '',
 }
 
 const RULES = {
@@ -26,6 +28,7 @@ const RULES = {
 export function ProductFormModal({ open, product, onClose, onSaved }) {
   const { showToast } = useToast()
   const fileInputRef = useRef(null)
+  const bestsellerFileInputRef = useRef(null)
   const [values, setValues] = useState(EMPTY_VALUES)
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState(null)
@@ -38,6 +41,7 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
     setErrors({})
     setFormError(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
+    if (bestsellerFileInputRef.current) bestsellerFileInputRef.current.value = ''
     setValues(
       product
         ? {
@@ -48,6 +52,8 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
             stock: String(product.stock),
             shortDescription: product.shortDescription,
             description: product.description,
+            isBestseller: Boolean(product.isBestseller),
+            bestsellerRank: product.bestsellerRank ? String(product.bestsellerRank) : '',
           }
         : EMPTY_VALUES,
     )
@@ -55,6 +61,10 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
 
   const handleChange = (field) => (event) => {
     setValues((current) => ({ ...current, [field]: event.target.value }))
+  }
+
+  const handleCheckboxChange = (field) => (event) => {
+    setValues((current) => ({ ...current, [field]: event.target.checked }))
   }
 
   const handleSubmit = async (event) => {
@@ -67,11 +77,17 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
     setSubmitting(true)
     try {
       const imageFile = fileInputRef.current?.files?.[0] ?? null
+      const bestsellerImageFile = bestsellerFileInputRef.current?.files?.[0] ?? null
+      const payload = {
+        ...values,
+        ...(imageFile && { imageFile }),
+        ...(bestsellerImageFile && { bestsellerImageFile }),
+      }
       if (isEditing) {
-        await updateProduct(product.id, { ...values, ...(imageFile && { imageFile }) })
+        await updateProduct(product.id, payload)
         showToast('Producto actualizado')
       } else {
-        await createProduct({ ...values, imageFile })
+        await createProduct(payload)
         showToast('Producto creado')
       }
       onSaved?.()
@@ -183,6 +199,57 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
             accept="image/*"
             className="w-full text-sm text-ivory-dim file:mr-4 file:rounded-full file:border-0 file:bg-gold file:px-4 file:py-2 file:text-sm file:font-medium file:text-on-gold"
           />
+        </div>
+
+        <div className="rounded-xl border border-gold/20 bg-gold/5 p-4">
+          <label className="flex items-center gap-2 text-sm text-ivory">
+            <input
+              type="checkbox"
+              checked={values.isBestseller}
+              onChange={handleCheckboxChange('isBestseller')}
+              className="h-4 w-4 rounded border-ivory/20 accent-gold"
+            />
+            Mostrar en el módulo "Top ventas" de la página principal
+          </label>
+
+          {values.isBestseller && (
+            <div className="mt-4 flex flex-col gap-4">
+              <div>
+                <label className="mb-1 block text-sm text-ivory-dim">Posición en el ranking (opcional)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={values.bestsellerRank}
+                  onChange={handleChange('bestsellerRank')}
+                  placeholder="Ej: 1 para que aparezca primero"
+                  className="w-full max-w-[220px] rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-ivory-dim">Si lo dejas vacío, se ordena por más reciente.</p>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm text-ivory-dim">
+                  Foto destacada para Top ventas (opcional)
+                </label>
+                {product?.bestsellerImage && (
+                  <img
+                    src={product.bestsellerImage}
+                    alt=""
+                    className="mb-2 h-20 w-20 rounded-lg border border-ivory/10 object-cover"
+                  />
+                )}
+                <input
+                  ref={bestsellerFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="w-full text-sm text-ivory-dim file:mr-4 file:rounded-full file:border-0 file:bg-gold file:px-4 file:py-2 file:text-sm file:font-medium file:text-on-gold"
+                />
+                <p className="mt-1 text-xs text-ivory-dim">
+                  Si no subes una, se usa la foto normal del producto.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-2">

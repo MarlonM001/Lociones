@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { CATEGORIES } from '@/config/categories'
 import { getProductCountByCategory } from '@/services/products'
 import { CategoryCard } from '@/components/product/CategoryCard'
+import { Reveal } from '@/components/ui/Reveal'
 
 export function CategoriesSection() {
   const [counts, setCounts] = useState({})
@@ -20,8 +21,10 @@ export function CategoriesSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {CATEGORIES.map((category) => (
-          <CategoryCard key={category.id} category={category} productCount={counts[category.id]} />
+        {CATEGORIES.map((category, index) => (
+          <Reveal key={category.id} delay={index * 100}>
+            <CategoryCard category={category} productCount={counts[category.id]} />
+          </Reveal>
         ))}
       </div>
     </section>

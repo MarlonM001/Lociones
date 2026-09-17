@@ -3,6 +3,7 @@ import { getFeaturedProducts } from '@/services/products'
 import { ProductCard } from '@/components/product/ProductCard'
 import { Loading } from '@/components/ui/Loading'
 import { Button } from '@/components/ui/Button'
+import { Reveal } from '@/components/ui/Reveal'
 
 export function FeaturedSection() {
   const [products, setProducts] = useState([])
@@ -27,8 +28,10 @@ export function FeaturedSection() {
           <Loading label="Cargando destacados..." />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.map((product, index) => (
+              <Reveal key={product.id} delay={(index % 4) * 80}>
+                <ProductCard product={product} />
+              </Reveal>
             ))}
           </div>
         )}

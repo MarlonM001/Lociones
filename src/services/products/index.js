@@ -10,6 +10,7 @@ function toPublicProduct(product) {
     ...product,
     image: resolveMediaUrl(product.image),
     images: (product.images ?? []).map(resolveMediaUrl),
+    bestsellerImage: resolveMediaUrl(product.bestsellerImage),
   }
 }
 
@@ -39,6 +40,11 @@ export async function getFeaturedProducts(limit = 8) {
   return products.map(toPublicProduct)
 }
 
+export async function getBestsellerProducts(limit = 8) {
+  const products = await apiFetch(`/api/products/bestsellers?limit=${limit}`)
+  return products.map(toPublicProduct)
+}
+
 export async function getProductCountByCategory(categoryId) {
   const products = await apiFetch(`/api/products?categoryId=${encodeURIComponent(categoryId)}`)
   return products.length
@@ -55,7 +61,20 @@ export async function getProductCategoryMap() {
   return new Map(products.map((product) => [product.id, product.categoryId]))
 }
 
-function toProductFormData({ name, categoryId, price, sku, stock, shortDescription, description, active, imageFile }) {
+function toProductFormData({
+  name,
+  categoryId,
+  price,
+  sku,
+  stock,
+  shortDescription,
+  description,
+  active,
+  imageFile,
+  isBestseller,
+  bestsellerRank,
+  bestsellerImageFile,
+}) {
   return buildFormData({
     name,
     categoryId,
@@ -66,6 +85,9 @@ function toProductFormData({ name, categoryId, price, sku, stock, shortDescripti
     description,
     ...(typeof active === 'boolean' && { active: String(active) }),
     ...(imageFile && { image: imageFile }),
+    ...(typeof isBestseller === 'boolean' && { isBestseller: String(isBestseller) }),
+    ...(bestsellerRank !== undefined && { bestsellerRank }),
+    ...(bestsellerImageFile && { bestsellerImage: bestsellerImageFile }),
   })
 }
 

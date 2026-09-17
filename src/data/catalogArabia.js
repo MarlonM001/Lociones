@@ -108,7 +108,6 @@ export const ARABIA_CATALOG = [
   { name: 'Amber Rouge', ml: 120, price: 100000, notes: ['cálido especiado', 'ámbar', 'almizclado', 'amaderado', 'animálico', 'metálico', 'atalcado', 'floral blanco', 'cuero', 'tabaco'] },
   { name: 'Amber Oud Aqua Dubai', ml: 100, price: 105000, notes: ['cítrico', 'verde', 'aromático', 'almizclado', 'afrutados', 'fresco especiado', 'atalcado'] },
   { name: 'Island Breeze', ml: 100, price: 119000, notes: ['afrutados', 'almizclado', 'atalcado', 'rosas', 'dulce', 'amaderado'] },
-  { name: 'Amber Oud Gold Edition Caja', ml: 120, price: 85000, notes: ['ámbar', 'amaderado', 'aromático', 'cítrico', 'fresco especiado', 'atalcado', 'cálido especiado', 'almizclado', 'balsámico'] },
   { name: 'Island Bliss', ml: 100, price: 105000, notes: ['coco', 'avainillado', 'floral blanco', 'dulce', 'florales', 'afrutados', 'acuático', 'lactónico', 'amaderado', 'tropical'] },
   { name: 'Yum Yum', ml: 100, price: 105000, notes: ['atalcado', 'afrutados', 'avainillado', 'almizclado', 'acerezado', 'dulce', 'amaderado', 'floral blanco', 'rosas', 'ámbar'] },
   { name: 'Baccarat Rouge 540', ml: 70, price: 69000, notes: ['ámbar', 'almendra', 'cálido especiado', 'leñoso', 'almizclado', 'animal', 'de nuez', 'sabroso', 'metálico', 'flores blancas'] },

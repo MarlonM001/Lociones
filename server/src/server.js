@@ -11,6 +11,9 @@ import ordersRoutes from './routes/orders.routes.js'
 import referencesRoutes from './routes/references.routes.js'
 import promotionsRoutes from './routes/promotions.routes.js'
 import celebrationRoutes from './routes/celebration.routes.js'
+import auctionsRoutes from './routes/auctions.routes.js'
+import chatRoutes from './routes/chat.routes.js'
+import { attachChatSocket } from './realtime/chatSocket.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -44,6 +47,8 @@ export function createApp() {
   app.use('/api/references', referencesRoutes)
   app.use('/api/promotions', promotionsRoutes)
   app.use('/api/celebration', celebrationRoutes)
+  app.use('/api/auctions', auctionsRoutes)
+  app.use('/api/chat', chatRoutes)
 
   app.use(notFoundHandler)
   app.use(errorHandler)
@@ -56,5 +61,6 @@ const isMainModule = process.argv[1] && fileURLToPath(import.meta.url) === path.
 if (isMainModule) {
   const app = createApp()
   const port = process.env.PORT ?? 4000
-  app.listen(port, () => console.log(`API escuchando en http://localhost:${port}`))
+  const server = app.listen(port, () => console.log(`API escuchando en http://localhost:${port}`))
+  attachChatSocket(server)
 }

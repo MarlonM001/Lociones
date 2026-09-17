@@ -29,6 +29,14 @@ router.get(
 )
 
 router.get(
+  '/bestsellers',
+  asyncHandler(async (req, res) => {
+    const limit = req.query.limit ? Number(req.query.limit) : 8
+    res.json(await productsService.getBestsellerProducts(limit))
+  }),
+)
+
+router.get(
   '/:slug',
   asyncHandler(async (req, res) => {
     const product = await productsService.getProductBySlug(req.params.slug)
@@ -47,14 +55,27 @@ router.get(
   }),
 )
 
+const uploadProductImages = uploadProductImage.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'bestsellerImage', maxCount: 1 },
+])
+
 router.post(
   '/',
   requireAuth,
   requireAdmin,
-  uploadProductImage.single('image'),
+  uploadProductImages,
   asyncHandler(async (req, res) => {
-    const imageUrl = req.file ? publicUploadUrl('products', req.file.filename) : undefined
-    const product = await productsService.createProduct({ ...req.body, imageUrl })
+    const imageUrl = req.files?.image?.[0] ? publicUploadUrl('products', req.files.image[0].filename) : undefined
+    const bestsellerImageUrl = req.files?.bestsellerImage?.[0]
+      ? publicUploadUrl('products', req.files.bestsellerImage[0].filename)
+      : undefined
+    const product = await productsService.createProduct({
+      ...req.body,
+      imageUrl,
+      isBestseller: req.body.isBestseller === 'true',
+      bestsellerImageUrl,
+    })
     res.status(201).json(product)
   }),
 )
@@ -63,11 +84,15 @@ router.patch(
   '/:id',
   requireAuth,
   requireAdmin,
-  uploadProductImage.single('image'),
+  uploadProductImages,
   asyncHandler(async (req, res) => {
     const updates = { ...req.body }
     if (typeof updates.active === 'string') updates.active = updates.active === 'true'
-    if (req.file) updates.imageUrl = publicUploadUrl('products', req.file.filename)
+    if (typeof updates.isBestseller === 'string') updates.isBestseller = updates.isBestseller === 'true'
+    if (req.files?.image?.[0]) updates.imageUrl = publicUploadUrl('products', req.files.image[0].filename)
+    if (req.files?.bestsellerImage?.[0]) {
+      updates.bestsellerImageUrl = publicUploadUrl('products', req.files.bestsellerImage[0].filename)
+    }
     const product = await productsService.updateProduct(Number(req.params.id), updates)
     res.json(product)
   }),

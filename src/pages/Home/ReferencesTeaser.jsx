@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getReferences } from '@/services/references'
 import { EXAMPLE_REFERENCES } from '@/data/exampleReferences'
 import { Button } from '@/components/ui/Button'
+import { Reveal } from '@/components/ui/Reveal'
 
 const REFERENCES_LIMIT = 3
 
@@ -33,32 +34,36 @@ export function ReferencesTeaser() {
 
       {hasRealReferences ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {references.map((reference) => (
-            <div key={reference.id} className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-              <video controls preload="metadata" className="aspect-video w-full bg-ink">
-                <source src={reference.videoUrl} />
-              </video>
-              <div className="p-4">
-                <p className="font-display text-base text-ivory">{reference.title}</p>
-                {reference.city && (
-                  <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold/80">{reference.city}</p>
-                )}
+          {references.map((reference, index) => (
+            <Reveal key={reference.id} delay={index * 100}>
+              <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
+                <video controls preload="metadata" className="aspect-video w-full bg-ink">
+                  <source src={reference.videoUrl} />
+                </video>
+                <div className="p-4">
+                  <p className="font-display text-base text-ivory">{reference.title}</p>
+                  {reference.city && (
+                    <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold/80">{reference.city}</p>
+                  )}
+                </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {EXAMPLE_REFERENCES.map((reference) => (
-            <div key={reference.id} className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-              <div className="relative aspect-video w-full overflow-hidden bg-ink">
-                <img src={reference.image} alt="Ejemplo de referencia de entrega" className="h-full w-full object-cover" />
-                <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-[10px] uppercase tracking-widest-plus text-gold">
-                  Ejemplo
-                </span>
+          {EXAMPLE_REFERENCES.map((reference, index) => (
+            <Reveal key={reference.id} delay={index * 100}>
+              <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
+                <div className="relative aspect-video w-full overflow-hidden bg-ink">
+                  <img src={reference.image} alt="Ejemplo de referencia de entrega" className="h-full w-full object-cover" />
+                  <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-[10px] uppercase tracking-widest-plus text-gold">
+                    Ejemplo
+                  </span>
+                </div>
+                <p className="p-4 text-sm text-ivory-dim">{reference.caption}</p>
               </div>
-              <p className="p-4 text-sm text-ivory-dim">{reference.caption}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       )}

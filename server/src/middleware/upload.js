@@ -32,6 +32,17 @@ export const uploadProductImage = multer({
   },
 })
 
+export const uploadAuctionImage = multer({
+  storage: makeStorage('auctions'),
+  limits: { fileSize: Number(process.env.MAX_IMAGE_SIZE_MB ?? 8) * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(ApiError.badRequest('El archivo debe ser una imagen.'))
+    }
+    cb(null, true)
+  },
+})
+
 export const uploadReferenceVideo = multer({
   storage: makeStorage('references'),
   limits: { fileSize: Number(process.env.MAX_VIDEO_SIZE_MB ?? 100) * 1024 * 1024 },

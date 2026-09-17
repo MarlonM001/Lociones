@@ -108,7 +108,6 @@ export const ARABIA_IMAGES = {
   'Amber Rouge': 'amber-rouge.jpg',
   'Amber Oud Aqua Dubai': 'amber-oud-aqua-dubai.jpg',
   'Island Breeze': 'island-breeze.jpg',
-  'Amber Oud Gold Edition Caja': 'amber-oud-gold-edition-caja.png',
   'Island Bliss': 'island-bliss.png',
   'Yum Yum': 'yum-yum.png',
   'Baccarat Rouge 540': 'baccarat-rouge-540.jpg',

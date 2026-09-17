@@ -92,7 +92,7 @@ export function Product() {
             <img
               src={product.images[activeImage] ?? product.image}
               alt={product.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full scale-125 object-cover object-center"
             />
           </div>
           {product.images.length > 1 && (
@@ -106,7 +106,7 @@ export function Product() {
                     activeImage === index ? 'border-gold' : 'border-ivory/10'
                   }`}
                 >
-                  <img src={image} alt="" className="h-full w-full object-cover" />
+                  <img src={image} alt="" className="h-full w-full scale-125 object-cover object-center" />
                 </button>
               ))}
             </div>

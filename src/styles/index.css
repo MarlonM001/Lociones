@@ -27,9 +27,12 @@
   --color-surface: #efe6d2;
   --color-ivory: #1c1912;
   --color-ivory-dim: #6b6153;
-  --color-gold: #a9822f;
+  /* Más oscuro que el dorado "base" del tema oscuro: como texto plano sobre
+     marfil, #a9822f solo llegaba a ~3.2:1 de contraste (falla WCAG AA 4.5:1
+     para texto normal). #7d5f22 da ~5.3:1 sin perder el tono dorado. */
+  --color-gold: #7d5f22;
   --color-gold-light: #c8a45c;
-  --color-gold-dark: #7d5f22;
+  --color-gold-dark: #63491a;
 }
 
 @layer base {

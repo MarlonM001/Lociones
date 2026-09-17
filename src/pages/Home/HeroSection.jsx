@@ -177,7 +177,7 @@ export function HeroSection() {
           type="button"
           aria-label="Diapositiva anterior"
           onClick={() => goTo(index - 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ivory/15 bg-ink/50 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ivory/15 bg-ink/50 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
         >
           <ArrowIcon direction="left" />
         </button>
@@ -200,7 +200,7 @@ export function HeroSection() {
           type="button"
           aria-label="Siguiente diapositiva"
           onClick={() => goTo(index + 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-ivory/15 bg-ink/50 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-ivory/15 bg-ink/50 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
         >
           <ArrowIcon direction="right" />
         </button>

@@ -10,7 +10,17 @@ export function ProductRow({ product, onEdit, onToggleActive, onDelete }) {
         <img src={product.image} alt={product.name} className="h-12 w-12 rounded-lg object-cover" />
       </td>
       <td className="px-4 py-3 text-sm text-ivory">
-        <div>{product.name}</div>
+        <div className="flex items-center gap-2">
+          {product.name}
+          {product.isBestseller && (
+            <span
+              title="Top ventas"
+              className="rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gold"
+            >
+              ★ Top
+            </span>
+          )}
+        </div>
         <div className="text-xs text-ivory-dim">{product.sku}</div>
       </td>
       <td className="px-4 py-3 text-sm text-ivory-dim">{category?.name ?? product.categoryId}</td>

@@ -60,6 +60,7 @@ export function Navbar() {
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
+
   const handleLogout = () => {
     logout()
     setMobileOpen(false)
@@ -78,9 +79,14 @@ export function Navbar() {
       isActive ? 'text-gold' : 'text-ivory-dim hover:text-ivory'
     }`
 
+  const mobileLinkClasses = ({ isActive }) =>
+    `flex items-center rounded-lg px-2 py-3 text-base tracking-wide transition-colors duration-200 ${
+      isActive ? 'text-gold' : 'text-ivory-dim hover:bg-ivory/5 hover:text-ivory'
+    }`
+
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`sticky top-0 transition-all duration-300 ${mobileOpen ? 'z-[200]' : 'z-50'} ${
         scrolled
           ? 'bg-ink/90 backdrop-blur-md shadow-lg shadow-black/30 border-b border-gold/10'
           : 'bg-ink/60 backdrop-blur-sm border-b border-transparent'
@@ -128,7 +134,7 @@ export function Navbar() {
             type="button"
             aria-label={theme === 'dark' ? 'Cambiar a modo día' : 'Cambiar a modo noche'}
             onClick={toggleTheme}
-            className="text-ivory transition-colors hover:text-gold"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 hover:text-gold"
           >
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
@@ -137,11 +143,11 @@ export function Navbar() {
             type="button"
             aria-label="Ver carrito"
             onClick={() => navigate('/carrito')}
-            className="relative text-ivory transition-colors hover:text-gold"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 hover:text-gold"
           >
             <CartIcon />
             {totalItems > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-semibold text-on-gold">
+              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-semibold text-on-gold">
                 {totalItems > 9 ? '9+' : totalItems}
               </span>
             )}
@@ -150,7 +156,7 @@ export function Navbar() {
           <button
             type="button"
             aria-label="Abrir menú"
-            className="text-ivory lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
           >
             <MenuIcon open={mobileOpen} />
@@ -159,14 +165,14 @@ export function Navbar() {
       </nav>
 
       {mobileOpen && (
-        <div className="border-t border-gold/10 bg-ink/95 px-4 pb-6 pt-2 lg:hidden">
-          <div className="flex flex-col gap-4 pt-4">
+        <div className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-gold/10 bg-ink/98 px-4 pb-6 pt-2 backdrop-blur-md lg:hidden">
+          <div className="flex flex-col gap-1 pt-2">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 onClick={() => setMobileOpen(false)}
-                className={linkClasses}
+                className={mobileLinkClasses}
                 end={link.to === '/'}
               >
                 {link.label}
@@ -174,19 +180,19 @@ export function Navbar() {
             ))}
             {isAuthenticated ? (
               <>
-                <NavLink to="/perfil" onClick={() => setMobileOpen(false)} className="text-sm text-ivory-dim hover:text-ivory">
-                  Hola, <span className="text-ivory">{user.name.split(' ')[0]}</span>
+                <NavLink to="/perfil" onClick={() => setMobileOpen(false)} className="flex items-center rounded-lg px-2 py-3 text-base text-ivory-dim hover:bg-ivory/5 hover:text-ivory">
+                  Hola, <span className="ml-1 text-ivory">{user.name.split(' ')[0]}</span>
                 </NavLink>
-                <button type="button" onClick={handleLogout} className="text-left text-sm text-ivory-dim hover:text-gold">
+                <button type="button" onClick={handleLogout} className="rounded-lg px-2 py-3 text-left text-base text-ivory-dim hover:bg-ivory/5 hover:text-gold">
                   Cerrar sesión
                 </button>
               </>
             ) : (
               <>
-                <NavLink to="/login" onClick={() => setMobileOpen(false)} className={linkClasses}>
+                <NavLink to="/login" onClick={() => setMobileOpen(false)} className={mobileLinkClasses}>
                   Iniciar sesión
                 </NavLink>
-                <NavLink to="/registro" onClick={() => setMobileOpen(false)} className={linkClasses}>
+                <NavLink to="/registro" onClick={() => setMobileOpen(false)} className={mobileLinkClasses}>
                   Crear cuenta
                 </NavLink>
               </>

@@ -51,6 +51,24 @@ function resolveProductImage(categoryId, name) {
   return fileName ? `/images/products/${categoryId}/${fileName}` : `/images/products/${categoryId}.svg`
 }
 
+/**
+ * Segundo ángulo real (foto de la caja) para los pocos productos que sí
+ * tienen dos fotos distintas del proveedor. El resto de productos solo
+ * tiene una foto, así que `images` no debe inventar un segundo elemento
+ * duplicado — eso es lo que generaba el selector de "2 fotos" falso en la
+ * ficha de producto.
+ */
+const SECOND_ANGLE_IMAGES = {
+  arabia: { 'Amber Oud Gold Edition': 'amber-oud-gold-edition-caja.png' },
+  caballero: { 'Xerjoff Erba Pura': 'xerjoff-erba-pura-caja.png' },
+}
+
+function resolveProductImages(categoryId, name, mainImage) {
+  const secondFileName = SECOND_ANGLE_IMAGES[categoryId]?.[name]
+  if (!secondFileName) return [mainImage]
+  return [mainImage, `/images/products/${categoryId}/${secondFileName}`]
+}
+
 function buildDescription(name, categoryName, ml, notes) {
   return `${name} es una fragancia de la línea ${categoryName} presentada en frasco de ${ml}ml. ` +
     `Notas destacadas: ${notes.join(', ')}. Alta fijación y larga duración, ideal para uso diario o momentos especiales.`
@@ -83,6 +101,7 @@ function generateSeedProducts() {
       const slug = nextSlug(`${name}-${ml}ml`, id)
       const sku = `${category.id.slice(0, 3).toUpperCase()}-${String(id).padStart(4, '0')}`
       const image = resolveProductImage(category.id, name)
+      const images = resolveProductImages(category.id, name, image)
 
       products.push({
         name: `${name} ${ml}ml`,
@@ -93,6 +112,7 @@ function generateSeedProducts() {
         description: buildDescription(name, category.name, ml, notes),
         shortDescription: buildShortDescription(ml, notes),
         image,
+        images,
         stock,
       })
     }
@@ -163,7 +183,7 @@ async function seedProducts() {
         product.description,
         product.shortDescription,
         product.image,
-        JSON.stringify([product.image, product.image]),
+        JSON.stringify(product.images),
         product.stock,
       ],
     )

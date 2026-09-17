@@ -61,7 +61,6 @@ export const CABALLERO_IMAGES = {
   'Valentino Born In Roma': 'valentino-born-in-roma.png',
   'Valentino Uomo': 'valentino-uomo.jpg',
   'Layton Royal': 'layton-royal.jpg',
-  'Xerjoff Erba Pura Caja': 'xerjoff-erba-pura-caja.png',
   'Xerjoff Erba Pura': 'xerjoff-erba-pura.png',
 
   'Scandal Men JPG': 'scandal-men-jpg.jpg',

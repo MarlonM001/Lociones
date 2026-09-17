@@ -18,6 +18,7 @@ export function AdminProducts() {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(null)
   const [statusFilter, setStatusFilter] = useState('all')
+  const [bestsellerFilter, setBestsellerFilter] = useState(false)
   const [page, setPage] = useState(1)
 
   const [formOpen, setFormOpen] = useState(false)
@@ -39,12 +40,13 @@ export function AdminProducts() {
     if (categoryFilter) results = results.filter((p) => p.categoryId === categoryFilter)
     if (statusFilter === 'active') results = results.filter((p) => p.active)
     if (statusFilter === 'inactive') results = results.filter((p) => !p.active)
+    if (bestsellerFilter) results = results.filter((p) => p.isBestseller)
     if (search.trim()) {
       const term = search.trim().toLowerCase()
       results = results.filter((p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term))
     }
     return results
-  }, [products, categoryFilter, statusFilter, search])
+  }, [products, categoryFilter, statusFilter, bestsellerFilter, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -106,6 +108,15 @@ export function AdminProducts() {
               {status === 'all' ? 'Todos' : status === 'active' ? 'Activos' : 'Inactivos'}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => { setBestsellerFilter((current) => !current); resetToFirstPage() }}
+            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+              bestsellerFilter ? 'border-gold bg-gold/10 text-gold' : 'border-ivory/10 text-ivory-dim hover:text-ivory'
+            }`}
+          >
+            ★ Top ventas
+          </button>
         </div>
       </div>
 

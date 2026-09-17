@@ -74,7 +74,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-gold/10 px-4 py-6 text-center text-xs text-ivory-dim/70 sm:px-6 lg:px-8">
+      <div className="border-t border-gold/10 px-4 py-6 pb-28 text-center text-xs text-ivory-dim/70 sm:px-6 lg:px-8">
         © {new Date().getFullYear()} {STORE_CONFIG.name}. Todos los derechos reservados.
       </div>
     </footer>

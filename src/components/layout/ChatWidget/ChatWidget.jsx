@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useChat } from '@/hooks/useChat'
 import { useAuth } from '@/hooks/useAuth'
+import { useHideNearFooter } from '@/hooks/useHideNearFooter'
 import { getAuctions } from '@/services/auctions'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { Button } from '@/components/ui/Button'
@@ -110,6 +111,7 @@ export function ChatWidget() {
   const [draft, setDraft] = useState('')
   const [activeAuction, setActiveAuction] = useState(null)
   const scrollRef = useRef(null)
+  const hideLauncher = useHideNearFooter()
 
   useEffect(() => {
     getAuctions()
@@ -134,8 +136,12 @@ export function ChatWidget() {
         type="button"
         aria-label={open ? 'Cerrar chat' : 'Abrir chat'}
         aria-expanded={open}
+        aria-hidden={hideLauncher && !open}
+        tabIndex={hideLauncher && !open ? -1 : undefined}
         onClick={() => (open ? setOpen(false) : openChat())}
-        className="fixed bottom-5 left-5 z-[150] flex h-14 w-14 items-center justify-center rounded-full bg-gold text-on-gold shadow-xl shadow-gold-dark/30 transition-transform duration-200 hover:scale-110 hover:bg-gold-light sm:bottom-6 sm:left-6"
+        className={`fixed bottom-4 left-4 z-[150] flex h-12 w-12 items-center justify-center rounded-full bg-gold text-on-gold shadow-xl shadow-gold-dark/30 transition-all duration-200 hover:scale-110 hover:bg-gold-light sm:bottom-6 sm:left-6 sm:h-14 sm:w-14 ${
+          hideLauncher && !open ? 'pointer-events-none translate-y-4 opacity-0' : 'opacity-100'
+        }`}
       >
         <ChatIcon />
       </button>

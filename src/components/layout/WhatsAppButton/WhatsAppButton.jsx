@@ -1,4 +1,5 @@
 import { STORE_CONFIG } from '@/config/store'
+import { useHideNearFooter } from '@/hooks/useHideNearFooter'
 
 function WhatsAppIcon() {
   return (
@@ -9,13 +10,19 @@ function WhatsAppIcon() {
 }
 
 export function WhatsAppButton() {
+  const hidden = useHideNearFooter()
+
   return (
     <a
       href={`https://wa.me/${STORE_CONFIG.whatsappNumber}`}
       target="_blank"
       rel="noreferrer"
       aria-label="Escríbenos por WhatsApp"
-      className="fixed bottom-5 right-5 z-[150] flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl shadow-emerald-900/40 transition-transform duration-200 hover:scale-110 hover:bg-emerald-500 sm:bottom-6 sm:right-6"
+      aria-hidden={hidden}
+      tabIndex={hidden ? -1 : undefined}
+      className={`fixed bottom-4 right-4 z-[150] flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl shadow-emerald-900/40 transition-all duration-200 hover:scale-110 hover:bg-emerald-500 sm:bottom-6 sm:right-6 sm:h-14 sm:w-14 ${
+        hidden ? 'pointer-events-none translate-y-4 opacity-0' : 'opacity-100'
+      }`}
     >
       <WhatsAppIcon />
     </a>

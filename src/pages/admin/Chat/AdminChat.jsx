@@ -124,7 +124,11 @@ export function AdminChat() {
       </p>
 
       <div className="mt-6 flex h-[70vh] overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-        <div className="w-72 shrink-0 overflow-y-auto border-r border-ivory/5">
+        <div
+          className={`w-full shrink-0 overflow-y-auto lg:block lg:w-72 lg:border-r lg:border-ivory/5 ${
+            selectedConversation ? 'hidden' : 'block'
+          }`}
+        >
           {conversations.length === 0 ? (
             <div className="p-4">
               <EmptyState title="Sin conversaciones" message="Aún nadie ha escrito por el chat de la tienda." />
@@ -141,16 +145,26 @@ export function AdminChat() {
           )}
         </div>
 
-        <div className="flex flex-1 flex-col">
+        <div className={`flex-1 flex-col ${selectedConversation ? 'flex' : 'hidden lg:flex'}`}>
           {!selectedConversation ? (
             <div className="m-auto text-sm text-ivory-dim">Selecciona una conversación para ver los mensajes.</div>
           ) : (
             <>
-              <div className="border-b border-ivory/5 px-4 py-3">
-                <p className="text-sm text-ivory">{selectedConversation.displayName}</p>
-                {selectedConversation.guestPhone && (
-                  <p className="text-xs text-ivory-dim">{selectedConversation.guestPhone}</p>
-                )}
+              <div className="flex items-center gap-2 border-b border-ivory/5 px-4 py-3">
+                <button
+                  type="button"
+                  aria-label="Volver a las conversaciones"
+                  onClick={() => setSelectedId(null)}
+                  className="text-ivory-dim hover:text-ivory lg:hidden"
+                >
+                  ←
+                </button>
+                <div>
+                  <p className="text-sm text-ivory">{selectedConversation.displayName}</p>
+                  {selectedConversation.guestPhone && (
+                    <p className="text-xs text-ivory-dim">{selectedConversation.guestPhone}</p>
+                  )}
+                </div>
               </div>
 
               <div ref={scrollRef} className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-3">

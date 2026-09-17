@@ -238,7 +238,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
                       onClick={() => handleAddItem(product)}
                       className="flex w-full items-center gap-2 border-b border-ivory/5 px-3 py-2 text-left text-sm last:border-0 hover:bg-ivory/5"
                     >
-                      <img src={product.image} alt="" className="h-8 w-8 rounded object-cover" />
+                      <img src={product.image} alt="" className="h-8 w-8 rounded bg-white object-contain p-0.5" />
                       <span className="flex-1 text-ivory">{product.name}</span>
                       <span className="text-xs text-ivory-dim">{formatCurrency(product.price)}</span>
                     </button>
@@ -253,7 +253,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
               const category = getCategoryById(item.categoryId)
               return (
                 <div key={item.id} className="flex items-center gap-3 rounded-lg border border-ivory/5 bg-ink px-3 py-2">
-                  <img src={item.image} alt="" className="h-10 w-10 rounded object-cover" />
+                  <img src={item.image} alt="" className="h-10 w-10 rounded bg-white object-contain p-0.5" />
                   <div className="flex-1">
                     <p className="text-sm text-ivory">{item.name}</p>
                     <p className="text-xs text-ivory-dim">{category?.name} · {formatCurrency(item.price)}</p>

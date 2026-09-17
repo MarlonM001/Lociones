@@ -2,28 +2,29 @@ import { useEffect, useRef, useState } from 'react'
 import { getCelebrationConfig } from '@/services/celebration'
 
 const TOTAL_DURATION_MS = 90 * 1000
-const SPAWN_INTERVAL_MS = 250
-// Colores festivos con contraste deliberado frente a la paleta dorada/marfil
-// del sitio, para que el confeti se note en vez de camuflarse con el fondo.
-const COLORS = ['#ff5c7a', '#ffd23f', '#4ade80', '#38bdf8', '#c084fc', '#ffffff']
+const SPAWN_INTERVAL_MS = 350
+// Tonos dorados/marfil de la propia marca (en vez de confeti multicolor de
+// fiesta infantil), para que el efecto de bienvenida se sienta como un
+// destello o bruma de atomizador, acorde a una perfumería de lujo.
+const COLORS = ['#c8a45c', '#e4c988', '#f6f2ea', '#9c7c3d']
 
-function makeParticle(side, id) {
+function makeParticle(id) {
   return {
     id,
-    side,
-    edgePercent: Math.random() * 12,
+    leftPercent: Math.random() * 100,
     color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    size: 6 + Math.random() * 6,
-    duration: 3 + Math.random() * 2,
-    spin: `${(Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 360)}deg`,
-    drift: side === 'left' ? `${40 + Math.random() * 30}vw` : `${-(40 + Math.random() * 30)}vw`,
+    size: 3 + Math.random() * 5,
+    duration: 4 + Math.random() * 3,
+    drift: `${(Math.random() > 0.5 ? 1 : -1) * (10 + Math.random() * 18)}vw`,
+    delay: Math.random() * 0.6,
   }
 }
 
 /**
- * Confeti que cae desde ambos bordes de la pantalla al entrar a la tienda.
- * Se activa solo si el admin lo enciende en /admin/celebracion y no tiene
- * forma de cerrarse desde la tienda: corre sola durante TOTAL_DURATION_MS.
+ * Destellos dorados que suben lentamente desde el borde inferior, como una
+ * bruma de perfume atomizada, al entrar a la tienda. Se activa solo si el
+ * admin lo enciende en /admin/celebracion y no tiene forma de cerrarse desde
+ * la tienda: corre sola durante TOTAL_DURATION_MS.
  */
 export function CelebrationEffect() {
   const [running, setRunning] = useState(false)
@@ -41,10 +42,8 @@ export function CelebrationEffect() {
         setRunning(true)
         spawnTimer = setInterval(() => {
           idRef.current += 1
-          const left = makeParticle('left', idRef.current)
-          idRef.current += 1
-          const right = makeParticle('right', idRef.current)
-          setParticles((current) => [...current.slice(-120), left, right])
+          const particle = makeParticle(idRef.current)
+          setParticles((current) => [...current.slice(-60), particle])
         }, SPAWN_INTERVAL_MS)
 
         stopTimer = setTimeout(() => {
@@ -68,16 +67,15 @@ export function CelebrationEffect() {
         <span
           key={particle.id}
           onAnimationEnd={() => setParticles((current) => current.filter((item) => item.id !== particle.id))}
-          className="absolute top-0 rounded-sm"
+          className="absolute bottom-0 rounded-full"
           style={{
-            [particle.side]: `${particle.edgePercent}%`,
+            left: `${particle.leftPercent}%`,
             width: particle.size,
-            height: particle.size * 1.6,
+            height: particle.size,
             backgroundColor: particle.color,
-            boxShadow: `0 0 6px 0 ${particle.color}`,
-            animation: `confetti-fall ${particle.duration}s linear forwards`,
-            '--confetti-drift': particle.drift,
-            '--confetti-spin': particle.spin,
+            boxShadow: `0 0 8px 2px ${particle.color}`,
+            animation: `sparkle-rise ${particle.duration}s ease-out ${particle.delay}s forwards`,
+            '--sparkle-drift': particle.drift,
           }}
         />
       ))}

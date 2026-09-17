@@ -156,7 +156,7 @@ export function AdminAuctions() {
                       <img
                         src={auction.image || auction.items[0]?.product.image}
                         alt={auction.title}
-                        className="h-12 w-12 rounded-lg object-cover"
+                        className="h-12 w-12 rounded-lg bg-white object-contain p-1"
                       />
                     </td>
                     <td className="px-4 py-3 text-sm text-ivory">
@@ -192,15 +192,13 @@ export function AdminAuctions() {
                           Cancelar
                         </button>
                       )}
-                      {auction.bidCount === 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setDeletingAuction(auction)}
-                          className="ml-3 text-ivory-dim hover:text-red-400"
-                        >
-                          Eliminar
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setDeletingAuction(auction)}
+                        className="ml-3 text-ivory-dim hover:text-red-400"
+                      >
+                        Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -233,7 +231,11 @@ export function AdminAuctions() {
         onClose={() => setDeletingAuction(null)}
         onConfirm={handleDelete}
         title="Eliminar subasta"
-        message={`¿Seguro que quieres eliminar "${deletingAuction?.title}"? Esta acción no se puede deshacer.`}
+        message={
+          deletingAuction?.bidCount > 0
+            ? `"${deletingAuction?.title}" tiene ${deletingAuction.bidCount} puja(s) registrada(s). Al eliminarla se borran también esas pujas. Esta acción no se puede deshacer.`
+            : `¿Seguro que quieres eliminar "${deletingAuction?.title}"? Esta acción no se puede deshacer.`
+        }
         confirmLabel="Eliminar"
       />
     </div>

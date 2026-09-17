@@ -235,7 +235,7 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
                   <img
                     src={product.bestsellerImage}
                     alt=""
-                    className="mb-2 h-20 w-20 rounded-lg border border-ivory/10 object-cover"
+                    className="mb-2 h-20 w-20 rounded-lg border border-ivory/10 bg-white object-contain p-1"
                   />
                 )}
                 <input

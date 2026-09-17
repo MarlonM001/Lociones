@@ -1,10 +1,6 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { HERO_SLIDES } from './heroSlides'
-
-// three.js se carga en un chunk aparte (lazy), para no inflar el bundle
-// inicial que descarga cada visitante antes de que la página sea interactiva.
-const Bottle3D = lazy(() => import('@/components/three/Bottle3D').then((m) => ({ default: m.Bottle3D })))
 
 const AUTO_ADVANCE_MS = 6000
 
@@ -139,9 +135,6 @@ export function HeroSection() {
           })}
         </div>
 
-        {/* Un solo canvas 3D persistente: cambia de color según la colección activa en
-            lugar de reiniciarse en cada avance del carrusel, para no perder la rotación
-            que el visitante haya dejado con el mouse. */}
         <div className="relative flex justify-center">
           {/* Círculo grande tipo espejo de agua detrás de la botella, como si flotara sobre él. */}
           <div
@@ -164,9 +157,18 @@ export function HeroSection() {
             aria-hidden="true"
           />
 
-          <Suspense fallback={<div className="h-[280px] w-[220px] sm:h-[420px] sm:w-[320px]" />}>
-            <Bottle3D colors={activeColors} label={activeSlide.bottleLabel} />
-          </Suspense>
+          <div className="relative h-[280px] w-[220px] sm:h-[420px] sm:w-[340px]">
+            {HERO_SLIDES.map((slide, slideIndex) => (
+              <img
+                key={slide.id}
+                src={slide.image}
+                alt={`Loción ${slide.bottleLabel}`}
+                className={`absolute inset-0 h-full w-full rounded-[2rem] bg-white object-contain p-6 shadow-2xl shadow-black/50 transition-opacity duration-700 ease-out sm:p-10 ${
+                  slideIndex === index ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

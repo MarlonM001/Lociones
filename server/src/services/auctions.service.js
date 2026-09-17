@@ -257,11 +257,13 @@ export async function cancelAuction(id) {
   if (!rows[0]) throw ApiError.notFound('Subasta no encontrada.')
 }
 
+/**
+ * Borra la subasta y, en cascada (FK ON DELETE CASCADE), sus items y pujas.
+ * A diferencia de cancelar (que conserva el historial), esto es permanente —
+ * pensado para que el admin limpie subastas de prueba, no para uso normal
+ * con pujas reales en curso.
+ */
 export async function deleteAuction(id) {
-  const { rows: bidRows } = await pool.query('SELECT COUNT(*) FROM auction_bids WHERE auction_id = $1', [id])
-  if (Number(bidRows[0].count) > 0) {
-    throw ApiError.conflict('No se puede eliminar: la subasta ya tiene pujas. Cancélala en su lugar.')
-  }
   const { rowCount } = await pool.query('DELETE FROM auctions WHERE id = $1', [id])
   if (rowCount === 0) throw ApiError.notFound('Subasta no encontrada.')
 }

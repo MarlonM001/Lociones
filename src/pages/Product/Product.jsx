@@ -88,11 +88,11 @@ export function Product() {
 
       <div className="grid gap-10 lg:grid-cols-2">
         <div>
-          <div className="aspect-square w-full overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
+          <div className="aspect-square w-full overflow-hidden rounded-2xl border border-ivory/5 bg-white p-8">
             <img
               src={product.images[activeImage] ?? product.image}
               alt={product.name}
-              className="h-full w-full scale-125 object-cover object-center"
+              className="h-full w-full object-contain object-center"
             />
           </div>
           {product.images.length > 1 && (
@@ -102,11 +102,11 @@ export function Product() {
                   key={index}
                   type="button"
                   onClick={() => setActiveImage(index)}
-                  className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border transition-colors ${
+                  className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-white p-2 transition-colors ${
                     activeImage === index ? 'border-gold' : 'border-ivory/10'
                   }`}
                 >
-                  <img src={image} alt="" className="h-full w-full scale-125 object-cover object-center" />
+                  <img src={image} alt="" className="h-full w-full object-contain object-center" />
                 </button>
               ))}
             </div>

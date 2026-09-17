@@ -7,8 +7,8 @@ export function CartItem({ item }) {
 
   return (
     <div className="flex items-center gap-4 border-b border-ivory/5 py-4 last:border-0">
-      <Link to={`/producto/${item.slug}`} className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-charcoal">
-        <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+      <Link to={`/producto/${item.slug}`} className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white p-2">
+        <img src={item.image} alt={item.name} className="h-full w-full object-contain object-center" />
       </Link>
 
       <div className="min-w-0 flex-1">

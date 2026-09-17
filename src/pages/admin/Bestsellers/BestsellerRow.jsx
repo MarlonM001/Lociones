@@ -19,7 +19,7 @@ export function BestsellerRow({ product, position, isFirst, isLast, onMoveUp, on
         <img
           src={product.bestsellerImage || product.image}
           alt={product.name}
-          className="h-14 w-14 rounded-lg object-cover"
+          className="h-14 w-14 rounded-lg bg-white object-contain p-1"
         />
       </td>
       <td className="px-4 py-3 text-sm text-ivory">

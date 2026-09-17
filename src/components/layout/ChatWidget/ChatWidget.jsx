@@ -41,7 +41,7 @@ function PinnedAuction({ auction }) {
       to={`/subastas/${auction.slug}`}
       className="flex items-center gap-3 border-b border-gold/20 bg-gold/5 px-4 py-3 transition-colors hover:bg-gold/10"
     >
-      <img src={image} alt="" className="h-11 w-11 scale-125 rounded-lg object-cover object-center" />
+      <img src={image} alt="" className="h-11 w-11 rounded-lg bg-white object-contain object-center p-1" />
       <div className="min-w-0 flex-1">
         <p className="text-[10px] uppercase tracking-widest-plus text-gold">Subasta en curso</p>
         <p className="truncate text-sm text-ivory">{auction.title}</p>
@@ -103,7 +103,7 @@ function MessageBubble({ message }) {
 }
 
 export function ChatWidget() {
-  const { open, setOpen, openChat, status, messages, submitIntake, sendMessage } = useChat()
+  const { open, setOpen, openChat, status, messages, submitIntake, sendMessage, retry } = useChat()
   const { user } = useAuth()
   const [draft, setDraft] = useState('')
   const [activeAuction, setActiveAuction] = useState(null)
@@ -144,7 +144,10 @@ export function ChatWidget() {
             <div>
               <h3 className="font-display text-base text-ivory">Chat con Essence Polar</h3>
               <p className="text-[11px] text-ivory-dim">
-                {status === 'ready' ? 'En línea' : 'Conectando...'}
+                {status === 'ready' && 'En línea'}
+                {status === 'connecting' && 'Conectando...'}
+                {status === 'error' && 'Sin conexión'}
+                {status === 'needsIntake' && 'En línea'}
               </p>
             </div>
             <button
@@ -159,7 +162,16 @@ export function ChatWidget() {
 
           {activeAuction && <PinnedAuction auction={activeAuction} />}
 
-          {status === 'needsIntake' ? (
+          {status === 'error' ? (
+            <div className="m-auto flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+              <p className="text-sm text-ivory-dim">
+                No pudimos conectar con el chat. Revisa tu conexión e intenta de nuevo.
+              </p>
+              <Button type="button" variant="secondary" size="sm" onClick={retry}>
+                Reintentar
+              </Button>
+            </div>
+          ) : status === 'needsIntake' ? (
             <IntakeForm onSubmit={submitIntake} />
           ) : (
             <>

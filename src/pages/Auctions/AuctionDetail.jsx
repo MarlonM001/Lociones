@@ -94,8 +94,8 @@ export function AuctionDetail() {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <div className="aspect-square w-full overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-          <img src={image} alt={auction.title} className="h-full w-full scale-125 object-cover object-center" />
+        <div className="aspect-square w-full overflow-hidden rounded-2xl border border-ivory/5 bg-white p-8">
+          <img src={image} alt={auction.title} className="h-full w-full object-contain object-center" />
         </div>
 
         <div>
@@ -114,7 +114,7 @@ export function AuctionDetail() {
                   to={`/producto/${item.product.slug}`}
                   className="group flex items-center gap-3 rounded-lg border border-ivory/5 bg-charcoal px-3 py-2 transition-colors hover:border-gold/30"
                 >
-                  <img src={item.product.image} alt="" className="h-12 w-12 scale-125 rounded object-cover object-center" />
+                  <img src={item.product.image} alt="" className="h-12 w-12 rounded bg-white object-contain object-center p-1" />
                   <span className="flex-1 text-sm text-ivory transition-colors group-hover:text-gold">
                     {item.product.name}
                   </span>

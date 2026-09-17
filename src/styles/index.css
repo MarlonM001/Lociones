@@ -118,7 +118,8 @@
   animation: ripple-pulse 4.5s ease-out infinite;
 }
 
-@keyframes confetti-fall {
-  from { transform: translate(0, -10px) rotate(0deg); opacity: 1; }
-  to { transform: translate(var(--confetti-drift), 100dvh) rotate(var(--confetti-spin)); opacity: 0; }
+@keyframes sparkle-rise {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(var(--sparkle-drift), -100dvh) scale(1.1); opacity: 0; }
 }

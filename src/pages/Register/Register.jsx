@@ -69,7 +69,7 @@ export function Register() {
       <span className="text-xs uppercase tracking-widest-plus text-gold">Únete</span>
       <h1 className="mt-2 font-display text-3xl text-ivory">Crear cuenta</h1>
       <p className="mt-2 text-sm text-ivory-dim">
-        Regístrate para poder finalizar tus pedidos por WhatsApp y hacer seguimiento a tus compras.
+        Puedes comprar sin cuenta. Regístrate si quieres hacer seguimiento a tus pedidos y guardar tus datos de entrega.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">

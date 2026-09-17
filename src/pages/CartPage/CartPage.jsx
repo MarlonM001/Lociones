@@ -40,7 +40,7 @@ export function CartPage() {
     try {
       const order = await createOrder({
         ...deliveryData,
-        userId: user.id,
+        userId: user?.id ?? null,
         items: items.map((item) => ({
           productId: item.productId,
           name: item.name,

@@ -3,22 +3,18 @@ import { formatCurrency } from '@/utils/formatCurrency'
 import { getCategoryById } from '@/config/categories'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
-import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/Button'
 
 export function ProductCard({ product, image }) {
   const { addItem } = useCart()
   const { showToast } = useToast()
-  const requireAuth = useRequireAuth()
   const category = getCategoryById(product.categoryId)
   const inStock = product.stock > 0
 
   const handleAddToCart = (event) => {
     event.preventDefault()
-    requireAuth(() => {
-      addItem(product, 1)
-      showToast('Producto agregado al carrito')
-    })
+    addItem(product, 1)
+    showToast('Producto agregado al carrito')
   }
 
   return (

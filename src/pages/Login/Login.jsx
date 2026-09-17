@@ -57,7 +57,7 @@ export function Login() {
       <span className="text-xs uppercase tracking-widest-plus text-gold">Bienvenido de nuevo</span>
       <h1 className="mt-2 font-display text-3xl text-ivory">Iniciar sesión</h1>
       <p className="mt-2 text-sm text-ivory-dim">
-        Necesitas una cuenta para finalizar tu compra por WhatsApp.
+        Inicia sesión para ver tu perfil y el historial de tus pedidos.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">

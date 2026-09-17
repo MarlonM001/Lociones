@@ -118,6 +118,15 @@
   animation: ripple-pulse 4.5s ease-out infinite;
 }
 
+@keyframes bottle-sheen-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.75; }
+}
+
+.animate-bottle-sheen {
+  animation: bottle-sheen-pulse 3.5s ease-in-out infinite;
+}
+
 @keyframes sparkle-rise {
   0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
   15% { opacity: 1; }

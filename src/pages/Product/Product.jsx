@@ -6,7 +6,6 @@ import { generateWhatsAppProductInquiry } from '@/services/whatsapp'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
-import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { Button } from '@/components/ui/Button'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -16,7 +15,6 @@ export function Product() {
   const { slug } = useParams()
   const { addItem } = useCart()
   const { showToast } = useToast()
-  const requireAuth = useRequireAuth()
 
   const [product, setProduct] = useState(null)
   const [related, setRelated] = useState([])
@@ -64,16 +62,12 @@ export function Product() {
   const maxQuantity = Math.max(1, product.stock)
 
   const handleAddToCart = () => {
-    requireAuth(() => {
-      addItem(product, quantity)
-      showToast('Producto agregado al carrito')
-    })
+    addItem(product, quantity)
+    showToast('Producto agregado al carrito')
   }
 
   const handleBuyOnWhatsApp = () => {
-    requireAuth(() => {
-      window.open(generateWhatsAppProductInquiry(product, quantity), '_blank', 'noopener')
-    })
+    window.open(generateWhatsAppProductInquiry(product, quantity), '_blank', 'noopener')
   }
 
   return (

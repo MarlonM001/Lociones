@@ -265,6 +265,36 @@ export function HeroSection() {
                   }`}
                 />
               ))}
+
+              {/* Franja de luz que "cae" sobre el frasco, recortada a la silueta
+                  real de la botella (máscara = el propio PNG sin fondo), para
+                  que la foto plana no se vea tan plana. Se desliza sola y, al
+                  girar la botella, su posición sigue el ángulo, como si la luz
+                  la recorriera. */}
+              {HERO_SLIDES.map((slide, slideIndex) => (
+                <div
+                  key={slide.id}
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute inset-0 overflow-hidden mix-blend-screen transition-opacity duration-700 ease-out ${
+                    slideIndex === index ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{
+                    WebkitMaskImage: `url(${slide.image})`,
+                    maskImage: `url(${slide.image})`,
+                    WebkitMaskSize: 'contain',
+                    maskSize: 'contain',
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'center',
+                    maskPosition: 'center',
+                  }}
+                >
+                  <div
+                    className="animate-bottle-sheen absolute inset-y-[-10%] w-1/4 bg-gradient-to-r from-transparent via-white/70 to-transparent transition-[left] duration-300 ease-out"
+                    style={{ left: `${(((rotation.y % 360) + 360) % 360) / 360 * 130 - 15}%` }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -54,14 +54,7 @@ export function AppRoutes() {
         <Route path="/producto/:slug" element={<Product />} />
         <Route path="/subastas" element={<Auctions />} />
         <Route path="/subastas/:slug" element={<AuctionDetail />} />
-        <Route
-          path="/carrito"
-          element={
-            <RequireAuth>
-              <CartPage />
-            </RequireAuth>
-          }
-        />
+        <Route path="/carrito" element={<CartPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
         <Route path="/referencias" element={<References />} />

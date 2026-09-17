@@ -3,7 +3,11 @@ import { Button } from '@/components/ui/Button'
 import { HERO_SLIDES } from './heroSlides'
 
 const AUTO_ADVANCE_MS = 6000
-const MAX_TILT_DEG = 14
+const DEG_PER_PX_YAW = 0.5
+const DEG_PER_PX_PITCH = 0.25
+const MAX_PITCH_DEG = 30
+const INERTIA_DECAY = 0.94
+const PITCH_RECENTER = 0.95
 
 const SPARKLES = [
   { top: '16%', left: '8%', size: 6, delay: '0s' },
@@ -67,8 +71,14 @@ function FloatingSparkles() {
 export function HeroSection() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [rotation, setRotation] = useState({ x: 0, y: 0 })
+  const [hasSpun, setHasSpun] = useState(false)
   const stageRef = useRef(null)
+  const rotationRef = useRef({ x: 0, y: 0 })
+  const velocityRef = useRef({ x: 0, y: 0 })
+  const draggingRef = useRef(false)
+  const lastPointerRef = useRef({ x: 0, y: 0, t: 0 })
+  const animRef = useRef(null)
 
   const reduceMotion = useMemo(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -83,23 +93,74 @@ export function HeroSection() {
     return () => clearInterval(id)
   }, [paused])
 
+  useEffect(() => () => cancelAnimationFrame(animRef.current), [])
+
   const goTo = (nextIndex) => {
     setIndex((nextIndex + HERO_SLIDES.length) % HERO_SLIDES.length)
   }
 
-  // Inclina la botella hacia el cursor, como si pudieras "tomarla" y girarla
-  // un poco para verla de lado — un efecto 3D liviano sobre la foto real del
-  // producto, en vez de un modelo 3D genérico sin marca.
-  const handleStageMouseMove = (event) => {
-    if (reduceMotion || !stageRef.current) return
-    const rect = stageRef.current.getBoundingClientRect()
-    const relX = (event.clientX - rect.left) / rect.width - 0.5
-    const relY = (event.clientY - rect.top) / rect.height - 0.5
-    setTilt({ x: relY * MAX_TILT_DEG * -1, y: relX * MAX_TILT_DEG })
+  const applyRotation = (next) => {
+    rotationRef.current = next
+    setRotation(next)
   }
 
-  const handleStageMouseLeave = () => {
-    setTilt({ x: 0, y: 0 })
+  const runInertia = () => {
+    const step = () => {
+      velocityRef.current = {
+        x: velocityRef.current.x * INERTIA_DECAY,
+        y: velocityRef.current.y * INERTIA_DECAY,
+      }
+      const nextX = clampPitch((rotationRef.current.x + velocityRef.current.x) * PITCH_RECENTER)
+      const nextY = rotationRef.current.y + velocityRef.current.y
+      applyRotation({ x: nextX, y: nextY })
+
+      if (Math.abs(velocityRef.current.x) > 0.01 || Math.abs(velocityRef.current.y) > 0.01 || Math.abs(nextX) > 0.05) {
+        animRef.current = requestAnimationFrame(step)
+      }
+    }
+    animRef.current = requestAnimationFrame(step)
+  }
+
+  function clampPitch(value) {
+    return Math.max(-MAX_PITCH_DEG, Math.min(MAX_PITCH_DEG, value))
+  }
+
+  // Arrastra la botella con el mouse (o el dedo) para girarla y verla desde
+  // otros ángulos, con inercia al soltar — como un "spin viewer" de producto,
+  // sobre la foto real en vez de un modelo 3D genérico.
+  const handlePointerDown = (event) => {
+    draggingRef.current = true
+    setHasSpun(true)
+    cancelAnimationFrame(animRef.current)
+    velocityRef.current = { x: 0, y: 0 }
+    lastPointerRef.current = { x: event.clientX, y: event.clientY, t: performance.now() }
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+  }
+
+  const handlePointerMove = (event) => {
+    if (!draggingRef.current) return
+    const now = performance.now()
+    const last = lastPointerRef.current
+    const dt = Math.max(now - last.t, 1)
+    const dx = event.clientX - last.x
+    const dy = event.clientY - last.y
+
+    const deltaY = dx * DEG_PER_PX_YAW
+    const deltaX = -dy * DEG_PER_PX_PITCH
+    const next = {
+      x: clampPitch(rotationRef.current.x + deltaX),
+      y: rotationRef.current.y + deltaY,
+    }
+    applyRotation(next)
+    velocityRef.current = { x: deltaX / dt, y: deltaY / dt }
+    lastPointerRef.current = { x: event.clientX, y: event.clientY, t: now }
+  }
+
+  const handlePointerUp = () => {
+    if (!draggingRef.current) return
+    draggingRef.current = false
+    if (!reduceMotion) runInertia()
+    else applyRotation({ x: 0, y: rotationRef.current.y })
   }
 
   const activeSlide = HERO_SLIDES[index]
@@ -158,12 +219,7 @@ export function HeroSection() {
           })}
         </div>
 
-        <div
-          ref={stageRef}
-          className="relative flex justify-center"
-          onMouseMove={handleStageMouseMove}
-          onMouseLeave={handleStageMouseLeave}
-        >
+        <div ref={stageRef} className="relative flex justify-center">
           {/* Círculo grande tipo espejo de agua detrás de la botella, como si flotara sobre él. */}
           <div
             className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-md transition-colors duration-1000 sm:h-[500px] sm:w-[500px]"
@@ -186,15 +242,17 @@ export function HeroSection() {
           />
 
           <div
-            className="relative h-[240px] w-[240px] sm:h-[380px] sm:w-[380px]"
-            style={{
-              perspective: '900px',
-            }}
+            className="relative h-[240px] w-[240px] cursor-grab touch-none active:cursor-grabbing sm:h-[380px] sm:w-[380px]"
+            style={{ perspective: '900px' }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
           >
             <div
-              className="relative h-full w-full transition-transform duration-150 ease-out"
+              className="relative h-full w-full"
               style={{
-                transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+                transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
                 transformStyle: 'preserve-3d',
               }}
             >
@@ -211,6 +269,12 @@ export function HeroSection() {
               ))}
             </div>
           </div>
+
+          {!hasSpun && (
+            <p className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] uppercase tracking-widest-plus text-ivory-dim/70 sm:bottom-0">
+              ↔ Arrastra la botella para girarla
+            </p>
+          )}
         </div>
       </div>
 

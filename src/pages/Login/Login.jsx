@@ -40,7 +40,11 @@ export function Login() {
     try {
       const user = await login(values)
       showToast(`Bienvenido de nuevo, ${user.name.split(' ')[0]}`)
-      navigate(redirectTo, { replace: true })
+      // Un admin que entra directo por /login (sin haber sido redirigido desde
+      // una ruta puntual) va al panel de administración, no al inicio de la
+      // tienda — es lo que quiere ver casi siempre que inicia sesión.
+      const destination = user.role === 'admin' && !location.state?.from ? '/admin' : redirectTo
+      navigate(destination, { replace: true })
     } catch (error) {
       setFormError(error.message)
     } finally {

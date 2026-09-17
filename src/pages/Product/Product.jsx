@@ -138,7 +138,8 @@ export function Product() {
             <div className="flex items-center rounded-full border border-ivory/10">
               <button
                 type="button"
-                className="px-3 py-1.5 text-ivory disabled:opacity-30"
+                aria-label="Disminuir cantidad"
+                className="flex h-11 w-11 items-center justify-center text-ivory disabled:opacity-30"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 disabled={quantity <= 1}
               >
@@ -147,7 +148,8 @@ export function Product() {
               <span id="quantity" className="w-8 text-center text-ivory">{quantity}</span>
               <button
                 type="button"
-                className="px-3 py-1.5 text-ivory disabled:opacity-30"
+                aria-label="Aumentar cantidad"
+                className="flex h-11 w-11 items-center justify-center text-ivory disabled:opacity-30"
                 onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
                 disabled={quantity >= maxQuantity}
               >

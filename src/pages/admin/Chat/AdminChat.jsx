@@ -165,6 +165,7 @@ export function AdminChat() {
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Escribe una respuesta..."
+                  aria-label="Escribe una respuesta"
                   className="flex-1 rounded-full border border-ivory/10 bg-ink px-4 py-2 text-sm text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
                 />
                 <button

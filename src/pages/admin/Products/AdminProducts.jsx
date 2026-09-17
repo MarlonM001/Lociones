@@ -92,6 +92,7 @@ export function AdminProducts() {
           value={search}
           onChange={(event) => { setSearch(event.target.value); resetToFirstPage() }}
           placeholder="Buscar por nombre o SKU..."
+          aria-label="Buscar producto por nombre o SKU"
           className="w-full rounded-full border border-ivory/10 bg-charcoal px-4 py-2 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none sm:w-72"
         />
 

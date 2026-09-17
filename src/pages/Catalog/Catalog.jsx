@@ -60,6 +60,7 @@ export function Catalog() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Buscar loción..."
+          aria-label="Buscar loción"
           className="w-full rounded-full border border-ivory/10 bg-charcoal px-4 py-2 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none sm:w-64"
         />
       </div>

@@ -21,7 +21,8 @@ export function CartItem({ item }) {
           <div className="flex items-center rounded-full border border-ivory/10">
             <button
               type="button"
-              className="px-2.5 py-1 text-ivory disabled:opacity-30"
+              aria-label="Disminuir cantidad"
+              className="flex h-11 w-11 items-center justify-center text-ivory disabled:opacity-30"
               onClick={() => updateQuantity(item.productId, item.quantity - 1)}
               disabled={item.quantity <= 1}
             >
@@ -30,7 +31,8 @@ export function CartItem({ item }) {
             <span className="w-6 text-center text-sm text-ivory">{item.quantity}</span>
             <button
               type="button"
-              className="px-2.5 py-1 text-ivory disabled:opacity-30"
+              aria-label="Aumentar cantidad"
+              className="flex h-11 w-11 items-center justify-center text-ivory disabled:opacity-30"
               onClick={() => updateQuantity(item.productId, item.quantity + 1)}
               disabled={item.quantity >= (item.stock || 99)}
             >

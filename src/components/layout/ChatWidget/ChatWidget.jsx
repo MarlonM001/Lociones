@@ -71,6 +71,7 @@ function IntakeForm({ onSubmit }) {
         value={name}
         onChange={(event) => setName(event.target.value)}
         placeholder="Tu nombre"
+        aria-label="Tu nombre"
         required
         className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-sm text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
       />
@@ -79,6 +80,7 @@ function IntakeForm({ onSubmit }) {
         value={phone}
         onChange={(event) => setPhone(event.target.value)}
         placeholder="Tu número de WhatsApp"
+        aria-label="Tu número de WhatsApp"
         required
         className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-sm text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
       />
@@ -195,6 +197,7 @@ export function ChatWidget() {
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Escribe un mensaje..."
+                  aria-label="Escribe un mensaje"
                   disabled={status !== 'ready'}
                   className="flex-1 rounded-full border border-ivory/10 bg-ink px-4 py-2 text-sm text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none disabled:opacity-50"
                 />

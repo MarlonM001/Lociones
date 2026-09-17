@@ -72,7 +72,6 @@ export function HeroSection() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const [rotation, setRotation] = useState({ x: 0, y: 0 })
-  const [hasSpun, setHasSpun] = useState(false)
   const stageRef = useRef(null)
   const rotationRef = useRef({ x: 0, y: 0 })
   const velocityRef = useRef({ x: 0, y: 0 })
@@ -130,7 +129,6 @@ export function HeroSection() {
   // sobre la foto real en vez de un modelo 3D genérico.
   const handlePointerDown = (event) => {
     draggingRef.current = true
-    setHasSpun(true)
     cancelAnimationFrame(animRef.current)
     velocityRef.current = { x: 0, y: 0 }
     lastPointerRef.current = { x: event.clientX, y: event.clientY, t: performance.now() }
@@ -269,12 +267,6 @@ export function HeroSection() {
               ))}
             </div>
           </div>
-
-          {!hasSpun && (
-            <p className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 text-[11px] uppercase tracking-widest-plus text-ivory-dim/70 sm:bottom-0">
-              ↔ Arrastra la botella para girarla
-            </p>
-          )}
         </div>
       </div>
 

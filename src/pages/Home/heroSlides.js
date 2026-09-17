@@ -11,7 +11,7 @@ export const HERO_SLIDES = [
     secondaryCta: { label: 'Ver catálogo', to: '/catalogo' },
     bottleColors: { from: '#e4c988', to: '#9c7c3d' },
     bottleLabel: 'Essence',
-    image: '/images/products/arabia/khamrah-lattafa.png',
+    image: '/images/hero/essence.png',
   },
   {
     id: 'arabia',
@@ -25,7 +25,7 @@ export const HERO_SLIDES = [
     secondaryCta: { label: 'Ver catálogo', to: '/catalogo' },
     bottleColors: { from: '#e4c988', to: '#9c7c3d' },
     bottleLabel: 'ARABIA',
-    image: '/images/products/arabia/khamrah-lattafa.png',
+    image: '/images/hero/arabia.png',
   },
   {
     id: 'mujeres',
@@ -39,7 +39,7 @@ export const HERO_SLIDES = [
     secondaryCta: { label: 'Ver catálogo', to: '/catalogo' },
     bottleColors: { from: '#f3c9c9', to: '#c88a8a' },
     bottleLabel: 'Mujeres',
-    image: '/images/products/mujeres/bright-crystal.jpg',
+    image: '/images/hero/mujeres.png',
   },
   {
     id: 'caballero',
@@ -53,6 +53,6 @@ export const HERO_SLIDES = [
     secondaryCta: { label: 'Ver catálogo', to: '/catalogo' },
     bottleColors: { from: '#8fa6b3', to: '#3d4c56' },
     bottleLabel: 'Caballero',
-    image: '/images/products/caballero/invictus-victory.png',
+    image: '/images/hero/caballero.png',
   },
 ]

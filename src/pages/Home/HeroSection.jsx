@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { HERO_SLIDES } from './heroSlides'
 
 const AUTO_ADVANCE_MS = 6000
+const MAX_TILT_DEG = 14
 
 const SPARKLES = [
   { top: '16%', left: '8%', size: 6, delay: '0s' },
@@ -66,6 +67,13 @@ function FloatingSparkles() {
 export function HeroSection() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const stageRef = useRef(null)
+
+  const reduceMotion = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    [],
+  )
 
   useEffect(() => {
     if (paused) return undefined
@@ -77,6 +85,21 @@ export function HeroSection() {
 
   const goTo = (nextIndex) => {
     setIndex((nextIndex + HERO_SLIDES.length) % HERO_SLIDES.length)
+  }
+
+  // Inclina la botella hacia el cursor, como si pudieras "tomarla" y girarla
+  // un poco para verla de lado — un efecto 3D liviano sobre la foto real del
+  // producto, en vez de un modelo 3D genérico sin marca.
+  const handleStageMouseMove = (event) => {
+    if (reduceMotion || !stageRef.current) return
+    const rect = stageRef.current.getBoundingClientRect()
+    const relX = (event.clientX - rect.left) / rect.width - 0.5
+    const relY = (event.clientY - rect.top) / rect.height - 0.5
+    setTilt({ x: relY * MAX_TILT_DEG * -1, y: relX * MAX_TILT_DEG })
+  }
+
+  const handleStageMouseLeave = () => {
+    setTilt({ x: 0, y: 0 })
   }
 
   const activeSlide = HERO_SLIDES[index]
@@ -135,7 +158,12 @@ export function HeroSection() {
           })}
         </div>
 
-        <div className="relative flex justify-center">
+        <div
+          ref={stageRef}
+          className="relative flex justify-center"
+          onMouseMove={handleStageMouseMove}
+          onMouseLeave={handleStageMouseLeave}
+        >
           {/* Círculo grande tipo espejo de agua detrás de la botella, como si flotara sobre él. */}
           <div
             className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-md transition-colors duration-1000 sm:h-[500px] sm:w-[500px]"
@@ -157,17 +185,31 @@ export function HeroSection() {
             aria-hidden="true"
           />
 
-          <div className="relative h-[280px] w-[220px] sm:h-[420px] sm:w-[340px]">
-            {HERO_SLIDES.map((slide, slideIndex) => (
-              <img
-                key={slide.id}
-                src={slide.image}
-                alt={`Loción ${slide.bottleLabel}`}
-                className={`absolute inset-0 h-full w-full rounded-[2rem] bg-white object-contain p-6 shadow-2xl shadow-black/50 transition-opacity duration-700 ease-out sm:p-10 ${
-                  slideIndex === index ? 'opacity-100' : 'opacity-0'
-                }`}
-              />
-            ))}
+          <div
+            className="relative h-[240px] w-[240px] sm:h-[380px] sm:w-[380px]"
+            style={{
+              perspective: '900px',
+            }}
+          >
+            <div
+              className="relative h-full w-full transition-transform duration-150 ease-out"
+              style={{
+                transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              {HERO_SLIDES.map((slide, slideIndex) => (
+                <img
+                  key={slide.id}
+                  src={slide.image}
+                  alt={`Loción ${slide.bottleLabel}`}
+                  draggable="false"
+                  className={`absolute inset-0 h-full w-full select-none object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.55)] transition-opacity duration-700 ease-out ${
+                    slideIndex === index ? 'opacity-100' : 'opacity-0'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -6,6 +6,10 @@ const AUTO_ADVANCE_MS = 6000
 const DEG_PER_PX_YAW = 0.5
 const DEG_PER_PX_PITCH = 0.25
 const MAX_PITCH_DEG = 30
+// Es una foto, no un modelo 3D real: pasado este ángulo el frasco se ve de
+// canto (una línea) porque no existe una foto de perfil/espalda. Limitamos
+// el giro para que siempre se reconozca la forma de la botella.
+const MAX_YAW_DEG = 42
 const INERTIA_DECAY = 0.94
 const PITCH_RECENTER = 0.95
 
@@ -109,8 +113,9 @@ export function HeroSection() {
         x: velocityRef.current.x * INERTIA_DECAY,
         y: velocityRef.current.y * INERTIA_DECAY,
       }
-      const nextX = clampPitch((rotationRef.current.x + velocityRef.current.x) * PITCH_RECENTER)
-      const nextY = rotationRef.current.y + velocityRef.current.y
+      const nextX = clamp(rotationRef.current.x + velocityRef.current.x, MAX_PITCH_DEG) * PITCH_RECENTER
+      const nextY = clamp(rotationRef.current.y + velocityRef.current.y, MAX_YAW_DEG)
+      if (nextY === MAX_YAW_DEG || nextY === -MAX_YAW_DEG) velocityRef.current.y = 0
       applyRotation({ x: nextX, y: nextY })
 
       if (Math.abs(velocityRef.current.x) > 0.01 || Math.abs(velocityRef.current.y) > 0.01 || Math.abs(nextX) > 0.05) {
@@ -120,8 +125,8 @@ export function HeroSection() {
     animRef.current = requestAnimationFrame(step)
   }
 
-  function clampPitch(value) {
-    return Math.max(-MAX_PITCH_DEG, Math.min(MAX_PITCH_DEG, value))
+  function clamp(value, max) {
+    return Math.max(-max, Math.min(max, value))
   }
 
   // Arrastra la botella con el mouse (o el dedo) para girarla y verla desde
@@ -146,8 +151,8 @@ export function HeroSection() {
     const deltaY = dx * DEG_PER_PX_YAW
     const deltaX = -dy * DEG_PER_PX_PITCH
     const next = {
-      x: clampPitch(rotationRef.current.x + deltaX),
-      y: rotationRef.current.y + deltaY,
+      x: clamp(rotationRef.current.x + deltaX, MAX_PITCH_DEG),
+      y: clamp(rotationRef.current.y + deltaY, MAX_YAW_DEG),
     }
     applyRotation(next)
     velocityRef.current = { x: deltaX / dt, y: deltaY / dt }
@@ -291,7 +296,7 @@ export function HeroSection() {
                 >
                   <div
                     className="animate-bottle-sheen absolute inset-y-[-10%] w-1/4 bg-gradient-to-r from-transparent via-white/70 to-transparent transition-[left] duration-300 ease-out"
-                    style={{ left: `${(((rotation.y % 360) + 360) % 360) / 360 * 130 - 15}%` }}
+                    style={{ left: `${((rotation.y + MAX_YAW_DEG) / (MAX_YAW_DEG * 2)) * 130 - 15}%` }}
                   />
                 </div>
               ))}

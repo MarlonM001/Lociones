@@ -20,26 +20,56 @@ function SuccessIcon() {
   )
 }
 
+function OrderSummary({ subtotal }) {
+  return (
+    <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
+      <h2 className="mb-4 font-display text-xl text-ivory">Resumen</h2>
+      <div className="flex justify-between text-sm text-ivory-dim">
+        <span>Subtotal</span>
+        <span>{formatCurrency(subtotal)}</span>
+      </div>
+      <div className="mt-1 flex justify-between text-sm text-ivory-dim">
+        <span>Envío</span>
+        <span>Se confirma por WhatsApp</span>
+      </div>
+      <div className="mt-4 flex justify-between border-t border-ivory/10 pt-4 font-display text-lg text-ivory">
+        <span>Total</span>
+        <span>{formatCurrency(subtotal)}</span>
+      </div>
+    </div>
+  )
+}
+
 export function CartPage() {
   const { items, subtotal, clearCart } = useCart()
   const { showToast } = useToast()
   const { user } = useAuth()
+  const [step, setStep] = useState('cart') // 'cart' | 'details' | 'review'
+  const [checkoutData, setCheckoutData] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
   const [whatsappLink, setWhatsappLink] = useState(null)
 
+  const [firstName = '', ...restName] = (user?.name ?? '').split(' ')
   const defaultCheckoutValues = {
-    customerName: user?.name ?? '',
+    customerEmail: user?.email ?? '',
+    firstName,
+    lastName: restName.join(' '),
     customerPhone: user?.phone ?? '',
     city: isCityAvailable(user?.city) ? user.city : '',
     address: user?.address ?? '',
   }
 
-  const handleCheckout = async (deliveryData) => {
+  const handleDetailsSubmit = (values) => {
+    setCheckoutData(values)
+    setStep('review')
+  }
+
+  const handleConfirmOrder = async () => {
     setSubmitting(true)
     try {
       const order = await createOrder({
-        ...deliveryData,
+        ...checkoutData,
         userId: user?.id ?? null,
         items: items.map((item) => ({
           productId: item.productId,
@@ -110,45 +140,95 @@ export function CartPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="mb-8 font-display text-3xl text-ivory">Tu carrito</h1>
+      <h1 className="mb-8 font-display text-3xl text-ivory">
+        {step === 'cart' && 'Tu carrito'}
+        {step === 'details' && 'Datos de entrega'}
+        {step === 'review' && 'Revisa y confirma tu pedido'}
+      </h1>
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <div className="rounded-2xl border border-ivory/5 bg-charcoal p-4 sm:p-6">
-            {items.map((item) => (
-              <CartItem key={item.productId} item={item} />
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={clearCart}
-            className="mt-4 text-sm text-ivory-dim underline-offset-2 hover:text-red-400 hover:underline"
-          >
-            Vaciar carrito
-          </button>
+          {step === 'cart' && (
+            <>
+              <div className="rounded-2xl border border-ivory/5 bg-charcoal p-4 sm:p-6">
+                {items.map((item) => (
+                  <CartItem key={item.productId} item={item} />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={clearCart}
+                className="mt-4 text-sm text-ivory-dim underline-offset-2 hover:text-red-400 hover:underline"
+              >
+                Vaciar carrito
+              </button>
+            </>
+          )}
+
+          {step === 'details' && (
+            <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
+              <button
+                type="button"
+                onClick={() => setStep('cart')}
+                className="mb-4 text-sm text-ivory-dim hover:text-ivory"
+              >
+                ← Volver al carrito
+              </button>
+              <CheckoutForm onSubmit={handleDetailsSubmit} defaultValues={defaultCheckoutValues} />
+            </div>
+          )}
+
+          {step === 'review' && checkoutData && (
+            <div className="flex flex-col gap-6">
+              <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display text-lg text-ivory">Detalles del cliente y de la entrega</h2>
+                  <button
+                    type="button"
+                    onClick={() => setStep('details')}
+                    className="text-sm text-gold hover:underline"
+                  >
+                    Editar
+                  </button>
+                </div>
+                <div className="mt-3 text-sm text-ivory-dim">
+                  <p className="text-ivory">{checkoutData.customerName}</p>
+                  {checkoutData.customerEmail && <p>{checkoutData.customerEmail}</p>}
+                  <p>{checkoutData.customerPhone}</p>
+                  <p>{checkoutData.address}, {checkoutData.city}</p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
+                <h2 className="mb-3 font-display text-lg text-ivory">Pago</h2>
+                <p className="text-sm leading-relaxed text-ivory-dim">
+                  Este pedido no se cobra en línea. Al confirmar, se registra en nuestro sistema y te
+                  contactamos por WhatsApp para coordinar el pago (efectivo o transferencia contra entrega) y
+                  los últimos detalles de la entrega.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="whatsapp"
+                size="lg"
+                disabled={submitting}
+                onClick={handleConfirmOrder}
+                fullWidth
+              >
+                {submitting ? 'Creando pedido...' : 'Finalizar pedido por WhatsApp'}
+              </Button>
+            </div>
+          )}
         </div>
 
-        <div>
-          <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
-            <h2 className="mb-4 font-display text-xl text-ivory">Resumen</h2>
-            <div className="flex justify-between text-sm text-ivory-dim">
-              <span>Subtotal</span>
-              <span>{formatCurrency(subtotal)}</span>
-            </div>
-            <div className="mt-1 flex justify-between text-sm text-ivory-dim">
-              <span>Envío</span>
-              <span>Se confirma por WhatsApp</span>
-            </div>
-            <div className="mt-4 flex justify-between border-t border-ivory/10 pt-4 font-display text-lg text-ivory">
-              <span>Total</span>
-              <span>{formatCurrency(subtotal)}</span>
-            </div>
-
-            <div className="mt-6 border-t border-ivory/10 pt-6">
-              <h3 className="mb-4 text-sm uppercase tracking-widest-plus text-gold">Datos de entrega</h3>
-              <CheckoutForm onSubmit={handleCheckout} submitting={submitting} defaultValues={defaultCheckoutValues} />
-            </div>
-          </div>
+        <div className="flex flex-col gap-4">
+          <OrderSummary subtotal={subtotal} />
+          {step === 'cart' && (
+            <Button variant="primary" size="lg" onClick={() => setStep('details')} fullWidth>
+              Pagar
+            </Button>
+          )}
         </div>
       </div>
     </div>

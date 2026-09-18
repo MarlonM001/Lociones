@@ -1,19 +1,31 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { SHIPPING_CITY_NAMES, isCityAvailable } from '@/config/shipping'
 import { validateDeliveryAddress } from '@/services/geocoding'
-import { isNonEmpty, isValidPhone, validateFields } from '@/utils/validation'
+import { isNonEmpty, isValidEmail, isValidPhone, validateFields } from '@/utils/validation'
 import { Button } from '@/components/ui/Button'
 
-const INITIAL_VALUES = { customerName: '', customerPhone: '', city: '', address: '' }
+const INITIAL_VALUES = {
+  customerEmail: '',
+  firstName: '',
+  lastName: '',
+  customerPhone: '',
+  city: '',
+  address: '',
+}
 
 const RULES = {
-  customerName: (value) => (!isNonEmpty(value) ? 'Ingresa tu nombre completo' : null),
+  customerEmail: (value) => (value && !isValidEmail(value) ? 'Ingresa un email válido' : null),
+  firstName: (value) => (!isNonEmpty(value) ? 'Ingresa tu nombre' : null),
+  lastName: (value) => (!isNonEmpty(value) ? 'Ingresa tu apellido' : null),
   customerPhone: (value) => (!isValidPhone(value) ? 'Ingresa un teléfono válido' : null),
   city: (value) => (!isCityAvailable(value) ? 'Por ahora solo enviamos a las ciudades listadas' : null),
   address: (value) => (!isNonEmpty(value) ? 'Ingresa la dirección de entrega' : null),
 }
 
 export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [values, setValues] = useState(() => ({ ...INITIAL_VALUES, ...defaultValues }))
   const [errors, setErrors] = useState({})
   const [checkingAddress, setCheckingAddress] = useState(false)
@@ -49,20 +61,54 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
     // 'valid', 'skipped' (sin API key configurada) o 'error' (falla de red):
     // en estos dos últimos casos dejamos pasar para no bloquear la compra
     // por un problema del servicio externo, no de la dirección en sí.
-    onSubmit(values)
+    onSubmit({ ...values, customerName: `${values.firstName.trim()} ${values.lastName.trim()}`.trim() })
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <p className="text-sm text-ivory-dim">
+        ¿Ya tienes una cuenta?{' '}
+        <button
+          type="button"
+          onClick={() => navigate('/login', { state: { from: location.pathname } })}
+          className="text-gold hover:underline"
+        >
+          Iniciar sesión
+        </button>
+      </p>
+
       <div>
-        <label className="mb-1 block text-sm text-ivory-dim">Nombre completo</label>
+        <label className="mb-1 block text-sm text-ivory-dim">Email (opcional)</label>
         <input
-          type="text"
-          value={values.customerName}
-          onChange={handleChange('customerName')}
+          type="email"
+          value={values.customerEmail}
+          onChange={handleChange('customerEmail')}
           className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
         />
-        {errors.customerName && <p className="mt-1 text-xs text-red-400">{errors.customerName}</p>}
+        {errors.customerEmail && <p className="mt-1 text-xs text-red-400">{errors.customerEmail}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-sm text-ivory-dim">Nombre</label>
+          <input
+            type="text"
+            value={values.firstName}
+            onChange={handleChange('firstName')}
+            className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
+          />
+          {errors.firstName && <p className="mt-1 text-xs text-red-400">{errors.firstName}</p>}
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-ivory-dim">Apellido</label>
+          <input
+            type="text"
+            value={values.lastName}
+            onChange={handleChange('lastName')}
+            className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
+          />
+          {errors.lastName && <p className="mt-1 text-xs text-red-400">{errors.lastName}</p>}
+        </div>
       </div>
 
       <div>
@@ -102,8 +148,8 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
         {errors.address && <p className="mt-1 text-xs text-red-400">{errors.address}</p>}
       </div>
 
-      <Button type="submit" variant="whatsapp" size="lg" disabled={submitting || checkingAddress} fullWidth>
-        {checkingAddress ? 'Verificando dirección...' : submitting ? 'Creando pedido...' : 'Finalizar pedido por WhatsApp'}
+      <Button type="submit" variant="primary" size="lg" disabled={submitting || checkingAddress} fullWidth>
+        {checkingAddress ? 'Verificando dirección...' : 'Continuar'}
       </Button>
     </form>
   )

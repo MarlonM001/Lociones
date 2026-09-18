@@ -162,7 +162,10 @@ export async function updateProduct(id, updates) {
   if ('active' in updates) set('active', Boolean(updates.active))
   if ('imageUrl' in updates && updates.imageUrl) {
     set('image', updates.imageUrl)
-    set('images', JSON.stringify([updates.imageUrl]))
+    // Preserva un segundo ángulo real existente (ver server/scripts/fix-product-image-galleries.js)
+    // en vez de perderlo cada vez que se actualiza solo la foto principal.
+    const existingSecondImage = existing.images?.[1]
+    set('images', JSON.stringify(existingSecondImage ? [updates.imageUrl, existingSecondImage] : [updates.imageUrl]))
   }
   if ('isBestseller' in updates) set('is_bestseller', Boolean(updates.isBestseller))
   if ('bestsellerRank' in updates) {

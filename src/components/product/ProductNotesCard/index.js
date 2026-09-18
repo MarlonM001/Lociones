@@ -1,0 +1,1 @@
+export { ProductNotesCard } from './ProductNotesCard'

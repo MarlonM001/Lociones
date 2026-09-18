@@ -4,12 +4,16 @@ import { getProductBySlug, getRelatedProducts } from '@/services/products'
 import { getCategoryById } from '@/config/categories'
 import { generateWhatsAppProductInquiry } from '@/services/whatsapp'
 import { formatCurrency } from '@/utils/formatCurrency'
+import { parseNotes } from '@/utils/parseNotes'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
 import { Button } from '@/components/ui/Button'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ProductCard } from '@/components/product/ProductCard'
+import { ProductNotesCard } from '@/components/product/ProductNotesCard'
+
+const NOTES_THUMB_COLORS = ['#c8a45c', '#c88a8a', '#8fa6b3']
 
 export function Product() {
   const { slug } = useParams()
@@ -60,6 +64,9 @@ export function Product() {
   const category = getCategoryById(product.categoryId)
   const inStock = product.stock > 0
   const maxQuantity = Math.max(1, product.stock)
+  const notes = parseNotes(product.description)
+  const notesViewIndex = product.images.length
+  const isNotesView = notes.length > 0 && activeImage === notesViewIndex
 
   const handleAddToCart = () => {
     addItem(product, quantity)
@@ -82,14 +89,22 @@ export function Product() {
 
       <div className="grid gap-10 lg:grid-cols-2">
         <div>
-          <div className="aspect-square w-full overflow-hidden rounded-2xl border border-ivory/5 bg-white p-8">
-            <img
-              src={product.images[activeImage] ?? product.image}
-              alt={product.name}
-              className="h-full w-full object-contain object-center"
-            />
+          <div
+            className={`aspect-square w-full overflow-hidden rounded-2xl border border-ivory/5 ${
+              isNotesView ? '' : 'bg-white p-8'
+            }`}
+          >
+            {isNotesView ? (
+              <ProductNotesCard image={product.image} name={product.name} notes={notes} />
+            ) : (
+              <img
+                src={product.images[activeImage] ?? product.image}
+                alt={product.name}
+                className="h-full w-full object-contain object-center"
+              />
+            )}
           </div>
-          {product.images.length > 1 && (
+          {(product.images.length > 1 || notes.length > 0) && (
             <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
               {product.images.map((image, index) => (
                 <button
@@ -103,6 +118,27 @@ export function Product() {
                   <img src={image} alt="" className="h-full w-full object-contain object-center" />
                 </button>
               ))}
+              {notes.length > 0 && (
+                <button
+                  type="button"
+                  aria-label="Ver notas y acordes"
+                  onClick={() => setActiveImage(notesViewIndex)}
+                  className={`flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border bg-charcoal p-2 transition-colors ${
+                    isNotesView ? 'border-gold' : 'border-ivory/10'
+                  }`}
+                >
+                  <div className="flex w-full flex-col gap-1">
+                    {NOTES_THUMB_COLORS.map((color, i) => (
+                      <div
+                        key={color}
+                        className="h-1.5 rounded-full"
+                        style={{ width: `${100 - i * 20}%`, backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[9px] uppercase tracking-wide text-ivory-dim">Notas</span>
+                </button>
+              )}
             </div>
           )}
         </div>

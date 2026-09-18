@@ -9,6 +9,7 @@ function toPublicOrder(row, items) {
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
     customerEmail: row.customer_email,
+    marketingOptIn: row.marketing_opt_in,
     items: items.map((item) => ({
       productId: item.product_id,
       name: item.name,
@@ -68,14 +69,15 @@ export async function createOrder(payload) {
 
   return withTransaction(async (client) => {
     const { rows: orderRows } = await client.query(
-      `INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, subtotal, shipping, total, city, address, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, marketing_opt_in, subtotal, shipping, total, city, address, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         payload.userId ?? null,
         payload.customerName.trim(),
         payload.customerPhone.trim(),
         payload.customerEmail?.trim() || null,
+        Boolean(payload.marketingOptIn),
         subtotal,
         shipping,
         total,

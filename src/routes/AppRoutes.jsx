@@ -11,6 +11,8 @@ import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { References } from '@/pages/References'
 import { Profile } from '@/pages/Profile'
+import { Terms } from '@/pages/Terms'
+import { Privacy } from '@/pages/Privacy'
 import { ComingSoon } from '@/pages/ComingSoon'
 import { AdminDashboard } from '@/pages/admin/Dashboard'
 import { AdminProducts } from '@/pages/admin/Products'
@@ -58,6 +60,8 @@ export function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
         <Route path="/referencias" element={<References />} />
+        <Route path="/terminos" element={<Terms />} />
+        <Route path="/privacidad" element={<Privacy />} />
         <Route
           path="/perfil"
           element={

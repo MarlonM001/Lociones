@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
 import { useAuth } from '@/hooks/useAuth'
@@ -20,10 +21,28 @@ function SuccessIcon() {
   )
 }
 
-function OrderSummary({ subtotal }) {
+function OrderSummary({ items, subtotal, showItems }) {
   return (
     <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
       <h2 className="mb-4 font-display text-xl text-ivory">Resumen</h2>
+
+      {showItems && (
+        <div className="mb-4 flex flex-col gap-3 border-b border-ivory/10 pb-4">
+          {items.map((item) => (
+            <div key={item.productId} className="flex items-center gap-3">
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white p-1">
+                <img src={item.image} alt={item.name} className="h-full w-full object-contain object-center" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-ivory">{item.name}</p>
+                <p className="text-xs text-ivory-dim">x{item.quantity}</p>
+              </div>
+              <span className="shrink-0 text-sm text-ivory-dim">{formatCurrency(item.price * item.quantity)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="flex justify-between text-sm text-ivory-dim">
         <span>Subtotal</span>
         <span>{formatCurrency(subtotal)}</span>
@@ -46,6 +65,8 @@ export function CartPage() {
   const { user } = useAuth()
   const [step, setStep] = useState('cart') // 'cart' | 'details' | 'review'
   const [checkoutData, setCheckoutData] = useState(null)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [acceptedMarketing, setAcceptedMarketing] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
   const [whatsappLink, setWhatsappLink] = useState(null)
@@ -66,11 +87,13 @@ export function CartPage() {
   }
 
   const handleConfirmOrder = async () => {
+    if (!acceptedTerms) return
     setSubmitting(true)
     try {
       const order = await createOrder({
         ...checkoutData,
         userId: user?.id ?? null,
+        marketingOptIn: acceptedMarketing,
         items: items.map((item) => ({
           productId: item.productId,
           name: item.name,
@@ -208,11 +231,51 @@ export function CartPage() {
                 </p>
               </div>
 
+              <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
+                <h2 className="mb-1 font-display text-lg text-ivory">Revisa y realiza el pedido</h2>
+                <p className="mb-4 text-sm text-ivory-dim">
+                  Revisa la información anterior y continúa cuando esté todo listo.
+                </p>
+
+                <label className="flex items-start gap-2 text-sm text-ivory-dim">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(event) => setAcceptedTerms(event.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-ivory/20 accent-gold"
+                  />
+                  <span>
+                    Acepto los{' '}
+                    <Link to="/terminos" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">
+                      Términos y condiciones
+                    </Link>{' '}
+                    y la{' '}
+                    <Link to="/privacidad" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">
+                      Política de privacidad
+                    </Link>{' '}
+                    *
+                  </span>
+                </label>
+
+                <label className="mt-3 flex items-start gap-2 text-sm text-ivory-dim">
+                  <input
+                    type="checkbox"
+                    checked={acceptedMarketing}
+                    onChange={(event) => setAcceptedMarketing(event.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-ivory/20 accent-gold"
+                  />
+                  <span>
+                    Acepto recibir información de marketing por email y WhatsApp sobre promociones y novedades
+                    (opcional).
+                  </span>
+                </label>
+              </div>
+
               <Button
                 type="button"
                 variant="whatsapp"
                 size="lg"
-                disabled={submitting}
+                disabled={submitting || !acceptedTerms}
                 onClick={handleConfirmOrder}
                 fullWidth
               >
@@ -223,7 +286,7 @@ export function CartPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <OrderSummary subtotal={subtotal} />
+          <OrderSummary items={items} subtotal={subtotal} showItems={step !== 'cart'} />
           {step === 'cart' && (
             <Button variant="primary" size="lg" onClick={() => setStep('details')} fullWidth>
               Pagar

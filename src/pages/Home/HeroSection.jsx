@@ -1,17 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { HERO_SLIDES } from './heroSlides'
 
+// three.js se carga en un chunk aparte (lazy), para no inflar el bundle
+// inicial que descarga cada visitante antes de que la página sea interactiva.
+const Bottle3D = lazy(() => import('@/components/three/Bottle3D').then((m) => ({ default: m.Bottle3D })))
+
 const AUTO_ADVANCE_MS = 6000
-const DEG_PER_PX_YAW = 0.5
-const DEG_PER_PX_PITCH = 0.25
-const MAX_PITCH_DEG = 30
-// Es una foto, no un modelo 3D real: pasado este ángulo el frasco se ve de
-// canto (una línea) porque no existe una foto de perfil/espalda. Limitamos
-// el giro para que siempre se reconozca la forma de la botella.
-const MAX_YAW_DEG = 42
-const INERTIA_DECAY = 0.94
-const PITCH_RECENTER = 0.95
 
 const SPARKLES = [
   { top: '16%', left: '8%', size: 6, delay: '0s' },
@@ -75,18 +70,6 @@ function FloatingSparkles() {
 export function HeroSection() {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
-  const [rotation, setRotation] = useState({ x: 0, y: 0 })
-  const stageRef = useRef(null)
-  const rotationRef = useRef({ x: 0, y: 0 })
-  const velocityRef = useRef({ x: 0, y: 0 })
-  const draggingRef = useRef(false)
-  const lastPointerRef = useRef({ x: 0, y: 0, t: 0 })
-  const animRef = useRef(null)
-
-  const reduceMotion = useMemo(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    [],
-  )
 
   useEffect(() => {
     if (paused) return undefined
@@ -96,74 +79,8 @@ export function HeroSection() {
     return () => clearInterval(id)
   }, [paused])
 
-  useEffect(() => () => cancelAnimationFrame(animRef.current), [])
-
   const goTo = (nextIndex) => {
     setIndex((nextIndex + HERO_SLIDES.length) % HERO_SLIDES.length)
-  }
-
-  const applyRotation = (next) => {
-    rotationRef.current = next
-    setRotation(next)
-  }
-
-  const runInertia = () => {
-    const step = () => {
-      velocityRef.current = {
-        x: velocityRef.current.x * INERTIA_DECAY,
-        y: velocityRef.current.y * INERTIA_DECAY,
-      }
-      const nextX = clamp(rotationRef.current.x + velocityRef.current.x, MAX_PITCH_DEG) * PITCH_RECENTER
-      const nextY = clamp(rotationRef.current.y + velocityRef.current.y, MAX_YAW_DEG)
-      if (nextY === MAX_YAW_DEG || nextY === -MAX_YAW_DEG) velocityRef.current.y = 0
-      applyRotation({ x: nextX, y: nextY })
-
-      if (Math.abs(velocityRef.current.x) > 0.01 || Math.abs(velocityRef.current.y) > 0.01 || Math.abs(nextX) > 0.05) {
-        animRef.current = requestAnimationFrame(step)
-      }
-    }
-    animRef.current = requestAnimationFrame(step)
-  }
-
-  function clamp(value, max) {
-    return Math.max(-max, Math.min(max, value))
-  }
-
-  // Arrastra la botella con el mouse (o el dedo) para girarla y verla desde
-  // otros ángulos, con inercia al soltar — como un "spin viewer" de producto,
-  // sobre la foto real en vez de un modelo 3D genérico.
-  const handlePointerDown = (event) => {
-    draggingRef.current = true
-    cancelAnimationFrame(animRef.current)
-    velocityRef.current = { x: 0, y: 0 }
-    lastPointerRef.current = { x: event.clientX, y: event.clientY, t: performance.now() }
-    event.currentTarget.setPointerCapture?.(event.pointerId)
-  }
-
-  const handlePointerMove = (event) => {
-    if (!draggingRef.current) return
-    const now = performance.now()
-    const last = lastPointerRef.current
-    const dt = Math.max(now - last.t, 1)
-    const dx = event.clientX - last.x
-    const dy = event.clientY - last.y
-
-    const deltaY = dx * DEG_PER_PX_YAW
-    const deltaX = -dy * DEG_PER_PX_PITCH
-    const next = {
-      x: clamp(rotationRef.current.x + deltaX, MAX_PITCH_DEG),
-      y: clamp(rotationRef.current.y + deltaY, MAX_YAW_DEG),
-    }
-    applyRotation(next)
-    velocityRef.current = { x: deltaX / dt, y: deltaY / dt }
-    lastPointerRef.current = { x: event.clientX, y: event.clientY, t: now }
-  }
-
-  const handlePointerUp = () => {
-    if (!draggingRef.current) return
-    draggingRef.current = false
-    if (!reduceMotion) runInertia()
-    else applyRotation({ x: 0, y: rotationRef.current.y })
   }
 
   const activeSlide = HERO_SLIDES[index]
@@ -222,7 +139,11 @@ export function HeroSection() {
           })}
         </div>
 
-        <div ref={stageRef} className="relative flex justify-center">
+        {/* Un solo canvas 3D persistente: cambia de foto/color según la
+            colección activa en vez de reiniciarse en cada avance del
+            carrusel, para no perder la rotación que el visitante haya
+            dejado con el mouse. */}
+        <div className="relative flex justify-center">
           {/* Círculo grande tipo espejo de agua detrás de la botella, como si flotara sobre él. */}
           <div
             className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-md transition-colors duration-1000 sm:h-[500px] sm:w-[500px]"
@@ -244,64 +165,9 @@ export function HeroSection() {
             aria-hidden="true"
           />
 
-          <div
-            className="relative h-[240px] w-[240px] cursor-grab touch-none active:cursor-grabbing sm:h-[380px] sm:w-[380px]"
-            style={{ perspective: '900px' }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-          >
-            <div
-              className="relative h-full w-full"
-              style={{
-                transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-                transformStyle: 'preserve-3d',
-              }}
-            >
-              {HERO_SLIDES.map((slide, slideIndex) => (
-                <img
-                  key={slide.id}
-                  src={slide.image}
-                  alt={`Loción ${slide.bottleLabel}`}
-                  draggable="false"
-                  className={`absolute inset-0 h-full w-full select-none object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.55)] transition-opacity duration-700 ease-out ${
-                    slideIndex === index ? 'opacity-100' : 'opacity-0'
-                  }`}
-                />
-              ))}
-
-              {/* Franja de luz que "cae" sobre el frasco, recortada a la silueta
-                  real de la botella (máscara = el propio PNG sin fondo), para
-                  que la foto plana no se vea tan plana. Se desliza sola y, al
-                  girar la botella, su posición sigue el ángulo, como si la luz
-                  la recorriera. */}
-              {HERO_SLIDES.map((slide, slideIndex) => (
-                <div
-                  key={slide.id}
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute inset-0 overflow-hidden mix-blend-screen transition-opacity duration-700 ease-out ${
-                    slideIndex === index ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  style={{
-                    WebkitMaskImage: `url(${slide.image})`,
-                    maskImage: `url(${slide.image})`,
-                    WebkitMaskSize: 'contain',
-                    maskSize: 'contain',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskRepeat: 'no-repeat',
-                    WebkitMaskPosition: 'center',
-                    maskPosition: 'center',
-                  }}
-                >
-                  <div
-                    className="animate-bottle-sheen absolute inset-y-[-10%] w-1/4 bg-gradient-to-r from-transparent via-white/70 to-transparent transition-[left] duration-300 ease-out"
-                    style={{ left: `${((rotation.y + MAX_YAW_DEG) / (MAX_YAW_DEG * 2)) * 130 - 15}%` }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <Suspense fallback={<div className="h-[280px] w-[220px] sm:h-[420px] sm:w-[320px]" />}>
+            <Bottle3D image={activeSlide.image} colors={activeColors} label={activeSlide.bottleLabel} />
+          </Suspense>
         </div>
       </div>
 

@@ -8,7 +8,7 @@ import { BottleModel } from './BottleModel'
  * verlo de frente, de lado, por detrás y por debajo. Gira solo mientras
  * nadie interactúa, y el usuario retoma el control con el primer arrastre.
  */
-export function Bottle3D({ image, colors, label }) {
+export function Bottle3D({ image, colors, label, silhouetteKey }) {
   const [autoRotate, setAutoRotate] = useState(true)
   const resumeTimer = useRef(null)
 
@@ -36,7 +36,7 @@ export function Bottle3D({ image, colors, label }) {
         <pointLight position={[0, 1.8, 1.5]} intensity={0.6} color="#ffffff" />
 
         <Suspense fallback={null}>
-          <BottleModel image={image} colors={colors} />
+          <BottleModel image={image} colors={colors} silhouetteKey={silhouetteKey} />
           <ContactShadows position={[0, -1.06, 0]} opacity={0.55} scale={4} blur={2.4} far={1.5} />
         </Suspense>
 

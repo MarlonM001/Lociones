@@ -166,7 +166,12 @@ export function HeroSection() {
           />
 
           <Suspense fallback={<div className="h-[280px] w-[220px] sm:h-[420px] sm:w-[320px]" />}>
-            <Bottle3D image={activeSlide.image} colors={activeColors} label={activeSlide.bottleLabel} />
+            <Bottle3D
+              image={activeSlide.image}
+              colors={activeColors}
+              label={activeSlide.bottleLabel}
+              silhouetteKey={activeSlide.id}
+            />
           </Suspense>
         </div>
       </div>

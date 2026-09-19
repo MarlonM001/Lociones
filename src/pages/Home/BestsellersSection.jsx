@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getBestsellerProducts } from '@/services/products'
 import { ProductCard } from '@/components/product/ProductCard'
 import { Loading } from '@/components/ui/Loading'
@@ -13,9 +14,18 @@ function chunk(items, size) {
   return groups
 }
 
-function ArrowIcon({ direction }) {
+function StarIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8L12 2.5z" />
+    </svg>
+  )
+}
+
+function ArrowIcon({ direction, small = false }) {
+  const size = small ? 16 : 20
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path
         d={direction === 'left' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}
         strokeLinecap="round"
@@ -71,74 +81,86 @@ export function BestsellersSection() {
     >
       <div className="pointer-events-none absolute inset-0 bg-noise opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Reveal>
-          <div className="mb-10 flex flex-col items-center gap-2 text-center">
-            <span className="text-xs uppercase tracking-widest-plus text-gold">Top ventas</span>
-            <h2 className="font-display text-3xl text-ivory sm:text-4xl">Las favoritas de nuestros clientes</h2>
-            <p className="max-w-xl text-sm text-ivory-dim">
-              Las lociones que más se repiten en cada pedido. Si buscas un acierto seguro, empieza por aquí.
-            </p>
-          </div>
-        </Reveal>
-
-        {loading ? (
-          <Loading label="Cargando top ventas..." />
-        ) : (
-          <Reveal delay={100}>
-            <div className="grid">
-              {slides.map((group, slideIndex) => (
-                <div
-                  key={slideIndex}
-                  aria-hidden={slideIndex !== index}
-                  inert={slideIndex !== index}
-                  className={`col-start-1 row-start-1 grid grid-cols-1 content-start gap-6 transition-opacity duration-700 ease-out sm:grid-cols-2 lg:grid-cols-3 ${
-                    slideIndex === index ? 'opacity-100' : 'pointer-events-none opacity-0'
-                  }`}
+        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-ink/70 px-4 py-10 shadow-2xl shadow-gold/10 sm:px-8 sm:py-12 lg:px-12">
+          <div className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-gold/15 blur-3xl" />
+          <div className="relative">
+            <Reveal>
+              <div className="mb-10 flex flex-col items-center gap-3 text-center">
+                <Link
+                  to="/top-ventas"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-gold/50 bg-gold/10 px-5 py-2 text-xs font-medium uppercase tracking-widest-plus text-gold transition-colors hover:bg-gold hover:text-on-gold"
                 >
-                  {group.map((product) => (
-                    <ProductCard key={product.id} product={product} image={product.bestsellerImage || product.image} />
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            {slides.length > 1 && (
-              <div className="mt-10 flex items-center justify-center gap-4">
-                <button
-                  type="button"
-                  aria-label="Lociones anteriores"
-                  onClick={() => goTo(index - 1)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-ivory/15 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
-                >
-                  <ArrowIcon direction="left" />
-                </button>
-
-                <div className="flex gap-2">
-                  {slides.map((_, dotIndex) => (
-                    <button
-                      key={dotIndex}
-                      type="button"
-                      aria-label={`Ir al grupo ${dotIndex + 1}`}
-                      onClick={() => goTo(dotIndex)}
-                      className={`h-1.5 rounded-full transition-all ${
-                        dotIndex === index ? 'w-6 bg-gold' : 'w-1.5 bg-ivory/30 hover:bg-ivory/50'
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  aria-label="Siguientes lociones"
-                  onClick={() => goTo(index + 1)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-ivory/15 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
-                >
-                  <ArrowIcon direction="right" />
-                </button>
+                  <StarIcon />
+                  Top ventas
+                  <ArrowIcon direction="right" small />
+                </Link>
+                <h2 className="font-display text-3xl text-ivory sm:text-4xl">Las favoritas de nuestros clientes</h2>
+                <p className="max-w-xl text-sm text-ivory-dim">
+                  Las lociones que más se repiten en cada pedido. Si buscas un acierto seguro, empieza por aquí.
+                </p>
               </div>
+            </Reveal>
+
+            {loading ? (
+              <Loading label="Cargando top ventas..." />
+            ) : (
+              <Reveal delay={100}>
+                <div className="grid">
+                  {slides.map((group, slideIndex) => (
+                    <div
+                      key={slideIndex}
+                      aria-hidden={slideIndex !== index}
+                      inert={slideIndex !== index}
+                      className={`col-start-1 row-start-1 grid grid-cols-1 content-start gap-6 transition-opacity duration-700 ease-out sm:grid-cols-2 lg:grid-cols-3 ${
+                        slideIndex === index ? 'opacity-100' : 'pointer-events-none opacity-0'
+                      }`}
+                    >
+                      {group.map((product) => (
+                        <ProductCard key={product.id} product={product} image={product.bestsellerImage || product.image} />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+
+                {slides.length > 1 && (
+                  <div className="mt-10 flex items-center justify-center gap-4">
+                    <button
+                      type="button"
+                      aria-label="Lociones anteriores"
+                      onClick={() => goTo(index - 1)}
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-ivory/15 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
+                    >
+                      <ArrowIcon direction="left" />
+                    </button>
+
+                    <div className="flex gap-2">
+                      {slides.map((_, dotIndex) => (
+                        <button
+                          key={dotIndex}
+                          type="button"
+                          aria-label={`Ir al grupo ${dotIndex + 1}`}
+                          onClick={() => goTo(dotIndex)}
+                          className={`h-1.5 rounded-full transition-all ${
+                            dotIndex === index ? 'w-6 bg-gold' : 'w-1.5 bg-ivory/30 hover:bg-ivory/50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      aria-label="Siguientes lociones"
+                      onClick={() => goTo(index + 1)}
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-ivory/15 text-ivory backdrop-blur transition-colors hover:border-gold hover:text-gold"
+                    >
+                      <ArrowIcon direction="right" />
+                    </button>
+                  </div>
+                )}
+              </Reveal>
             )}
-          </Reveal>
-        )}
+          </div>
+        </div>
       </div>
     </section>
   )

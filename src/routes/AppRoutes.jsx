@@ -52,6 +52,7 @@ export function AppRoutes() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/catalogo" element={<Catalog />} />
+        <Route path="/top-ventas" element={<Catalog topSellers />} />
         <Route path="/productos/:categorySlug" element={<Catalog />} />
         <Route path="/producto/:slug" element={<Product />} />
         <Route path="/subastas" element={<Auctions />} />

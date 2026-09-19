@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { CATEGORIES, getCategoryBySlug } from '@/config/categories'
-import { getProducts } from '@/services/products'
+import { getProducts, getBestsellerProducts } from '@/services/products'
 import { ProductCard } from '@/components/product/ProductCard'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
 
 const PAGE_SIZE = 24
+const TOP_SELLERS_LIMIT = 100
 
-export function Catalog() {
+/** `topSellers`: en vez del catálogo completo, muestra solo las lociones de top ventas (ruta /top-ventas). */
+export function Catalog({ topSellers = false }) {
   const { categorySlug } = useParams()
   const navigate = useNavigate()
   const activeCategory = categorySlug ? getCategoryBySlug(categorySlug) : null
@@ -22,7 +24,10 @@ export function Catalog() {
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    getProducts({ categoryId: activeCategory?.id, onlyInStock: true }).then((products) => {
+    const request = topSellers
+      ? getBestsellerProducts(TOP_SELLERS_LIMIT)
+      : getProducts({ categoryId: activeCategory?.id, onlyInStock: true })
+    request.then((products) => {
       if (!cancelled) {
         setAllProducts(products)
         setVisibleCount(PAGE_SIZE)
@@ -32,7 +37,7 @@ export function Catalog() {
     return () => {
       cancelled = true
     }
-  }, [activeCategory?.id])
+  }, [activeCategory?.id, topSellers])
 
   const filteredProducts = useMemo(() => {
     if (!search.trim()) return allProducts
@@ -48,10 +53,12 @@ export function Catalog() {
         <div>
           <span className="text-xs uppercase tracking-widest-plus text-gold">Catálogo</span>
           <h1 className="mt-1 font-display text-3xl text-ivory sm:text-4xl">
-            {activeCategory ? activeCategory.name : 'Todas las lociones'}
+            {topSellers ? 'Top ventas' : activeCategory ? activeCategory.name : 'Todas las lociones'}
           </h1>
           <p className="mt-1 text-sm text-ivory-dim">
-            {filteredProducts.length} productos disponibles
+            {topSellers
+              ? `Las ${filteredProducts.length} lociones favoritas de nuestros clientes`
+              : `${filteredProducts.length} productos disponibles`}
           </p>
         </div>
 
@@ -70,12 +77,21 @@ export function Catalog() {
           type="button"
           onClick={() => navigate('/catalogo')}
           className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-            !activeCategory
+            !activeCategory && !topSellers
               ? 'border-gold bg-gold/10 text-gold'
               : 'border-ivory/10 text-ivory-dim hover:text-ivory'
           }`}
         >
           Todas
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/top-ventas')}
+          className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+            topSellers ? 'border-gold bg-gold/10 text-gold' : 'border-ivory/10 text-ivory-dim hover:text-ivory'
+          }`}
+        >
+          Top ventas
         </button>
         {CATEGORIES.map((category) => (
           <button
@@ -83,7 +99,7 @@ export function Catalog() {
             type="button"
             onClick={() => navigate(`/productos/${category.slug}`)}
             className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-              activeCategory?.id === category.id
+              !topSellers && activeCategory?.id === category.id
                 ? 'border-gold bg-gold/10 text-gold'
                 : 'border-ivory/10 text-ivory-dim hover:text-ivory'
             }`}

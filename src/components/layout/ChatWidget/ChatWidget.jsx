@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useChat } from '@/hooks/useChat'
 import { useAuth } from '@/hooks/useAuth'
 import { useHideNearFooter } from '@/hooks/useHideNearFooter'
-import { getAuctions } from '@/services/auctions'
-import { formatCurrency } from '@/utils/formatCurrency'
 import { Button } from '@/components/ui/Button'
 
 function ChatIcon() {
@@ -32,23 +29,6 @@ function SendIcon() {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
       <path d="M3 20V4l19 8Zm2-3 11.85-5L5 7v3.5l7 1.5-7 1.5Z" />
     </svg>
-  )
-}
-
-function PinnedAuction({ auction }) {
-  const image = auction.image || auction.items[0]?.product.image
-  return (
-    <Link
-      to={`/subastas/${auction.slug}`}
-      className="flex items-center gap-3 border-b border-gold/20 bg-gold/5 px-4 py-3 transition-colors hover:bg-gold/10"
-    >
-      <img src={image} alt="" className="h-11 w-11 rounded-lg bg-white object-contain object-center p-1" />
-      <div className="min-w-0 flex-1">
-        <p className="text-[10px] uppercase tracking-widest-plus text-gold">Subasta en curso</p>
-        <p className="truncate text-sm text-ivory">{auction.title}</p>
-      </div>
-      <span className="shrink-0 font-display text-sm text-gold">{formatCurrency(auction.currentPrice)}</span>
-    </Link>
   )
 }
 
@@ -105,34 +85,12 @@ function MessageBubble({ message }) {
   )
 }
 
-/** Cada cuánto se revisa si ya hay (o dejó de haber) una subasta activa,
- * mientras el sitio sigue abierto en la pestaña del cliente. */
-const AUCTION_POLL_MS = 60000
-
 export function ChatWidget() {
   const { open, setOpen, openChat, status, messages, submitIntake, sendMessage, retry } = useChat()
   const { user } = useAuth()
   const [draft, setDraft] = useState('')
-  const [activeAuction, setActiveAuction] = useState(null)
   const scrollRef = useRef(null)
   const hideLauncher = useHideNearFooter()
-
-  useEffect(() => {
-    let cancelled = false
-    const checkActiveAuction = () => {
-      getAuctions()
-        .then((auctions) => {
-          if (!cancelled) setActiveAuction(auctions.find((auction) => auction.phase === 'active') ?? null)
-        })
-        .catch(() => {})
-    }
-    checkActiveAuction()
-    const interval = setInterval(checkActiveAuction, AUCTION_POLL_MS)
-    return () => {
-      cancelled = true
-      clearInterval(interval)
-    }
-  }, [])
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -144,11 +102,6 @@ export function ChatWidget() {
     sendMessage(draft)
     setDraft('')
   }
-
-  // El chat es el acompañante de las subastas en vivo: solo tiene sentido
-  // mostrarlo mientras hay una en curso. Fuera de eso, el contacto general
-  // pasa por el botón de WhatsApp (siempre visible).
-  if (!activeAuction) return null
 
   return (
     <>
@@ -187,8 +140,6 @@ export function ChatWidget() {
               <CloseIcon />
             </button>
           </div>
-
-          {activeAuction && <PinnedAuction auction={activeAuction} />}
 
           {status === 'error' ? (
             <div className="m-auto flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">

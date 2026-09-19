@@ -20,6 +20,12 @@ function buildWinnerWhatsAppLink(auction, bid) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 }
 
+function buildBidWhatsAppLink(auction, bid) {
+  const message = `Hola ${bid.bidder.name}, te escribo por tu puja de ${formatCurrency(bid.amount)} en la subasta "${auction.title}".`
+  const phone = bid.bidder.phone?.replace(/[^0-9]/g, '')
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+}
+
 export function AuctionBidsModal({ open, auction, onClose }) {
   const [bids, setBids] = useState([])
   const [loading, setLoading] = useState(true)
@@ -84,7 +90,20 @@ export function AuctionBidsModal({ open, auction, onClose }) {
                         {formatCurrency(bid.amount)} {index === 0 && <span className="text-gold">(mayor)</span>}
                       </td>
                       <td className="px-3 py-2 text-ivory">{bid.bidder.name}</td>
-                      <td className="px-3 py-2 text-ivory-dim">{bid.bidder.phone}</td>
+                      <td className="px-3 py-2 text-ivory-dim">
+                        {bid.bidder.phone ? (
+                          <a
+                            href={buildBidWhatsAppLink(auction, bid)}
+                            target="_blank"
+                            rel="noopener"
+                            className="text-emerald-400 hover:underline"
+                          >
+                            {bid.bidder.phone}
+                          </a>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
                       <td className="px-3 py-2 text-ivory-dim">
                         {new Date(bid.createdAt).toLocaleString('es-CO')}
                       </td>

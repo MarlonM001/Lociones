@@ -6,12 +6,13 @@ import { useEffect, useRef, useState } from 'react'
  * dispararla de una al cargar la página. `delay` permite escalonar tarjetas
  * dentro de una misma grilla (efecto "stagger").
  *
- * Deliberadamente NO usa requestAnimationFrame para acotar la frecuencia del
- * chequeo: el chequeo (un getBoundingClientRect) es barato, y algunos
- * entornos de renderizado pausan rAF cuando la pestaña no está siendo
- * compuesta activamente, lo que dejaría la revelación colgada. Un listener
- * directo de scroll/resize es más lento de lo estrictamente necesario pero
- * nunca se queda esperando un frame que no llega.
+ * Usa IntersectionObserver en vez de un listener de scroll/resize propio:
+ * en móvil, la barra de direcciones del navegador se oculta/muestra al
+ * hacer scroll y eso cambia `window.innerHeight` a cada rato, disparando el
+ * chequeo basado en resize en momentos erráticos — el contenido se quedaba
+ * en opacity-0 (mostrando el fondo) un instante de más y luego aparecía ya
+ * desplazado. IntersectionObserver no depende de esas medidas y solo
+ * notifica cuando el elemento realmente entra al viewport.
  */
 export function Reveal({ children, delay = 0, className = '' }) {
   const ref = useRef(null)
@@ -26,24 +27,19 @@ export function Reveal({ children, delay = 0, className = '' }) {
       return undefined
     }
 
-    const check = () => {
-      const rect = node.getBoundingClientRect()
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight
-      if (rect.top < viewportHeight - 40 && rect.bottom > 0) {
-        setVisible(true)
-        window.removeEventListener('scroll', check)
-        window.removeEventListener('resize', check)
-      }
-    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '0px 0px 40px 0px', threshold: 0 },
+    )
 
-    check()
-    window.addEventListener('scroll', check, { passive: true })
-    window.addEventListener('resize', check)
+    observer.observe(node)
 
-    return () => {
-      window.removeEventListener('scroll', check)
-      window.removeEventListener('resize', check)
-    }
+    return () => observer.disconnect()
   }, [])
 
   return (

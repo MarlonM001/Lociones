@@ -15,7 +15,8 @@ export function Footer() {
     <footer id="site-footer" className="border-t border-gold/10 bg-charcoal">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div>
-          <Link to="/" className="font-display text-2xl tracking-widest text-ivory">
+          <Link to="/" className="flex items-center gap-2 font-display text-2xl tracking-widest text-ivory">
+            <img src="/images/brand/logo-icon.png" alt="" className="h-9 w-auto" />
             {STORE_CONFIG.name}
             <span className="ml-1 text-gold">.</span>
           </Link>

@@ -93,7 +93,8 @@ export function Navbar() {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <NavLink to="/" className="font-display text-2xl tracking-widest text-ivory">
+        <NavLink to="/" className="flex items-center gap-2 font-display text-2xl tracking-widest text-ivory">
+          <img src="/images/brand/logo-icon.png" alt="" className="h-9 w-auto" />
           {STORE_CONFIG.name}
           <span className="ml-1 text-gold">.</span>
         </NavLink>

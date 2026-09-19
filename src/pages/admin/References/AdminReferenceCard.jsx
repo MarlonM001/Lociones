@@ -1,5 +1,6 @@
 import { REFERENCE_STATUS_LABELS, REFERENCE_STATUSES } from '@/services/references/statuses'
 import { Button } from '@/components/ui/Button'
+import { ReferenceMedia } from '@/components/references/ReferenceMedia'
 
 const STATUS_BADGE_CLASSES = {
   pending: 'bg-gold/10 text-gold',
@@ -10,10 +11,7 @@ const STATUS_BADGE_CLASSES = {
 export function AdminReferenceCard({ reference, uploaderName, onApprove, onReject }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-      <video controls preload="metadata" className="aspect-video w-full bg-ink">
-        <source src={reference.videoUrl} />
-        Tu navegador no soporta la reproducción de este video.
-      </video>
+      <ReferenceMedia reference={reference} />
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">

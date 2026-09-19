@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import 'dotenv/config'
 import { createApp } from '../src/server.js'
 import { pool } from '../src/db/pool.js'
+import { removeUploadedFile } from '../src/middleware/upload.js'
 
 let baseUrl
 let server
@@ -194,4 +195,90 @@ test('login: tras 5 intentos fallidos la cuenta se bloquea temporalmente, inclus
   const locked = await postJson('/api/auth/login', { email, password: 'claveSegura123' })
   assert.equal(locked.status, 429)
   assert.ok(Number(locked.headers.get('retry-after')) > 0)
+})
+
+// 1x1 PNG válido, suficiente para probar la subida de fotos de referencia.
+const TINY_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+)
+
+async function removeTestUser(userId) {
+  const { rows } = await pool.query('DELETE FROM delivery_references WHERE created_by = $1 RETURNING video_url', [userId])
+  await Promise.all(rows.map((row) => removeUploadedFile(row.video_url)))
+  await pool.query('DELETE FROM users WHERE id = $1', [userId])
+}
+
+async function registerTestUser(label) {
+  const res = await postJson('/api/auth/register', {
+    name: `Usuario ${label}`,
+    email: `test-${label}-${Date.now()}@example.com`,
+    phone: '3001234567',
+    password: 'claveSegura123',
+  })
+  const { user, token } = await res.json()
+  return { user, headers: { Authorization: `Bearer ${token}` } }
+}
+
+function uploadReference(headers, { filename, type, content = TINY_PNG, title = 'Mi entrega' }) {
+  const form = new FormData()
+  form.append('title', title)
+  form.append('media', new Blob([content], { type }), filename)
+  return fetch(`${baseUrl}/api/references`, { method: 'POST', headers, body: form })
+}
+
+test('referencias: cada cuenta puede subir máximo 2 fotos y puede borrarlas', async () => {
+  const { user, headers } = await registerTestUser('fotos')
+  const created = []
+  try {
+    for (const name of ['uno.png', 'dos.png']) {
+      const res = await uploadReference(headers, { filename: name, type: 'image/png' })
+      assert.equal(res.status, 201)
+      const reference = await res.json()
+      assert.equal(reference.mediaType, 'image')
+      assert.equal(reference.status, 'pending')
+      assert.match(reference.mediaUrl, /^\/uploads\/references\/.+\.png$/)
+      created.push(reference)
+    }
+
+    const third = await uploadReference(headers, { filename: 'tres.png', type: 'image/png' })
+    assert.equal(third.status, 409)
+
+    const del = await fetch(`${baseUrl}/api/references/${created[0].id}`, { method: 'DELETE', headers })
+    assert.equal(del.status, 204)
+
+    const again = await uploadReference(headers, { filename: 'cuatro.png', type: 'image/png' })
+    assert.equal(again.status, 201)
+    created.push(await again.json())
+  } finally {
+    await removeTestUser(user.id)
+  }
+})
+
+test('referencias: rechaza formatos no permitidos y solo el dueño (o admin) puede borrar', async () => {
+  const owner = await registerTestUser('dueno')
+  const stranger = await registerTestUser('ajeno')
+  try {
+    const html = await uploadReference(owner.headers, { filename: 'malo.html', type: 'text/html', content: '<script>1</script>' })
+    assert.equal(html.status, 400)
+    const svg = await uploadReference(owner.headers, { filename: 'malo.svg', type: 'image/svg+xml', content: '<svg/>' })
+    assert.equal(svg.status, 400)
+    const disguised = await uploadReference(owner.headers, { filename: 'foto.html', type: 'image/png' })
+    assert.equal(disguised.status, 400)
+    const noAuth = await uploadReference({}, { filename: 'a.png', type: 'image/png' })
+    assert.equal(noAuth.status, 401)
+
+    const ok = await uploadReference(owner.headers, { filename: 'a.png', type: 'image/png' })
+    assert.equal(ok.status, 201)
+    const { id } = await ok.json()
+
+    const forbidden = await fetch(`${baseUrl}/api/references/${id}`, { method: 'DELETE', headers: stranger.headers })
+    assert.equal(forbidden.status, 403)
+    const deleted = await fetch(`${baseUrl}/api/references/${id}`, { method: 'DELETE', headers: owner.headers })
+    assert.equal(deleted.status, 204)
+  } finally {
+    for (const { user } of [owner, stranger]) {
+      await removeTestUser(user.id)
+    }
+  }
 })

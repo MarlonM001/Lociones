@@ -3,6 +3,7 @@ import { getReferences } from '@/services/references'
 import { EXAMPLE_REFERENCES } from '@/data/exampleReferences'
 import { Button } from '@/components/ui/Button'
 import { Reveal } from '@/components/ui/Reveal'
+import { ReferenceMedia } from '@/components/references/ReferenceMedia'
 
 const REFERENCES_LIMIT = 3
 
@@ -27,7 +28,7 @@ export function ReferencesTeaser() {
         <h2 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">Referencias de entrega</h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-ivory-dim">
           {hasRealReferences
-            ? 'Videos reales de clientes que ya recibieron su pedido.'
+            ? 'Videos y fotos reales de clientes que ya recibieron su pedido.'
             : 'Muy pronto vas a poder ver aquí videos reales de nuestras entregas. Por ahora te mostramos un ejemplo de cómo se van a ver.'}
         </p>
       </div>
@@ -37,9 +38,7 @@ export function ReferencesTeaser() {
           {references.map((reference, index) => (
             <Reveal key={reference.id} delay={index * 100}>
               <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-                <video controls preload="metadata" className="aspect-video w-full bg-ink">
-                  <source src={reference.videoUrl} />
-                </video>
+                <ReferenceMedia reference={reference} />
                 <div className="p-4">
                   <p className="font-display text-base text-ivory">{reference.title}</p>
                   {reference.city && (

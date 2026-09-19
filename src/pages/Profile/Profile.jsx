@@ -68,12 +68,12 @@ export function Profile() {
       <h2 className="mb-4 mt-10 font-display text-2xl text-ivory">Mis referencias</h2>
 
       {loadingReferences ? (
-        <Loading label="Cargando tus videos..." />
+        <Loading label="Cargando tus referencias..." />
       ) : references.length === 0 ? (
         <EmptyState
-          title="Todavía no has subido videos"
-          message="Comparte el video de tu entrega en la página de Referencias."
-          action={<Button to="/referencias">Subir un video</Button>}
+          title="Todavía no has subido videos ni fotos"
+          message="Comparte el video o la foto de tu entrega en la página de Referencias."
+          action={<Button to="/referencias">Subir referencia</Button>}
         />
       ) : (
         <div className="flex flex-col gap-4">

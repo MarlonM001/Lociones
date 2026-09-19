@@ -34,13 +34,13 @@ export function AdminReferences() {
 
   const handleApprove = async (id) => {
     await updateReferenceStatus(id, REFERENCE_STATUSES.APPROVED)
-    showToast('Video aprobado y publicado en la galería pública.')
+    showToast('Referencia aprobada y publicada en la galería pública.')
     load()
   }
 
   const handleReject = async (id) => {
     await updateReferenceStatus(id, REFERENCE_STATUSES.REJECTED)
-    showToast('Video rechazado.', 'info')
+    showToast('Referencia rechazada.', 'info')
     load()
   }
 
@@ -50,7 +50,7 @@ export function AdminReferences() {
     <div>
       <h1 className="font-display text-3xl text-ivory">Referencias</h1>
       <p className="mt-1 text-sm text-ivory-dim">
-        Revisa los videos subidos por clientes antes de que aparezcan en la galería pública.
+        Revisa los videos y fotos subidos por clientes antes de que aparezcan en la galería pública.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
@@ -72,7 +72,7 @@ export function AdminReferences() {
         {loading ? (
           <Loading label="Cargando referencias..." />
         ) : filtered.length === 0 ? (
-          <EmptyState title="No hay videos en esta categoría" />
+          <EmptyState title="No hay referencias en esta categoría" />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((reference) => (

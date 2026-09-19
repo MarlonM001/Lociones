@@ -3,6 +3,7 @@ import { deleteReference } from '@/services/references'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import { ConfirmModal } from '@/components/ui/Modal'
+import { ReferenceMedia } from '@/components/references/ReferenceMedia'
 
 export function ReferenceCard({ reference, onDeleted }) {
   const { user } = useAuth()
@@ -13,16 +14,13 @@ export function ReferenceCard({ reference, onDeleted }) {
   const handleDelete = async () => {
     await deleteReference(reference.id)
     setConfirmOpen(false)
-    showToast('Video eliminado')
+    showToast(reference.mediaType === 'image' ? 'Foto eliminada' : 'Video eliminado')
     onDeleted?.()
   }
 
   return (
     <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
-      <video controls preload="metadata" className="aspect-video w-full bg-ink">
-        <source src={reference.videoUrl} />
-        Tu navegador no soporta la reproducción de este video.
-      </video>
+      <ReferenceMedia reference={reference} />
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
@@ -49,8 +47,8 @@ export function ReferenceCard({ reference, onDeleted }) {
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
-        title="Eliminar video"
-        message="¿Seguro que quieres eliminar este video de referencia? Esta acción no se puede deshacer."
+        title={reference.mediaType === 'image' ? 'Eliminar foto' : 'Eliminar video'}
+        message="¿Seguro que quieres eliminar esta referencia? Esta acción no se puede deshacer."
         confirmLabel="Eliminar"
       />
     </div>

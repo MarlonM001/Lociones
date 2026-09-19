@@ -10,12 +10,12 @@ function formatOrderItemsBlock(items) {
 /**
  * Construye el texto del mensaje de WhatsApp a partir de un pedido ya creado
  * (misma forma que devuelve services/orders#createOrder). Está escrito desde
- * el cliente y pensado para cerrar la venta: resume el pedido y pide lo que
- * falta para concretarla (envío y datos de pago).
+ * el cliente y pensado para cerrar la venta: resume el pedido (cliente,
+ * productos, total y datos de entrega) y avisa que queda atento a concretarlo.
  */
 export function buildWhatsAppMessage(order) {
   return [
-    `Hola, acabo de hacer el pedido No. ${order.id} en Essence Polar y quiero finalizar mi compra.`,
+    'Hola, quiero realizar el siguiente pedido:',
     '',
     `*Cliente:* ${order.customerName}`,
     `*Teléfono:* ${order.customerPhone}`,
@@ -30,7 +30,7 @@ export function buildWhatsAppMessage(order) {
     order.neighborhood ? `Barrio: ${order.neighborhood}` : null,
     `Dirección: ${order.address}`,
     '',
-    '¿Me confirmas el valor del envío y los datos para realizar el pago? Quedo atento(a) para cerrar la compra. ¡Gracias!',
+    'Quedo atento(a) para cerrar la compra. ¡Gracias!',
   ]
     .filter((line) => line !== null)
     .join('\n')

@@ -40,7 +40,7 @@ export function ProductCard({ product, image }) {
         <p className="line-clamp-2 text-sm text-ivory-dim">{product.shortDescription}</p>
 
         <div className="mt-1 flex items-center justify-between">
-          <Price value={product.price} className="text-xl text-gold" />
+          <Price value={product.price} className="text-lg text-gold" />
           <span className={`text-xs ${inStock ? 'text-emerald-400' : 'text-red-400'}`}>
             {inStock ? 'Disponible' : 'Agotado'}
           </span>

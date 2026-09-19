@@ -147,7 +147,7 @@ export function Product() {
           <span className="text-xs uppercase tracking-widest-plus text-gold">{category?.name}</span>
           <h1 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">{product.name}</h1>
           <p className="mt-4">
-            <Price value={product.price} className="text-3xl text-gold sm:text-4xl" />
+            <Price value={product.price} className="text-2xl text-gold sm:text-3xl" />
           </p>
 
           <p className="mt-6 leading-relaxed text-ivory-dim">{product.description}</p>

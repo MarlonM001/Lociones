@@ -29,23 +29,6 @@ function ArrowIcon({ direction }) {
   )
 }
 
-/** Silueta grande de botella detrás de todo, para anclar el tema de perfumería sin competir con el contenido. */
-function HeroBackdropBottle() {
-  return (
-    <svg
-      viewBox="0 0 320 420"
-      className="pointer-events-none absolute -left-28 bottom-0 h-[95%] w-auto text-gold opacity-[0.05] sm:-left-16 lg:left-6"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-    >
-      <rect x="130" y="55" width="60" height="48" rx="6" />
-      <rect x="108" y="103" width="104" height="280" rx="22" />
-      <line x1="108" y1="182" x2="212" y2="182" />
-    </svg>
-  )
-}
-
 /** Motas doradas flotando, como la bruma de un atomizador de perfume. */
 function FloatingSparkles() {
   return (
@@ -123,7 +106,6 @@ export function HeroSection() {
         className="pointer-events-none absolute -left-16 bottom-0 h-[280px] w-[280px] rounded-full blur-3xl transition-colors duration-1000"
         style={{ backgroundColor: `${activeColors.to}1f` }}
       />
-      <HeroBackdropBottle />
       <FloatingSparkles />
 
       <div className="relative mx-auto grid min-h-[600px] max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:min-h-[620px] lg:grid-cols-2 lg:px-8 lg:py-28">

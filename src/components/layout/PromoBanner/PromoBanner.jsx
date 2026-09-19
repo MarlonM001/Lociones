@@ -2,12 +2,40 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getPromoBanner, isPromoBannerActive, DEFAULT_BANNER } from '@/services/promotions'
 
+const CACHE_KEY = 'essence_promo_banner_cache'
+
+/**
+ * El banner solo se sabe si debe mostrarse después de consultar la API, y
+ * como vive arriba de todo (Navbar incluido) en el flujo normal del
+ * documento, aparecer recién cuando esa respuesta llega empuja el resto de
+ * la página hacia abajo — en el celular eso se siente como "la página se
+ * corre sola" y puede hacer que un toque sobre el logo (que ya se movió)
+ * falle. Arrancar desde el último valor visto en este navegador evita ese
+ * salto en cualquier visita que no sea la primera; el fetch sigue
+ * ejecutándose para mantenerlo al día.
+ */
+function readCachedBanner() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    return raw ? JSON.parse(raw) : DEFAULT_BANNER
+  } catch {
+    return DEFAULT_BANNER
+  }
+}
+
 export function PromoBanner() {
-  const [banner, setBanner] = useState(DEFAULT_BANNER)
+  const [banner, setBanner] = useState(readCachedBanner)
 
   useEffect(() => {
     getPromoBanner()
-      .then(setBanner)
+      .then((fresh) => {
+        setBanner(fresh)
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(fresh))
+        } catch {
+          // Almacenamiento no disponible (privado/bloqueado): sin caché, sin problema.
+        }
+      })
       .catch(() => {})
   }, [])
 

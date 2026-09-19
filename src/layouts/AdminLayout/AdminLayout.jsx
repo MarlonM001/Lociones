@@ -65,7 +65,6 @@ export function AdminLayout() {
       <aside className="hidden w-64 shrink-0 border-r border-ivory/5 bg-charcoal p-6 lg:block">
         <NavLink to="/" className="font-display text-xl tracking-widest text-ivory">
           {STORE_CONFIG.name}
-          <span className="ml-1 text-gold">.</span>
         </NavLink>
         <p className="mt-1 text-xs uppercase tracking-widest-plus text-ivory-dim">Panel admin</p>
 
@@ -81,7 +80,6 @@ export function AdminLayout() {
           <aside className="relative h-full w-64 border-r border-ivory/5 bg-charcoal p-6">
             <NavLink to="/" className="font-display text-xl tracking-widest text-ivory">
               {STORE_CONFIG.name}
-              <span className="ml-1 text-gold">.</span>
             </NavLink>
             <p className="mt-1 text-xs uppercase tracking-widest-plus text-ivory-dim">Panel admin</p>
             <div className="mt-8">

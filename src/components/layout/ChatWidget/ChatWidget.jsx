@@ -105,6 +105,10 @@ function MessageBubble({ message }) {
   )
 }
 
+/** Cada cuánto se revisa si ya hay (o dejó de haber) una subasta activa,
+ * mientras el sitio sigue abierto en la pestaña del cliente. */
+const AUCTION_POLL_MS = 60000
+
 export function ChatWidget() {
   const { open, setOpen, openChat, status, messages, submitIntake, sendMessage, retry } = useChat()
   const { user } = useAuth()
@@ -114,9 +118,20 @@ export function ChatWidget() {
   const hideLauncher = useHideNearFooter()
 
   useEffect(() => {
-    getAuctions()
-      .then((auctions) => setActiveAuction(auctions.find((auction) => auction.phase === 'active') ?? null))
-      .catch(() => {})
+    let cancelled = false
+    const checkActiveAuction = () => {
+      getAuctions()
+        .then((auctions) => {
+          if (!cancelled) setActiveAuction(auctions.find((auction) => auction.phase === 'active') ?? null)
+        })
+        .catch(() => {})
+    }
+    checkActiveAuction()
+    const interval = setInterval(checkActiveAuction, AUCTION_POLL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [])
 
   useEffect(() => {
@@ -129,6 +144,11 @@ export function ChatWidget() {
     sendMessage(draft)
     setDraft('')
   }
+
+  // El chat es el acompañante de las subastas en vivo: solo tiene sentido
+  // mostrarlo mientras hay una en curso. Fuera de eso, el contacto general
+  // pasa por el botón de WhatsApp (siempre visible).
+  if (!activeAuction) return null
 
   return (
     <>

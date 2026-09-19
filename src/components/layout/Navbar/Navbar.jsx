@@ -96,7 +96,6 @@ export function Navbar() {
         <NavLink to="/" className="flex items-center gap-2 font-display text-2xl tracking-widest text-ivory">
           <img src="/images/brand/logo-icon.png" alt="" className="h-9 w-auto" />
           {STORE_CONFIG.name}
-          <span className="ml-1 text-gold">.</span>
         </NavLink>
 
         <div className="hidden items-center gap-7 lg:flex">

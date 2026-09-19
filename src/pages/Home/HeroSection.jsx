@@ -105,7 +105,7 @@ export function HeroSection() {
             loading={slideIndex === 0 ? 'eager' : 'lazy'}
             fetchPriority={slideIndex === 0 ? 'high' : 'auto'}
             draggable="false"
-            className={`absolute inset-0 h-full w-full scale-105 object-cover blur-[3px] transition-opacity duration-1000 ease-out ${
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
               slideIndex === index ? 'opacity-100' : 'opacity-0'
             }`}
           />

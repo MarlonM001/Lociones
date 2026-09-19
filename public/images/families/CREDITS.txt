@@ -10,8 +10,10 @@ frutales    pexels-photo-6316703
 amaderados  pexels-photo-12944764
 Cada foto se encuentra en https://www.pexels.com/photo/<id>/
 
-Fondos del hero (public/images/hero/bg-*.webp), tambien de Pexels:
-bg-essence     pexels-photo-6638269
-bg-mujeres     pexels-photo-15845170
-bg-caballero   pexels-photo-14392043
-bg-arabia      pexels-photo-29147674
+Fondos del hero (public/images/hero/bg-*.webp): fotos de Unsplash (https://unsplash.com),
+licencia Unsplash: uso comercial permitido, sin atribucion obligatoria.
+bg-essence     photo-1779878603885-f211807da45e
+bg-mujeres     photo-1515138692129-197a2c608cfd
+bg-caballero   photo-1453396450673-3fe83d2db2c4
+bg-arabia      photo-1512917860049-18d416baa831
+Cada foto se encuentra en https://unsplash.com/photos/<id sin el prefijo photo->

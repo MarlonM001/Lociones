@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { createOrder } from '@/services/orders'
 import { generateWhatsAppOrder } from '@/services/whatsapp'
 import { isCityAvailable } from '@/config/shipping'
-import { formatCurrency } from '@/utils/formatCurrency'
+import { Price } from '@/components/ui/Price'
 import { toTitleCase } from '@/utils/formatName'
 import { CartItem } from '@/components/cart/CartItem'
 import { Button } from '@/components/ui/Button'
@@ -37,7 +37,7 @@ function OrderSummary({ items, subtotal, showItems }) {
                 <p className="truncate text-sm text-ivory">{item.name}</p>
                 <p className="text-xs text-ivory-dim">x{item.quantity}</p>
               </div>
-              <span className="shrink-0 text-sm text-ivory-dim">{formatCurrency(item.price * item.quantity)}</span>
+              <Price value={item.price * item.quantity} className="shrink-0 text-sm text-ivory" />
             </div>
           ))}
         </div>
@@ -45,15 +45,15 @@ function OrderSummary({ items, subtotal, showItems }) {
 
       <div className="flex justify-between text-sm text-ivory-dim">
         <span>Subtotal</span>
-        <span>{formatCurrency(subtotal)}</span>
+        <Price value={subtotal} className="text-ivory" />
       </div>
       <div className="mt-1 flex justify-between text-sm text-ivory-dim">
         <span>Envío</span>
         <span>Se confirma por WhatsApp</span>
       </div>
-      <div className="mt-4 flex justify-between border-t border-ivory/10 pt-4 font-display text-lg text-ivory">
+      <div className="mt-4 flex items-baseline justify-between border-t border-ivory/10 pt-4 font-display text-lg text-ivory">
         <span>Total</span>
-        <span>{formatCurrency(subtotal)}</span>
+        <Price value={subtotal} className="text-2xl text-gold" />
       </div>
     </div>
   )
@@ -133,7 +133,7 @@ export function CartPage() {
         <div className="mt-8 rounded-2xl border border-ivory/5 bg-charcoal p-6 text-left">
           <div className="flex justify-between text-sm">
             <span className="text-ivory-dim">Total</span>
-            <span className="font-display text-lg text-gold">{formatCurrency(completedOrder.total)}</span>
+            <Price value={completedOrder.total} className="text-xl text-gold" />
           </div>
         </div>
 

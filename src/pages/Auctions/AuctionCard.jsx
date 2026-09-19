@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { formatCurrency } from '@/utils/formatCurrency'
+import { Price } from '@/components/ui/Price'
 import { useCountdown } from '@/hooks/useCountdown'
 
 const PHASE_LABELS = {
@@ -48,7 +48,7 @@ export function AuctionCard({ auction }) {
           <span className="text-xs text-ivory-dim">
             {auction.bidCount > 0 ? 'Puja actual' : 'Precio inicial'}
           </span>
-          <span className="font-display text-lg text-ivory">{formatCurrency(auction.currentPrice)}</span>
+          <Price value={auction.currentPrice} className="text-xl text-gold" />
         </div>
 
         {!countdown.isOver && (

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { formatCurrency } from '@/utils/formatCurrency'
+import { Price } from '@/components/ui/Price'
 import { getCategoryById } from '@/config/categories'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
@@ -40,7 +40,7 @@ export function ProductCard({ product, image }) {
         <p className="line-clamp-2 text-sm text-ivory-dim">{product.shortDescription}</p>
 
         <div className="mt-1 flex items-center justify-between">
-          <span className="font-display text-lg text-ivory">{formatCurrency(product.price)}</span>
+          <Price value={product.price} className="text-xl text-gold" />
           <span className={`text-xs ${inStock ? 'text-emerald-400' : 'text-red-400'}`}>
             {inStock ? 'Disponible' : 'Agotado'}
           </span>

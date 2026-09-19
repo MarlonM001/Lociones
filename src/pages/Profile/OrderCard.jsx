@@ -1,5 +1,5 @@
 import { OrderStatusTimeline } from '@/components/orders/OrderStatusTimeline'
-import { formatCurrency } from '@/utils/formatCurrency'
+import { Price } from '@/components/ui/Price'
 
 export function OrderCard({ order }) {
   return (
@@ -12,7 +12,7 @@ export function OrderCard({ order }) {
             {' · '}{order.city}
           </p>
         </div>
-        <p className="font-display text-lg text-gold">{formatCurrency(order.total)}</p>
+        <Price value={order.total} className="text-xl text-gold" />
       </div>
 
       <ul className="mt-4 space-y-1 text-sm text-ivory-dim">

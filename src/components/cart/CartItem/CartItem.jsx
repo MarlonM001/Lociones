@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { formatCurrency } from '@/utils/formatCurrency'
+import { Price } from '@/components/ui/Price'
 import { useCart } from '@/hooks/useCart'
 
 export function CartItem({ item }) {
@@ -15,7 +15,9 @@ export function CartItem({ item }) {
         <Link to={`/producto/${item.slug}`} className="line-clamp-1 font-display text-base text-ivory hover:text-gold">
           {item.name}
         </Link>
-        <p className="mt-1 text-sm text-ivory-dim">{formatCurrency(item.price)}</p>
+        <p className="mt-1 text-sm text-ivory-dim">
+          <Price value={item.price} className="font-semibold" />
+        </p>
 
         <div className="mt-2 flex items-center gap-3">
           <div className="flex items-center rounded-full border border-ivory/10">
@@ -49,7 +51,7 @@ export function CartItem({ item }) {
         </div>
       </div>
 
-      <p className="font-display text-base text-ivory">{formatCurrency(item.price * item.quantity)}</p>
+      <Price value={item.price * item.quantity} className="text-lg text-gold" />
     </div>
   )
 }

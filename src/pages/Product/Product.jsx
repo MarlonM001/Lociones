@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { getProductBySlug, getRelatedProducts } from '@/services/products'
 import { getCategoryById } from '@/config/categories'
 import { generateWhatsAppProductInquiry } from '@/services/whatsapp'
-import { formatCurrency } from '@/utils/formatCurrency'
+import { Price } from '@/components/ui/Price'
 import { parseNotes } from '@/utils/parseNotes'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
@@ -146,7 +146,9 @@ export function Product() {
         <div>
           <span className="text-xs uppercase tracking-widest-plus text-gold">{category?.name}</span>
           <h1 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">{product.name}</h1>
-          <p className="mt-4 font-display text-2xl text-gold">{formatCurrency(product.price)}</p>
+          <p className="mt-4">
+            <Price value={product.price} className="text-3xl text-gold sm:text-4xl" />
+          </p>
 
           <p className="mt-6 leading-relaxed text-ivory-dim">{product.description}</p>
 

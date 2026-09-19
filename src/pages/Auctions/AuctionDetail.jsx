@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getAuctionBySlug, placeBid } from '@/services/auctions'
 import { formatCurrency } from '@/utils/formatCurrency'
+import { Price } from '@/components/ui/Price'
 import { useCountdown } from '@/hooks/useCountdown'
 import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { useToast } from '@/hooks/useToast'
@@ -130,7 +131,9 @@ export function AuctionDetail() {
           <dl className="mt-6 grid grid-cols-2 gap-4 rounded-xl border border-ivory/5 p-4 text-sm">
             <div>
               <dt className="text-ivory-dim">{auction.bidCount > 0 ? 'Puja actual' : 'Precio inicial'}</dt>
-              <dd className="font-display text-xl text-gold">{formatCurrency(auction.currentPrice)}</dd>
+              <dd>
+                <Price value={auction.currentPrice} className="text-2xl text-gold" />
+              </dd>
             </div>
             <div>
               <dt className="text-ivory-dim">Pujas realizadas</dt>

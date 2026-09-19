@@ -47,7 +47,10 @@ export function BestsellersSection() {
   const slides = chunk(products, ITEMS_PER_SLIDE)
 
   useEffect(() => {
-    if (paused || slides.length <= 1) return undefined
+    // En celular las 3 tarjetas van apiladas (~1800px): rotarlas solas mientras
+    // el cliente hace scroll cambia el contenido bajo su dedo. Ahí solo manual.
+    const isMobile = window.matchMedia('(max-width: 639px)').matches
+    if (paused || isMobile || slides.length <= 1) return undefined
     const id = setInterval(() => {
       setIndex((current) => (current + 1) % slides.length)
     }, AUTO_ADVANCE_MS)
@@ -82,13 +85,14 @@ export function BestsellersSection() {
           <Loading label="Cargando top ventas..." />
         ) : (
           <Reveal delay={100}>
-            <div className="relative min-h-[420px] sm:min-h-[440px]">
+            <div className="grid">
               {slides.map((group, slideIndex) => (
                 <div
                   key={slideIndex}
                   aria-hidden={slideIndex !== index}
-                  className={`grid grid-cols-1 gap-6 transition-opacity duration-700 ease-out sm:grid-cols-2 lg:grid-cols-3 ${
-                    slideIndex === index ? 'relative opacity-100' : 'pointer-events-none absolute inset-0 opacity-0'
+                  inert={slideIndex !== index}
+                  className={`col-start-1 row-start-1 grid grid-cols-1 content-start gap-6 transition-opacity duration-700 ease-out sm:grid-cols-2 lg:grid-cols-3 ${
+                    slideIndex === index ? 'opacity-100' : 'pointer-events-none opacity-0'
                   }`}
                 >
                   {group.map((product) => (

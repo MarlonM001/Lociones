@@ -33,7 +33,7 @@ export function ProductCard({ product, image }) {
           {category?.name}
         </span>
         <Link to={`/producto/${product.slug}`}>
-          <h3 className="font-display text-lg leading-tight text-ivory transition-colors group-hover:text-gold">
+          <h3 className="line-clamp-2 min-h-[2.5rem] font-display text-lg leading-tight text-ivory transition-colors group-hover:text-gold">
             {product.name}
           </h3>
         </Link>

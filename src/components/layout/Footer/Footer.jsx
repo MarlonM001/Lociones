@@ -40,6 +40,8 @@ export function Footer() {
               </li>
             ))}
             <li><Link to="/referencias" className="hover:text-ivory">Referencias de entrega</Link></li>
+            <li><Link to="/terminos" className="hover:text-ivory">Términos y condiciones</Link></li>
+            <li><Link to="/privacidad" className="hover:text-ivory">Política de privacidad</Link></li>
           </ul>
         </div>
 

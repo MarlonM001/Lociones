@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import { isNonEmpty, isValidEmail, validateFields } from '@/utils/validation'
@@ -53,14 +53,19 @@ export function Login() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70dvh] max-w-md flex-col justify-center px-4 py-16">
-      <span className="text-xs uppercase tracking-widest-plus text-gold">Bienvenido de nuevo</span>
-      <h1 className="mt-2 font-display text-3xl text-ivory">Iniciar sesión</h1>
-      <p className="mt-2 text-sm text-ivory-dim">
-        Inicia sesión para ver tu perfil y el historial de tus pedidos.
-      </p>
+    <div className="mx-auto flex min-h-[70dvh] max-w-md flex-col justify-center px-4 py-12 sm:py-16">
+      <div className="text-center">
+        <span className="text-xs uppercase tracking-widest-plus text-gold">Mi cuenta</span>
+        <h1 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">Iniciar sesión</h1>
+        <p className="mt-2 text-sm text-ivory-dim">
+          Accede para ver tu perfil y el seguimiento de tus pedidos.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="mt-8 flex flex-col gap-4 rounded-2xl border border-ivory/10 bg-charcoal p-6 sm:p-8"
+      >
         {formError && (
           <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {formError}
@@ -68,23 +73,27 @@ export function Login() {
         )}
 
         <div>
-          <label className="mb-1 block text-sm text-ivory-dim">Email</label>
+          <label htmlFor="login-email" className="mb-1 block text-sm text-ivory-dim">Email</label>
           <input
+            id="login-email"
             type="email"
+            autoComplete="email"
             value={values.email}
             onChange={handleChange('email')}
-            className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
+            className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2.5 text-ivory focus:border-gold focus:outline-none"
           />
           {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-ivory-dim">Contraseña</label>
+          <label htmlFor="login-password" className="mb-1 block text-sm text-ivory-dim">Contraseña</label>
           <input
+            id="login-password"
             type="password"
+            autoComplete="current-password"
             value={values.password}
             onChange={handleChange('password')}
-            className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
+            className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2.5 text-ivory focus:border-gold focus:outline-none"
           />
           {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
         </div>
@@ -94,12 +103,15 @@ export function Login() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-ivory-dim">
-        ¿Aún no tienes cuenta?{' '}
-        <Link to="/registro" state={location.state} className="text-gold hover:underline">
-          Regístrate aquí
-        </Link>
-      </p>
+      <div className="mt-6 rounded-2xl border border-ivory/10 p-5 text-center">
+        <p className="text-sm text-ivory">¿Primera vez en Essence Polar?</p>
+        <p className="mt-1 text-xs text-ivory-dim">
+          Crea tu cuenta para guardar tus datos de entrega y seguir tus pedidos.
+        </p>
+        <Button to="/registro" state={location.state} variant="secondary" size="sm" className="mt-4">
+          Crear cuenta
+        </Button>
+      </div>
     </div>
   )
 }

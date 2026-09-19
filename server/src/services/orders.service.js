@@ -47,44 +47,118 @@ async function attachItems(orderRows, db = pool) {
   return orderRows.map((row) => toPublicOrder(row, itemsByOrder.get(row.id) ?? []))
 }
 
-export async function createOrder(payload) {
-  if (!Array.isArray(payload.items) || payload.items.length === 0) {
+const MAX_LINES = 50
+const MAX_QUANTITY_PER_LINE = 50
+const FIELD_LIMITS = { name: 120, phone: 20, email: 254, city: 100, neighborhood: 120, address: 300 }
+
+function readText(value, label, { required = true, max } = {}) {
+  if (value === undefined || value === null || value === '') {
+    if (required) throw ApiError.badRequest(`${label} es obligatorio.`)
+    return null
+  }
+  if (typeof value !== 'string') throw ApiError.badRequest(`${label} no es válido.`)
+  const text = value.trim()
+  if (!text) {
+    if (required) throw ApiError.badRequest(`${label} es obligatorio.`)
+    return null
+  }
+  if (text.length > max) throw ApiError.badRequest(`${label} es demasiado largo.`)
+  return text
+}
+
+/**
+ * Normaliza las líneas que manda el cliente: solo se toma de ellas el id del
+ * producto y la cantidad (el precio y el nombre se ignoran a propósito, se
+ * leen de la base de datos). Las líneas repetidas del mismo producto se suman.
+ */
+function normalizeRequestedLines(rawItems) {
+  if (!Array.isArray(rawItems) || rawItems.length === 0) {
     throw ApiError.badRequest('El pedido debe tener al menos un producto.')
   }
-  if (!payload.customerName?.trim() || !payload.customerPhone?.trim()) {
-    throw ApiError.badRequest('Nombre y teléfono del cliente son obligatorios.')
-  }
-  if (!payload.city?.trim() || !payload.address?.trim()) {
-    throw ApiError.badRequest('Ciudad y dirección son obligatorias.')
+  if (rawItems.length > MAX_LINES) {
+    throw ApiError.badRequest('El pedido tiene demasiados productos.')
   }
 
-  const items = payload.items.map((item) => ({
-    productId: Number(item.productId),
-    quantity: Number(item.quantity),
-    price: Number(item.price),
-    subtotal: Number(item.price) * Number(item.quantity),
-  }))
-  const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
-  const shipping = Number(payload.shipping ?? 0)
-  const total = subtotal + shipping
+  const quantities = new Map()
+  for (const raw of rawItems) {
+    const productId = Number(raw?.productId)
+    const quantity = Number(raw?.quantity)
+    if (!Number.isInteger(productId) || productId <= 0) {
+      throw ApiError.badRequest('Hay un producto inválido en el pedido.')
+    }
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      throw ApiError.badRequest('La cantidad de cada producto debe ser un número entero mayor que cero.')
+    }
+    quantities.set(productId, (quantities.get(productId) ?? 0) + quantity)
+  }
+  return [...quantities].map(([productId, quantity]) => ({ productId, quantity }))
+}
+
+/**
+ * Arma las líneas del pedido con los precios reales del catálogo y verifica
+ * que cada producto exista, esté activo y tenga stock suficiente.
+ */
+async function priceLinesFromCatalog(lines, db) {
+  const { rows } = await db.query(
+    'SELECT id, name, price, stock, active FROM products WHERE id = ANY($1)',
+    [lines.map((line) => line.productId)],
+  )
+  const products = new Map(rows.map((row) => [row.id, row]))
+
+  return lines.map(({ productId, quantity }) => {
+    const product = products.get(productId)
+    if (!product || !product.active) {
+      throw ApiError.badRequest('Uno de los productos ya no está disponible. Actualiza tu carrito e intenta de nuevo.')
+    }
+    if (quantity > MAX_QUANTITY_PER_LINE) {
+      throw ApiError.badRequest(`Máximo ${MAX_QUANTITY_PER_LINE} unidades por producto. Escríbenos por WhatsApp para pedidos al por mayor.`)
+    }
+    if (product.stock < quantity) {
+      const message = product.stock > 0
+        ? `Solo quedan ${product.stock} unidad(es) de ${product.name}.`
+        : `${product.name} está agotado.`
+      throw ApiError.badRequest(message)
+    }
+    const price = Number(product.price)
+    return { productId, quantity, price, subtotal: price * quantity }
+  })
+}
+
+export async function createOrder(payload) {
+  if (!payload || typeof payload !== 'object') {
+    throw ApiError.badRequest('Pedido inválido.')
+  }
+  const lines = normalizeRequestedLines(payload.items)
+  const customerName = readText(payload.customerName, 'El nombre', { max: FIELD_LIMITS.name })
+  const customerPhone = readText(payload.customerPhone, 'El teléfono', { max: FIELD_LIMITS.phone })
+  const city = readText(payload.city, 'La ciudad', { max: FIELD_LIMITS.city })
+  const address = readText(payload.address, 'La dirección', { max: FIELD_LIMITS.address })
+  const customerEmail = readText(payload.customerEmail, 'El correo', { required: false, max: FIELD_LIMITS.email })
+  const neighborhood = readText(payload.neighborhood, 'El barrio', { required: false, max: FIELD_LIMITS.neighborhood })
 
   return withTransaction(async (client) => {
+    const items = await priceLinesFromCatalog(lines, client)
+    const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
+    // El envío se acuerda por WhatsApp con cada cliente; el cliente no lo define.
+    const shipping = 0
+    const total = subtotal + shipping
+
     const { rows: orderRows } = await client.query(
       `INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, marketing_opt_in, subtotal, shipping, total, city, neighborhood, address, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING *`,
       [
         payload.userId ?? null,
-        payload.customerName.trim(),
-        payload.customerPhone.trim(),
-        payload.customerEmail?.trim() || null,
+        customerName,
+        customerPhone,
+        customerEmail,
         Boolean(payload.marketingOptIn),
         subtotal,
         shipping,
         total,
-        payload.city.trim(),
-        payload.neighborhood?.trim() || null,
-        payload.address.trim(),
+        city,
+        neighborhood,
+        address,
         ORDER_STATUSES.PEDIDO_RECIBIDO,
       ],
     )

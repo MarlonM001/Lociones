@@ -1,13 +1,22 @@
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler.js'
 import { requireAuth, requireAdmin, attachUserIfPresent } from '../middleware/auth.js'
+import { rateLimitByIp } from '../middleware/rateLimit.js'
 import { ApiError } from '../utils/ApiError.js'
 import * as ordersService from '../services/orders.service.js'
 
 const router = Router()
 
+// Evita que un script llene la tienda de pedidos falsos desde una misma IP.
+const createOrderLimiter = rateLimitByIp({
+  windowMs: 10 * 60 * 1000,
+  max: 15,
+  message: 'Estás creando pedidos muy seguido. Espera unos minutos e intenta de nuevo.',
+})
+
 router.post(
   '/',
+  createOrderLimiter,
   attachUserIfPresent,
   asyncHandler(async (req, res) => {
     const order = await ordersService.createOrder({ ...req.body, userId: req.user?.id ?? null })

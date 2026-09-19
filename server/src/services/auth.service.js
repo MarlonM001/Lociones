@@ -51,14 +51,23 @@ export async function registerUser({ name, email, phone, password, city, address
   return { user, token: signToken(user) }
 }
 
-export async function loginUser({ email, password }) {
-  const normalizedEmail = email?.trim().toLowerCase()
+// Mismo mensaje para "email inexistente" y "contraseña incorrecta": así no se
+// puede averiguar qué correos tienen cuenta. Cuando el usuario no existe se
+// compara igual contra un hash de relleno para que el tiempo de respuesta no
+// delate la diferencia.
+const INVALID_CREDENTIALS = 'Email o contraseña incorrectos.'
+const DUMMY_HASH = bcrypt.hashSync('essence-polar-dummy-password', SALT_ROUNDS)
+
+export async function loginUser({ email, password } = {}) {
+  if (typeof email !== 'string' || typeof password !== 'string') {
+    throw ApiError.unauthorized(INVALID_CREDENTIALS)
+  }
+  const normalizedEmail = email.trim().toLowerCase()
   const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [normalizedEmail])
   const row = rows[0]
-  if (!row) throw ApiError.unauthorized('No existe una cuenta con este email.')
 
-  const matches = await bcrypt.compare(password ?? '', row.password_hash)
-  if (!matches) throw ApiError.unauthorized('Contraseña incorrecta.')
+  const matches = await bcrypt.compare(password, row?.password_hash ?? DUMMY_HASH)
+  if (!row || !matches) throw ApiError.unauthorized(INVALID_CREDENTIALS)
 
   const user = toPublicUser(row)
   return { user, token: signToken(user) }

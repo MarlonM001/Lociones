@@ -214,7 +214,8 @@ export function CartPage() {
                   <p className="text-ivory">{checkoutData.customerName}</p>
                   {checkoutData.customerEmail && <p>{checkoutData.customerEmail}</p>}
                   <p>{checkoutData.customerPhone}</p>
-                  <p>{checkoutData.address}, {checkoutData.city}</p>
+                  <p>{checkoutData.address}</p>
+                  <p>Barrio {checkoutData.neighborhood} · {checkoutData.city}</p>
                 </div>
               </div>
 

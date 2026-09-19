@@ -41,7 +41,11 @@ export function OrderRow({ order, onStatusChanged, onDelete }) {
         {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
       </td>
       <td className="whitespace-nowrap px-4 py-3 text-sm text-ivory">{formatCurrency(order.total)}</td>
-      <td className="px-4 py-3 text-sm text-ivory-dim">{order.city}</td>
+      <td className="px-4 py-3 text-sm text-ivory-dim">
+        <div className="text-ivory">{order.city}</div>
+        {order.neighborhood && <div className="text-xs">Barrio {order.neighborhood}</div>}
+        <div className="text-xs">{order.address}</div>
+      </td>
       <td className="px-4 py-3">
         <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${STATUS_BADGE_CLASSES[order.status]}`}>
           {ORDER_STATUS_LABELS[order.status]}

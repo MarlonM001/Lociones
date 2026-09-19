@@ -3,40 +3,37 @@ import { formatCurrency } from '@/utils/formatCurrency'
 
 function formatOrderItemsBlock(items) {
   return items
-    .map(
-      (item) =>
-        `- ${item.name}\n  Cantidad: ${item.quantity}\n  Precio: ${formatCurrency(item.price)}`,
-    )
-    .join('\n\n')
+    .map((item) => `- ${item.name} x${item.quantity}: ${formatCurrency(item.price * item.quantity)}`)
+    .join('\n')
 }
 
 /**
  * Construye el texto del mensaje de WhatsApp a partir de un pedido ya creado
- * (misma forma que devuelve services/orders#createOrder).
+ * (misma forma que devuelve services/orders#createOrder). Está escrito desde
+ * el cliente y pensado para cerrar la venta: resume el pedido y pide lo que
+ * falta para concretarla (envío y datos de pago).
  */
 export function buildWhatsAppMessage(order) {
   return [
-    'Hola, quiero realizar el siguiente pedido:',
+    `Hola, acabo de hacer el pedido No. ${order.id} en Essence Polar y quiero finalizar mi compra.`,
     '',
-    'Cliente:',
-    order.customerName,
+    `*Cliente:* ${order.customerName}`,
+    `*Teléfono:* ${order.customerPhone}`,
     '',
-    'Productos:',
-    '',
+    '*Productos:*',
     formatOrderItemsBlock(order.items),
     '',
-    `Total: ${formatCurrency(order.total)}`,
+    `*Total:* ${formatCurrency(order.total)}`,
     '',
-    'Ciudad de entrega:',
+    '*Entrega:*',
     order.city,
+    order.neighborhood ? `Barrio: ${order.neighborhood}` : null,
+    `Dirección: ${order.address}`,
     '',
-    'Dirección:',
-    order.address,
-    '',
-    `Pedido No. ${order.id}`,
-    '',
-    'Gracias.',
-  ].join('\n')
+    '¿Me confirmas el valor del envío y los datos para realizar el pago? Quedo atento(a) para cerrar la compra. ¡Gracias!',
+  ]
+    .filter((line) => line !== null)
+    .join('\n')
 }
 
 export function buildWhatsAppLink(message) {

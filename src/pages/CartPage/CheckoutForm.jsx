@@ -11,6 +11,7 @@ const INITIAL_VALUES = {
   lastName: '',
   customerPhone: '',
   city: '',
+  neighborhood: '',
   address: '',
 }
 
@@ -20,6 +21,7 @@ const RULES = {
   lastName: (value) => (!isNonEmpty(value) ? 'Ingresa tu apellido' : null),
   customerPhone: (value) => (!isValidPhone(value) ? 'Ingresa un teléfono válido' : null),
   city: (value) => (!isCityAvailable(value) ? 'Por ahora solo enviamos a las ciudades listadas' : null),
+  neighborhood: (value) => (!isNonEmpty(value) ? 'Ingresa el barrio' : null),
   address: (value) => (!isNonEmpty(value) ? 'Ingresa la dirección de entrega' : null),
 }
 
@@ -61,7 +63,11 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
     // 'valid', 'skipped' (sin API key configurada) o 'error' (falla de red):
     // en estos dos últimos casos dejamos pasar para no bloquear la compra
     // por un problema del servicio externo, no de la dirección en sí.
-    onSubmit({ ...values, customerName: `${values.firstName.trim()} ${values.lastName.trim()}`.trim() })
+    onSubmit({
+      ...values,
+      neighborhood: values.neighborhood.trim(),
+      customerName: `${values.firstName.trim()} ${values.lastName.trim()}`.trim(),
+    })
   }
 
   return (
@@ -146,6 +152,19 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
           className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
         />
         {errors.address && <p className="mt-1 text-xs text-red-400">{errors.address}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="checkout-neighborhood" className="mb-1 block text-sm text-ivory-dim">Barrio</label>
+        <input
+          id="checkout-neighborhood"
+          type="text"
+          value={values.neighborhood}
+          onChange={handleChange('neighborhood')}
+          autoComplete="address-level3"
+          className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
+        />
+        {errors.neighborhood && <p className="mt-1 text-xs text-red-400">{errors.neighborhood}</p>}
       </div>
 
       <Button type="submit" variant="primary" size="lg" disabled={submitting || checkingAddress} fullWidth>

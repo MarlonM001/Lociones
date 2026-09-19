@@ -78,7 +78,7 @@ export function AdminOrders() {
                   <th className="px-4 py-3">Fecha</th>
                   <th className="px-4 py-3">Productos</th>
                   <th className="px-4 py-3">Total</th>
-                  <th className="px-4 py-3">Ciudad</th>
+                  <th className="px-4 py-3">Entrega</th>
                   <th className="px-4 py-3">Estado</th>
                   <th className="px-4 py-3">Cambiar</th>
                   <th className="px-4 py-3 text-right">Acciones</th>

@@ -21,6 +21,7 @@ function toPublicOrder(row, items) {
     shipping: row.shipping,
     total: row.total,
     city: row.city,
+    neighborhood: row.neighborhood,
     address: row.address,
     status: row.status,
     createdAt: row.created_at,
@@ -69,8 +70,8 @@ export async function createOrder(payload) {
 
   return withTransaction(async (client) => {
     const { rows: orderRows } = await client.query(
-      `INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, marketing_opt_in, subtotal, shipping, total, city, address, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      `INSERT INTO orders (user_id, customer_name, customer_phone, customer_email, marketing_opt_in, subtotal, shipping, total, city, neighborhood, address, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING *`,
       [
         payload.userId ?? null,
@@ -82,6 +83,7 @@ export async function createOrder(payload) {
         shipping,
         total,
         payload.city.trim(),
+        payload.neighborhood?.trim() || null,
         payload.address.trim(),
         ORDER_STATUSES.PEDIDO_RECIBIDO,
       ],

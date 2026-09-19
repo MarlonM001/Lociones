@@ -1,6 +1,6 @@
 import { HeroSection } from './HeroSection'
 import { TrustBar } from './TrustBar'
-import { CategoriesSection } from './CategoriesSection'
+import { CollectionsCarousel } from './CollectionsCarousel'
 import { BestsellersSection } from './BestsellersSection'
 import { FeaturedSection } from './FeaturedSection'
 import { ReferencesTeaser } from './ReferencesTeaser'
@@ -9,11 +9,11 @@ export function Home() {
   return (
     <>
       <HeroSection />
-      <TrustBar />
       <BestsellersSection />
-      <CategoriesSection />
+      <CollectionsCarousel />
       <FeaturedSection />
       <ReferencesTeaser />
+      <TrustBar />
     </>
   )
 }

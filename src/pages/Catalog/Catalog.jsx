@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { CATEGORIES, getCategoryBySlug } from '@/config/categories'
+import { getFragranceFamily, matchesFragranceFamily } from '@/config/fragranceFamilies'
 import { getProducts, getBestsellerProducts } from '@/services/products'
 import { ProductCard } from '@/components/product/ProductCard'
 import { Loading } from '@/components/ui/Loading'
@@ -15,6 +16,9 @@ export function Catalog({ topSellers = false }) {
   const { categorySlug } = useParams()
   const navigate = useNavigate()
   const activeCategory = categorySlug ? getCategoryBySlug(categorySlug) : null
+  const [searchParams] = useSearchParams()
+  // ?familia=citricos: filtra por familia olfativa (ver config/fragranceFamilies).
+  const activeFamily = topSellers ? null : getFragranceFamily(searchParams.get('familia'))
 
   const [allProducts, setAllProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -40,10 +44,14 @@ export function Catalog({ topSellers = false }) {
   }, [activeCategory?.id, topSellers])
 
   const filteredProducts = useMemo(() => {
-    if (!search.trim()) return allProducts
-    const term = search.trim().toLowerCase()
-    return allProducts.filter((product) => product.name.toLowerCase().includes(term))
-  }, [allProducts, search])
+    let products = allProducts
+    if (activeFamily) products = products.filter((product) => matchesFragranceFamily(product, activeFamily))
+    if (search.trim()) {
+      const term = search.trim().toLowerCase()
+      products = products.filter((product) => product.name.toLowerCase().includes(term))
+    }
+    return products
+  }, [allProducts, activeFamily, search])
 
   const visibleProducts = filteredProducts.slice(0, visibleCount)
 
@@ -53,7 +61,13 @@ export function Catalog({ topSellers = false }) {
         <div>
           <span className="text-xs uppercase tracking-widest-plus text-gold">Catálogo</span>
           <h1 className="mt-1 font-display text-3xl text-ivory sm:text-4xl">
-            {topSellers ? 'Top ventas' : activeCategory ? activeCategory.name : 'Todas las lociones'}
+            {topSellers
+              ? 'Top ventas'
+              : activeFamily
+                ? `Perfumes ${activeFamily.name.toLowerCase()}`
+                : activeCategory
+                  ? activeCategory.name
+                  : 'Todas las lociones'}
           </h1>
           <p className="mt-1 text-sm text-ivory-dim">
             {topSellers
@@ -77,7 +91,7 @@ export function Catalog({ topSellers = false }) {
           type="button"
           onClick={() => navigate('/catalogo')}
           className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-            !activeCategory && !topSellers
+            !activeCategory && !topSellers && !activeFamily
               ? 'border-gold bg-gold/10 text-gold'
               : 'border-ivory/10 text-ivory-dim hover:text-ivory'
           }`}

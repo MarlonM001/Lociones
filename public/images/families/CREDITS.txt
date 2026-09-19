@@ -1,0 +1,17 @@
+Fotos de Pexels (https://www.pexels.com), licencia Pexels: uso comercial permitido, sin atribucion obligatoria.
+arabia      pexels-photo-34470639
+mujeres     pexels-photo-30963560
+caballero   pexels-photo-35374302
+citricos    pexels-photo-14840380
+dulces      pexels-photo-18784859
+frescos     pexels-photo-371717
+florales    pexels-photo-19629031
+frutales    pexels-photo-6316703
+amaderados  pexels-photo-12944764
+Cada foto se encuentra en https://www.pexels.com/photo/<id>/
+
+Fondos del hero (public/images/hero/bg-*.webp), tambien de Pexels:
+bg-essence     pexels-photo-6638269
+bg-mujeres     pexels-photo-15845170
+bg-caballero   pexels-photo-14392043
+bg-arabia      pexels-photo-29147674

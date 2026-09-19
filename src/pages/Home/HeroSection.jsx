@@ -92,6 +92,28 @@ export function HeroSection() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
+      {/* Foto de fondo de cada colección, con un velo oscuro más cerrado del lado del texto
+          para que se lea igual sin importar qué tan clara sea la imagen. */}
+      <div className="absolute inset-0" aria-hidden="true">
+        {HERO_SLIDES.map((slide, slideIndex) => (
+          <img
+            key={slide.id}
+            src={slide.background}
+            alt=""
+            width="1920"
+            height="1080"
+            loading={slideIndex === 0 ? 'eager' : 'lazy'}
+            fetchPriority={slideIndex === 0 ? 'high' : 'auto'}
+            draggable="false"
+            className={`absolute inset-0 h-full w-full scale-105 object-cover blur-[3px] transition-opacity duration-1000 ease-out ${
+              slideIndex === index ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-ink/25" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/55 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-ink/35" />
+      </div>
       <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-transparent" />
       <div
         className="pointer-events-none absolute -right-24 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full blur-3xl transition-colors duration-1000"

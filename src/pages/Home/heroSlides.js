@@ -12,6 +12,7 @@ export const HERO_SLIDES = [
     bottleColors: { from: '#e4c988', to: '#9c7c3d' },
     bottleLabel: 'Essence',
     image: '/images/hero/essence.png',
+    background: '/images/hero/bg-essence.webp',
   },
   {
     id: 'arabia',
@@ -26,6 +27,7 @@ export const HERO_SLIDES = [
     bottleColors: { from: '#e4c988', to: '#9c7c3d' },
     bottleLabel: 'ARABIA',
     image: '/images/hero/arabia.png',
+    background: '/images/hero/bg-arabia.webp',
   },
   {
     id: 'mujeres',
@@ -40,6 +42,7 @@ export const HERO_SLIDES = [
     bottleColors: { from: '#f3c9c9', to: '#c88a8a' },
     bottleLabel: 'Mujeres',
     image: '/images/hero/mujeres.png',
+    background: '/images/hero/bg-mujeres.webp',
   },
   {
     id: 'caballero',
@@ -54,5 +57,6 @@ export const HERO_SLIDES = [
     bottleColors: { from: '#8fa6b3', to: '#3d4c56' },
     bottleLabel: 'Caballero',
     image: '/images/hero/caballero.png',
+    background: '/images/hero/bg-caballero.webp',
   },
 ]

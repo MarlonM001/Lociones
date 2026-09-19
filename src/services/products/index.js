@@ -14,7 +14,7 @@ function toPublicProduct(product) {
   }
 }
 
-export async function getProducts({ categoryId, search, includeInactive = false } = {}) {
+export async function getProducts({ categoryId, search, includeInactive = false, onlyInStock = false } = {}) {
   const params = new URLSearchParams()
   if (categoryId) params.set('categoryId', categoryId)
   if (search) params.set('search', search)
@@ -22,7 +22,8 @@ export async function getProducts({ categoryId, search, includeInactive = false 
 
   const query = params.toString()
   const products = await apiFetch(`/api/products${query ? `?${query}` : ''}`)
-  return products.map(toPublicProduct)
+  const publicProducts = products.map(toPublicProduct)
+  return onlyInStock ? publicProducts.filter((product) => product.stock > 0) : publicProducts
 }
 
 export async function getProductBySlug(slug) {
@@ -37,12 +38,12 @@ export async function getProductBySlug(slug) {
 
 export async function getFeaturedProducts(limit = 8) {
   const products = await apiFetch(`/api/products/featured?limit=${limit}`)
-  return products.map(toPublicProduct)
+  return products.map(toPublicProduct).filter((product) => product.stock > 0)
 }
 
 export async function getBestsellerProducts(limit = 8) {
   const products = await apiFetch(`/api/products/bestsellers?limit=${limit}`)
-  return products.map(toPublicProduct)
+  return products.map(toPublicProduct).filter((product) => product.stock > 0)
 }
 
 export async function getProductCountByCategory(categoryId) {
@@ -52,7 +53,7 @@ export async function getProductCountByCategory(categoryId) {
 
 export async function getRelatedProducts(product, limit = 4) {
   const related = await apiFetch(`/api/products/${product.slug}/related?limit=${limit}`)
-  return related.map(toPublicProduct)
+  return related.map(toPublicProduct).filter((item) => item.stock > 0)
 }
 
 /** Mapa productId -> categoryId sobre TODO el catálogo (incluye inactivos), para reportes históricos. */

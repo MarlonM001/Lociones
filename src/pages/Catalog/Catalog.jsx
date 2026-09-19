@@ -22,7 +22,7 @@ export function Catalog() {
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    getProducts({ categoryId: activeCategory?.id }).then((products) => {
+    getProducts({ categoryId: activeCategory?.id, onlyInStock: true }).then((products) => {
       if (!cancelled) {
         setAllProducts(products)
         setVisibleCount(PAGE_SIZE)

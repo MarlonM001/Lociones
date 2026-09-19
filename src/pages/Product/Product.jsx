@@ -150,19 +150,6 @@ export function Product() {
 
           <p className="mt-6 leading-relaxed text-ivory-dim">{product.description}</p>
 
-          <dl className="mt-6 grid grid-cols-2 gap-4 rounded-xl border border-ivory/5 p-4 text-sm">
-            <div>
-              <dt className="text-ivory-dim">SKU</dt>
-              <dd className="text-ivory">{product.sku}</dd>
-            </div>
-            <div>
-              <dt className="text-ivory-dim">Disponibilidad</dt>
-              <dd className={inStock ? 'text-emerald-400' : 'text-red-400'}>
-                {inStock ? `${product.stock} unidades` : 'Agotado'}
-              </dd>
-            </div>
-          </dl>
-
           <div className="mt-8 flex items-center gap-4">
             <label htmlFor="quantity" className="text-sm text-ivory-dim">Cantidad</label>
             <div className="flex items-center rounded-full border border-ivory/10">

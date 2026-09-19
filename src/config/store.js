@@ -10,7 +10,7 @@ export const STORE_CONFIG = {
   locale: 'es-CO',
   email: 'contacto@essence.com',
   instagram: 'https://instagram.com/essence',
-  facebook: 'https://facebook.com/essence',
+  facebook: 'https://www.facebook.com/profile.php?id=61594174995209',
   tiktok: 'https://tiktok.com/@essence',
   hours: 'Lunes a sábado, 9:00 a.m. – 7:00 p.m.',
 }

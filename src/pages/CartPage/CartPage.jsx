@@ -15,7 +15,7 @@ import { CheckoutForm } from './CheckoutForm'
 
 function SuccessIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -118,20 +118,16 @@ export function CartPage() {
   if (completedOrder) {
     return (
       <div className="mx-auto max-w-xl px-4 py-20 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 text-gold">
+        <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/30">
           <SuccessIcon />
         </div>
-        <span className="mt-6 block text-xs uppercase tracking-widest-plus text-gold">Pedido registrado</span>
+        <span className="mt-8 block text-xs uppercase tracking-widest-plus text-gold">Pedido registrado</span>
         <h1 className="mt-2 font-display text-3xl text-ivory text-balance">
           Gracias por tu compra, {toTitleCase(completedOrder.customerName)}
         </h1>
-        <p className="mt-4 text-ivory-dim">
-          Hemos registrado tu pedido correctamente. Abrimos una ventana de WhatsApp para confirmar contigo los
-          últimos detalles de la entrega.
-        </p>
 
         <div className="mt-8 rounded-2xl border border-ivory/5 bg-charcoal p-6 text-left">
-          <div className="flex justify-between text-sm">
+          <div className="flex items-baseline justify-between text-sm">
             <span className="text-ivory-dim">Total</span>
             <Price value={completedOrder.total} className="text-xl text-gold" />
           </div>

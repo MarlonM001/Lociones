@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@/hooks/useChat'
 import { useAuth } from '@/hooks/useAuth'
 import { useHideNearFooter } from '@/hooks/useHideNearFooter'
+import { getAuctions } from '@/services/auctions'
 import { Button } from '@/components/ui/Button'
 
 function ChatIcon() {
@@ -85,12 +86,34 @@ function MessageBubble({ message }) {
   )
 }
 
+/** Cada cuánto se revisa si ya hay (o dejó de haber) una subasta activa,
+ * mientras el sitio sigue abierto en la pestaña del cliente. */
+const AUCTION_POLL_MS = 60000
+
 export function ChatWidget() {
   const { open, setOpen, openChat, status, messages, submitIntake, sendMessage, retry } = useChat()
   const { user } = useAuth()
   const [draft, setDraft] = useState('')
+  const [hasActiveAuction, setHasActiveAuction] = useState(false)
   const scrollRef = useRef(null)
   const hideLauncher = useHideNearFooter()
+
+  useEffect(() => {
+    let cancelled = false
+    const checkActiveAuction = () => {
+      getAuctions()
+        .then((auctions) => {
+          if (!cancelled) setHasActiveAuction(auctions.some((auction) => auction.phase === 'active'))
+        })
+        .catch(() => {})
+    }
+    checkActiveAuction()
+    const interval = setInterval(checkActiveAuction, AUCTION_POLL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [])
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -102,6 +125,10 @@ export function ChatWidget() {
     sendMessage(draft)
     setDraft('')
   }
+
+  // El chat es solo para las subastas en vivo: sin una en curso no se muestra.
+  // El contacto general pasa por el botón de WhatsApp (siempre visible).
+  if (!hasActiveAuction) return null
 
   return (
     <>

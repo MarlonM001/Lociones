@@ -8,7 +8,7 @@ export const STORE_CONFIG = {
   whatsappNumber: '573124432044', // formato internacional sin '+' ni espacios (57 = Colombia)
   currency: 'COP',
   locale: 'es-CO',
-  email: 'contacto@essence.com',
+  email: 'Essencepolar7@gmail.com',
   instagram: 'https://instagram.com/essence',
   facebook: 'https://www.facebook.com/profile.php?id=61594174995209',
   tiktok: 'https://tiktok.com/@essence',

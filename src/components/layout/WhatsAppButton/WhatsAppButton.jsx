@@ -1,4 +1,4 @@
-import { STORE_CONFIG } from '@/config/store'
+import { generateWhatsAppGeneralInquiry } from '@/services/whatsapp'
 import { useHideNearFooter } from '@/hooks/useHideNearFooter'
 
 function WhatsAppIcon() {
@@ -14,7 +14,7 @@ export function WhatsAppButton() {
 
   return (
     <a
-      href={`https://wa.me/${STORE_CONFIG.whatsappNumber}`}
+      href={generateWhatsAppGeneralInquiry()}
       target="_blank"
       rel="noreferrer"
       aria-label="Escríbenos por WhatsApp"

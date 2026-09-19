@@ -53,6 +53,14 @@ export function generateWhatsAppOrder(order) {
 }
 
 /**
+ * Enlace para los botones de contacto general (botón flotante y footer): abre
+ * WhatsApp con un saludo ya escrito para que el cliente solo tenga que enviarlo.
+ */
+export function generateWhatsAppGeneralInquiry() {
+  return buildWhatsAppLink('Hola, me gustaría recibir información sobre sus lociones.')
+}
+
+/**
  * Para el botón "Comprar por WhatsApp" en la página de producto, sin pasar
  * por el carrito/checkout completo.
  */

@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom'
 import { STORE_CONFIG } from '@/config/store'
 import { SHIPPING_CITY_NAMES } from '@/config/shipping'
 import { CATEGORIES } from '@/config/categories'
+import { generateWhatsAppGeneralInquiry } from '@/services/whatsapp'
 
 const SOCIAL_LINKS = [
   { label: 'Instagram', href: STORE_CONFIG.instagram },
   { label: 'Facebook', href: STORE_CONFIG.facebook },
   { label: 'TikTok', href: STORE_CONFIG.tiktok },
-  { label: 'WhatsApp', href: `https://wa.me/${STORE_CONFIG.whatsappNumber}` },
+  { label: 'WhatsApp', href: generateWhatsAppGeneralInquiry() },
 ]
 
 export function Footer() {
@@ -49,7 +50,7 @@ export function Footer() {
             <li>Envíos a: {SHIPPING_CITY_NAMES.join(' · ')}</li>
             <li>
               <a
-                href={`https://wa.me/${STORE_CONFIG.whatsappNumber}`}
+                href={generateWhatsAppGeneralInquiry()}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-ivory"

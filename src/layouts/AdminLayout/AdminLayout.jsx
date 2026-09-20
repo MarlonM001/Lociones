@@ -71,7 +71,7 @@ export function AdminLayout() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { soundEnabled, toggleSound } = usePendingOrders()
+  const { soundEnabled, toggleSound, audioReady, enableAudio } = usePendingOrders()
   const navigate = useNavigate()
 
   // Ya está en el panel: desde aquí "Ver tienda" y el logo llevan a la tienda sin rebotar de vuelta.
@@ -162,6 +162,24 @@ export function AdminLayout() {
             </button>
           </div>
         </header>
+
+        {soundEnabled && !audioReady && (
+          <div
+            role="status"
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300 sm:px-6"
+          >
+            <span className="flex-1">
+              El navegador tiene el sonido bloqueado: no sonará cuando llegue un pedido hasta que hagas clic en la página.
+            </span>
+            <button
+              type="button"
+              onClick={enableAudio}
+              className="rounded-full border border-amber-400/60 px-4 py-1.5 font-medium text-amber-200 transition-colors hover:bg-amber-500/20"
+            >
+              Activar sonido
+            </button>
+          </div>
+        )}
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <Outlet />

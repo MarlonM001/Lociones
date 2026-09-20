@@ -4,6 +4,7 @@ import 'dotenv/config'
 import { createApp } from '../src/server.js'
 import { pool } from '../src/db/pool.js'
 import { removeUploadedFile } from '../src/middleware/upload.js'
+import { createOrder } from '../src/services/orders.service.js'
 
 let baseUrl
 let server
@@ -68,6 +69,7 @@ test('listar productos devuelve el catálogo sembrado', async () => {
 
 const guestOrder = {
   customerName: 'Cliente de Prueba',
+  customerEmail: 'cliente.prueba@example.com',
   customerPhone: '3000000000',
   city: 'Medellín',
   address: 'Carrera 45',
@@ -327,4 +329,15 @@ test('pedido de invitado: el detalle no trae cuenta', async () => {
     await removeOrder(created.id)
     await removeTestUser(user.id)
   }
+})
+
+test('pedido: el correo es obligatorio y debe tener formato válido', async () => {
+  // Directo sobre el servicio: la validación corre antes de tocar la base y así
+  // no gastamos el límite de pedidos por IP que ya usan los demás tests.
+  const items = [{ productId: 1, quantity: 1 }]
+  const { customerEmail: _omitted, ...withoutEmail } = guestOrder
+
+  await assert.rejects(createOrder({ ...withoutEmail, items }), /correo/i)
+  await assert.rejects(createOrder({ ...guestOrder, customerEmail: '   ', items }), /correo/i)
+  await assert.rejects(createOrder({ ...guestOrder, customerEmail: 'no-es-un-correo', items }), /correo/i)
 })

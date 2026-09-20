@@ -16,7 +16,10 @@ const INITIAL_VALUES = {
 }
 
 const RULES = {
-  customerEmail: (value) => (value && !isValidEmail(value) ? 'Ingresa un email válido' : null),
+  customerEmail: (value) => {
+    if (!isNonEmpty(value)) return 'Ingresa tu email'
+    return isValidEmail(value) ? null : 'Ingresa un email válido'
+  },
   firstName: (value) => (!isNonEmpty(value) ? 'Ingresa tu nombre' : null),
   lastName: (value) => (!isNonEmpty(value) ? 'Ingresa tu apellido' : null),
   customerPhone: (value) => (!isValidPhone(value) ? 'Ingresa un teléfono válido' : null),
@@ -84,7 +87,7 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
       </p>
 
       <div>
-        <label className="mb-1 block text-sm text-ivory-dim">Email (opcional)</label>
+        <label className="mb-1 block text-sm text-ivory-dim">Email</label>
         <input
           type="email"
           value={values.customerEmail}

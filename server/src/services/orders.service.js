@@ -62,6 +62,7 @@ async function attachItems(orderRows, db = pool) {
 
 const MAX_LINES = 50
 const MAX_QUANTITY_PER_LINE = 50
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const FIELD_LIMITS = { name: 120, phone: 20, email: 254, city: 100, neighborhood: 120, address: 300 }
 
 function readText(value, label, { required = true, max } = {}) {
@@ -146,7 +147,8 @@ export async function createOrder(payload) {
   const customerPhone = readText(payload.customerPhone, 'El teléfono', { max: FIELD_LIMITS.phone })
   const city = readText(payload.city, 'La ciudad', { max: FIELD_LIMITS.city })
   const address = readText(payload.address, 'La dirección', { max: FIELD_LIMITS.address })
-  const customerEmail = readText(payload.customerEmail, 'El correo', { required: false, max: FIELD_LIMITS.email })
+  const customerEmail = readText(payload.customerEmail, 'El correo', { max: FIELD_LIMITS.email })
+  if (!EMAIL_PATTERN.test(customerEmail)) throw ApiError.badRequest('El correo no es válido.')
   const neighborhood = readText(payload.neighborhood, 'El barrio', { required: false, max: FIELD_LIMITS.neighborhood })
 
   return withTransaction(async (client) => {

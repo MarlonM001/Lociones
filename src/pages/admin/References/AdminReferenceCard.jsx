@@ -8,7 +8,7 @@ const STATUS_BADGE_CLASSES = {
   rejected: 'bg-red-500/10 text-red-400',
 }
 
-export function AdminReferenceCard({ reference, uploaderName, onApprove, onReject }) {
+export function AdminReferenceCard({ reference, uploaderName, onApprove, onReject, onDelete }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
       <ReferenceMedia reference={reference} />
@@ -29,7 +29,7 @@ export function AdminReferenceCard({ reference, uploaderName, onApprove, onRejec
           {new Date(reference.createdAt).toLocaleDateString('es-CO')}
         </p>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <Button
             variant="primary"
             size="sm"
@@ -46,6 +46,13 @@ export function AdminReferenceCard({ reference, uploaderName, onApprove, onRejec
           >
             Rechazar
           </Button>
+          <button
+            type="button"
+            onClick={() => onDelete(reference)}
+            className="ml-auto rounded-full border border-red-500/40 px-4 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10"
+          >
+            Eliminar
+          </button>
         </div>
       </div>
     </div>

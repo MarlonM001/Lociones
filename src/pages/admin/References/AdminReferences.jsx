@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { getAllReferencesAdmin, updateReferenceStatus } from '@/services/references'
+import { deleteReference, getAllReferencesAdmin, updateReferenceStatus } from '@/services/references'
 import { REFERENCE_STATUSES } from '@/services/references/statuses'
 import { getAllUsers } from '@/services/auth'
 import { useToast } from '@/hooks/useToast'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ConfirmModal } from '@/components/ui/Modal'
 import { AdminReferenceCard } from './AdminReferenceCard'
 
 const FILTERS = [
@@ -20,6 +21,7 @@ export function AdminReferences() {
   const [usersById, setUsersById] = useState({})
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState(REFERENCE_STATUSES.PENDING)
+  const [deletingReference, setDeletingReference] = useState(null)
 
   const load = async () => {
     const [items, users] = await Promise.all([getAllReferencesAdmin(), getAllUsers()])
@@ -41,6 +43,18 @@ export function AdminReferences() {
   const handleReject = async (id) => {
     await updateReferenceStatus(id, REFERENCE_STATUSES.REJECTED)
     showToast('Referencia rechazada.', 'info')
+    load()
+  }
+
+  const handleDelete = async () => {
+    const reference = deletingReference
+    setDeletingReference(null)
+    try {
+      await deleteReference(reference.id)
+      showToast('Referencia eliminada.')
+    } catch (error) {
+      showToast(error.message || 'No pudimos eliminar la referencia, intenta de nuevo.', 'error')
+    }
     load()
   }
 
@@ -82,11 +96,23 @@ export function AdminReferences() {
                 uploaderName={usersById[reference.createdBy]}
                 onApprove={handleApprove}
                 onReject={handleReject}
+                onDelete={setDeletingReference}
               />
             ))}
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={Boolean(deletingReference)}
+        onClose={() => setDeletingReference(null)}
+        onConfirm={handleDelete}
+        title="Eliminar referencia"
+        message={`¿Seguro que quieres eliminar "${deletingReference?.title}"? Se borra también ${
+          deletingReference?.mediaType === 'image' ? 'la foto' : 'el video'
+        } y esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar"
+      />
     </div>
   )
 }

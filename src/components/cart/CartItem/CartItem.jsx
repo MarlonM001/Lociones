@@ -6,8 +6,8 @@ export function CartItem({ item }) {
   const { updateQuantity, removeItem } = useCart()
 
   return (
-    <div className="flex items-center gap-4 border-b border-ivory/5 py-4 last:border-0">
-      <Link to={`/producto/${item.slug}`} className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white p-2">
+    <div className="flex items-center gap-3 border-b border-ivory/5 py-4 last:border-0 sm:gap-4">
+      <Link to={`/producto/${item.slug}`} className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white p-2 sm:h-20 sm:w-20">
         <img src={item.image} alt={item.name} className="h-full w-full object-contain object-center" />
       </Link>
 
@@ -17,6 +17,11 @@ export function CartItem({ item }) {
         </Link>
         <p className="mt-1 text-sm text-ivory-dim">
           <Price value={item.price} className="font-semibold" />
+          {item.quantity > 1 && (
+            <span className="sm:hidden">
+              {' '}× {item.quantity} = <Price value={item.price * item.quantity} className="font-semibold text-gold" />
+            </span>
+          )}
         </p>
 
         <div className="mt-2 flex items-center gap-3">
@@ -51,7 +56,7 @@ export function CartItem({ item }) {
         </div>
       </div>
 
-      <Price value={item.price * item.quantity} className="text-lg text-gold" />
+      <Price value={item.price * item.quantity} className="hidden text-lg text-gold sm:block" />
     </div>
   )
 }

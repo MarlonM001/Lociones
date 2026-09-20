@@ -165,8 +165,8 @@ export function CartPage() {
         {step === 'review' && 'Revisa y confirma tu pedido'}
       </h1>
 
-      <div className="grid gap-10 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+        <div className="min-w-0 lg:col-span-2">
           {step === 'cart' && (
             <>
               <div className="rounded-2xl border border-ivory/5 bg-charcoal p-4 sm:p-6">
@@ -282,7 +282,7 @@ export function CartPage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4">
           <OrderSummary items={items} subtotal={subtotal} showItems={step !== 'cart'} />
           {step === 'cart' && (
             <Button variant="primary" size="lg" onClick={() => setStep('details')} fullWidth>

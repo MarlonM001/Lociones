@@ -1,18 +1,20 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
 import { useAuth } from '@/hooks/useAuth'
 import { createOrder } from '@/services/orders'
 import { generateWhatsAppOrder } from '@/services/whatsapp'
-import { isCityAvailable } from '@/config/shipping'
 import { PAYMENT_METHODS } from '@/config/payments'
 import { Price } from '@/components/ui/Price'
 import { toTitleCase } from '@/utils/formatName'
 import { CartItem } from '@/components/cart/CartItem'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { CheckoutForm } from './CheckoutForm'
+import { Loading } from '@/components/ui/Loading'
+
+// El formulario trae la lista de departamentos y municipios del país; se carga solo al llegar a este paso.
+const CheckoutForm = lazy(() => import('./CheckoutForm').then((module) => ({ default: module.CheckoutForm })))
 
 function SuccessIcon() {
   return (
@@ -78,7 +80,7 @@ export function CartPage() {
     firstName,
     lastName: restName.join(' '),
     customerPhone: user?.phone ?? '',
-    city: isCityAvailable(user?.city) ? user.city : '',
+    city: user?.city ?? '',
     address: user?.address ?? '',
   }
 
@@ -194,7 +196,9 @@ export function CartPage() {
               >
                 ← Volver al carrito
               </button>
-              <CheckoutForm onSubmit={handleDetailsSubmit} defaultValues={checkoutData ?? defaultCheckoutValues} />
+              <Suspense fallback={<Loading label="Cargando formulario..." />}>
+                <CheckoutForm onSubmit={handleDetailsSubmit} defaultValues={checkoutData ?? defaultCheckoutValues} />
+              </Suspense>
             </div>
           )}
 

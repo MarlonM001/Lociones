@@ -1,9 +1,9 @@
 import { loadGoogleMaps } from './loadGoogleMaps'
 
 /**
- * Geocodifica "dirección, ciudad, Colombia" y confirma que el resultado
- * realmente caiga dentro de la ciudad esperada (Bogotá/Yopal), en vez de
- * confiar solo en que el cliente eligió bien la ciudad en el dropdown.
+ * Geocodifica "dirección, ciudad, departamento, Colombia" y confirma que el
+ * resultado realmente caiga dentro de la ciudad elegida, en vez de confiar solo
+ * en que el cliente eligió bien la ciudad en el selector.
  *
  * Devuelve un status en vez de lanzar errores, para que el checkout decida
  * qué bloquear y qué dejar pasar:
@@ -15,7 +15,12 @@ import { loadGoogleMaps } from './loadGoogleMaps'
  *                        dependa por completo de un servicio externo)
  *   - 'error'         -> falla de red o de la API
  */
-export async function validateDeliveryAddress(address, cityName) {
+/** Minúsculas y sin tildes, para que "Bogotá" y "Bogota" cuenten como el mismo nombre. */
+function normalizeName(name) {
+  return name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+}
+
+export async function validateDeliveryAddress(address, cityName, department) {
   let maps
   try {
     maps = await loadGoogleMaps()
@@ -24,7 +29,7 @@ export async function validateDeliveryAddress(address, cityName) {
   }
 
   const geocoder = new maps.Geocoder()
-  const query = `${address}, ${cityName}, Colombia`
+  const query = [address, cityName, department, 'Colombia'].filter(Boolean).join(', ')
 
   return new Promise((resolve) => {
     geocoder.geocode({ address: query, region: 'co' }, (results, status) => {
@@ -38,11 +43,11 @@ export async function validateDeliveryAddress(address, cityName) {
       }
 
       const result = results[0]
-      const normalizedCity = cityName.trim().toLowerCase()
+      const normalizedCity = normalizeName(cityName)
       const matchesCity = result.address_components.some(
         (component) =>
-          component.long_name.toLowerCase().includes(normalizedCity) ||
-          component.short_name.toLowerCase().includes(normalizedCity),
+          normalizeName(component.long_name).includes(normalizedCity) ||
+          normalizeName(component.short_name).includes(normalizedCity),
       )
 
       resolve({

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { STORE_CONFIG } from '@/config/store'
-import { SHIPPING_CITY_NAMES } from '@/config/shipping'
 import { CATEGORIES } from '@/config/categories'
 import { generateWhatsAppGeneralInquiry } from '@/services/whatsapp'
 
@@ -49,7 +48,7 @@ export function Footer() {
           <h4 className="mb-4 text-xs uppercase tracking-widest-plus text-gold">Atención</h4>
           <ul className="space-y-2 text-sm text-ivory-dim">
             <li>{STORE_CONFIG.hours}</li>
-            <li>Envíos a: {SHIPPING_CITY_NAMES.join(' · ')}</li>
+            <li>Envíos a {STORE_CONFIG.shippingCoverage}</li>
             <li>
               <a
                 href={generateWhatsAppGeneralInquiry()}

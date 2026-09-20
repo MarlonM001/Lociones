@@ -1,5 +1,4 @@
 import { STORE_CONFIG } from '@/config/store'
-import { SHIPPING_CITY_NAMES } from '@/config/shipping'
 import { PAYMENT_METHODS_TEXT } from '@/config/payments'
 
 function Section({ title, children }) {
@@ -37,8 +36,11 @@ export function Terms() {
       </Section>
 
       <Section title="Envíos">
-        <p>Por ahora enviamos únicamente a: {SHIPPING_CITY_NAMES.join(' y ')}.</p>
-        <p>Los tiempos de entrega se confirman al coordinar el pedido y pueden variar según la zona.</p>
+        <p>Enviamos a {STORE_CONFIG.shippingCoverage}.</p>
+        <p>
+          El costo del envío y el tiempo de entrega dependen del destino y se confirman al coordinar el pedido por
+          WhatsApp.
+        </p>
       </Section>
 
       <Section title="Disponibilidad">

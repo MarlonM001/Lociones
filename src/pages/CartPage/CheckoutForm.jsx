@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   SHIPPING_DEPARTMENTS,
-  getShippingZoneByName,
-  getZonesByDepartment,
+  findPlaceByCityValue,
+  getCitiesByDepartment,
   isCityAvailable,
 } from '@/config/shipping'
 import { validateDeliveryAddress } from '@/services/geocoding'
@@ -32,7 +32,7 @@ const RULES = {
   department: (value) => (!isNonEmpty(value) ? 'Elige un departamento' : null),
   city: (value) => {
     if (!isNonEmpty(value)) return 'Elige una ciudad'
-    return isCityAvailable(value) ? null : 'Por ahora solo enviamos a las ciudades listadas'
+    return isCityAvailable(value) ? null : 'Elige una ciudad de la lista'
   },
   neighborhood: (value) => (!isNonEmpty(value) ? 'Ingresa el barrio' : null),
   address: (value) => (!isNonEmpty(value) ? 'Ingresa la dirección de entrega' : null),
@@ -58,13 +58,15 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
   const navigate = useNavigate()
   const [values, setValues] = useState(() => {
     const initial = { ...INITIAL_VALUES, ...defaultValues }
-    // Los pedidos guardan solo la ciudad; el departamento se deduce de ella al volver a editar.
-    return { ...initial, department: initial.department || getShippingZoneByName(initial.city)?.department || '' }
+    // Los pedidos guardan solo la ciudad ("Yopal, Casanare"); el departamento se deduce de ella al volver a
+    // editar. Si la ciudad de la cuenta no es una de la lista, se deja vacía para que el cliente la elija.
+    const place = findPlaceByCityValue(initial.city)
+    return { ...initial, department: place?.department ?? '', city: place ? initial.city : '' }
   })
   const [errors, setErrors] = useState({})
   const [checkingAddress, setCheckingAddress] = useState(false)
 
-  const zones = getZonesByDepartment(values.department)
+  const cities = getCitiesByDepartment(values.department)
 
   const handleChange = (field) => (event) => {
     setValues((current) => ({ ...current, [field]: event.target.value }))
@@ -82,7 +84,8 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
     if (!valid) return
 
     setCheckingAddress(true)
-    const result = await validateDeliveryAddress(values.address, values.city)
+    const place = findPlaceByCityValue(values.city)
+    const result = await validateDeliveryAddress(values.address, place.city, place.department)
     setCheckingAddress(false)
 
     if (result.status === 'not_found') {
@@ -95,7 +98,7 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
     if (result.status === 'city_mismatch') {
       setErrors((current) => ({
         ...current,
-        address: `Esa dirección no parece estar en ${values.city}. Revisa la ciudad o la dirección.`,
+        address: `Esa dirección no parece estar en ${place.city}. Revisa la ciudad o la dirección.`,
       }))
       return
     }
@@ -199,9 +202,9 @@ export function CheckoutForm({ onSubmit, submitting, defaultValues }) {
             className={`${INPUT_CLASSES} ${values.city ? '' : 'text-ivory-dim'}`}
           >
             <option value="">{values.department ? 'Elige una opción...' : 'Elige primero el departamento'}</option>
-            {zones.map((zone) => (
-              <option key={zone.id} value={zone.name}>
-                {zone.cityLabel}
+            {cities.map((city) => (
+              <option key={city.value} value={city.value}>
+                {city.label}
               </option>
             ))}
           </select>

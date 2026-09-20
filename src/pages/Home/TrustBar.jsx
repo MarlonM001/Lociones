@@ -40,7 +40,7 @@ function LockIcon() {
 }
 
 const ITEMS = [
-  { title: 'Envíos rápidos', detail: 'Bogotá y Yopal, Casanare', Icon: TruckIcon },
+  { title: 'Envíos nacionales', detail: 'A toda Colombia', Icon: TruckIcon },
   { title: 'Atención directa', detail: 'Pedidos confirmados por WhatsApp', Icon: ChatIcon },
   { title: 'Calidad garantizada', detail: 'Selección curada de fragancias', Icon: ShieldIcon },
   { title: 'Pago seguro', detail: 'Confirmas antes de pagar', Icon: LockIcon },

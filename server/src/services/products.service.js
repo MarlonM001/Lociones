@@ -34,6 +34,8 @@ function toPublicProduct(row) {
     salePrice: row.sale_price ?? null,
     saleEndsOn: row.sale_ends_on ?? null,
     onSale,
+    // true si la oferta la puso la franja de Promociones (y se quita sola al cambiar de promoción).
+    saleFromBanner: Boolean(row.sale_from_banner),
     description: row.description ?? '',
     shortDescription: row.short_description ?? '',
     image: row.image,
@@ -258,6 +260,9 @@ export async function updateProduct(id, updates) {
   if ('price' in updates || 'salePrice' in updates || 'saleEndsOn' in updates) {
     set('sale_price', salePrice)
     set('sale_ends_at', saleEndsOn)
+    // Si el admin cambia la oferta a mano, deja de ser "de la franja" y esta ya no la quita sola.
+    // (El formulario manda siempre estos campos, así que solo cuenta si de verdad cambiaron.)
+    if (salePrice !== existing.salePrice || saleEndsOn !== existing.saleEndsOn) set('sale_from_banner', false)
   }
 
   if ('imageUrl' in updates && updates.imageUrl) {

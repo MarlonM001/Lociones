@@ -11,7 +11,14 @@ import {
   deleteOrder,
   getOrderTracking,
 } from '../src/services/orders.service.js'
-import { createProduct, updateProduct, getProductBySlug, getProductById } from '../src/services/products.service.js'
+import {
+  createProduct,
+  updateProduct,
+  getProductBySlug,
+  getProductById,
+  SALE_ACTIVE_SQL,
+} from '../src/services/products.service.js'
+import { savePromoBanner, discountedPrice } from '../src/services/promotions.service.js'
 import { addMessage, findOrCreateConversation, isValidGuestId } from '../src/services/chat.service.js'
 import { assertCanUpload, addReference } from '../src/services/references.service.js'
 import { placeBid } from '../src/services/auctions.service.js'
@@ -617,4 +624,105 @@ test('referencias: cada cuenta tiene tope de videos, y el admin no', async () =>
   } finally {
     await removeTestUser(user.id)
   }
+})
+
+// ---------------------------------------------------------------------------------------------
+// Franja de promoción sincronizada con el producto en oferta
+// ---------------------------------------------------------------------------------------------
+
+async function saleState(client, id) {
+  const { rows } = await client.query(
+    `SELECT price, sale_price, sale_from_banner, ${SALE_ACTIVE_SQL} AS active FROM products WHERE id = $1`,
+    [id],
+  )
+  return rows[0]
+}
+
+/** Corre `fn` con un cliente dentro de una transacción que se deshace: la franja real no se toca. */
+async function inRolledBackTransaction(fn) {
+  const client = await pool.connect()
+  await client.query('BEGIN')
+  try {
+    return await fn(client)
+  } finally {
+    await client.query('ROLLBACK')
+    client.release()
+  }
+}
+
+test('promoción: el descuento se calcula redondeando a los 100 pesos más cercanos', () => {
+  assert.equal(discountedPrice(211000, 20), 168800)
+  assert.equal(discountedPrice(50000, 20), 40000)
+  assert.equal(discountedPrice(99000, 15), 84200)
+  assert.equal(discountedPrice(120000, 90), 12000)
+})
+
+test('promoción: el producto elegido baja de precio y lo recupera al cambiar de promoción o apagarla', async () => {
+  await withTestProduct({ name: 'Producto Promo A', price: 50000 }, async (a) => {
+    await withTestProduct({ name: 'Producto Promo B', price: 80000 }, async (b) => {
+      await inRolledBackTransaction(async (client) => {
+        const base = { enabled: true, message: '20% DESCUENTO', linkLabel: 'COMPRAR', expiresAt: '2999-12-31' }
+
+        const saved = await savePromoBanner({ ...base, productId: a.id, discountPercent: 20 }, { client })
+        assert.equal(saved.linkTo, `/producto/${a.slug}`, 'el enlace apunta al producto')
+        assert.equal(saved.product.id, a.id)
+        assert.equal(saved.discountPercent, 20)
+        let stateA = await saleState(client, a.id)
+        assert.deepEqual([stateA.sale_price, stateA.active, stateA.sale_from_banner], [40000, true, true])
+
+        // Se cambia de promoción: A vuelve a su precio y B recibe el descuento.
+        await savePromoBanner({ ...base, productId: b.id, discountPercent: 15 }, { client })
+        stateA = await saleState(client, a.id)
+        assert.deepEqual([stateA.sale_price, stateA.sale_from_banner], [null, false])
+        let stateB = await saleState(client, b.id)
+        assert.deepEqual([stateB.sale_price, stateB.active], [68000, true])
+
+        // Se apaga la franja: B también vuelve a su precio.
+        await savePromoBanner({ ...base, enabled: false, productId: b.id, discountPercent: 15 }, { client })
+        stateB = await saleState(client, b.id)
+        assert.deepEqual([stateB.sale_price, stateB.sale_from_banner], [null, false])
+
+        // Se vuelve a encender y luego se deja la franja solo como mensaje (sin producto).
+        await savePromoBanner({ ...base, productId: b.id, discountPercent: 30 }, { client })
+        assert.equal((await saleState(client, b.id)).sale_price, 56000)
+        const textOnly = await savePromoBanner({ ...base, linkTo: '/catalogo' }, { client })
+        assert.equal(textOnly.product, null)
+        assert.equal(textOnly.linkTo, '/catalogo')
+        assert.equal((await saleState(client, b.id)).sale_price, null)
+      })
+    })
+  })
+})
+
+test('promoción: una oferta puesta a mano en otro producto no la borra la franja', async () => {
+  await withTestProduct({ name: 'Producto Promo Manual', price: 50000 }, async (manual) => {
+    await withTestProduct({ name: 'Producto Promo C', price: 60000 }, async (c) => {
+      await updateProduct(manual.id, { salePrice: '45000' })
+      assert.equal((await getProductById(manual.id)).saleFromBanner, false)
+
+      await inRolledBackTransaction(async (client) => {
+        const base = { enabled: true, message: 'x', expiresAt: '' }
+        await savePromoBanner({ ...base, productId: c.id, discountPercent: 10 }, { client })
+        await savePromoBanner({ ...base, enabled: false, productId: c.id, discountPercent: 10 }, { client })
+        assert.equal((await saleState(client, manual.id)).sale_price, 45000, 'la oferta manual sigue')
+        assert.equal((await saleState(client, c.id)).sale_price, null)
+      })
+    })
+  })
+})
+
+test('promoción: entradas inválidas se rechazan', async () => {
+  await withTestProduct({ name: 'Producto Promo D', price: 60 }, async (cheap) => {
+    await inRolledBackTransaction(async (client) => {
+      const base = { enabled: true, message: 'x' }
+      await assert.rejects(savePromoBanner({ ...base, productId: cheap.id, discountPercent: 0 }, { client }), /entre 1 y 90/)
+      await assert.rejects(savePromoBanner({ ...base, productId: cheap.id, discountPercent: 91 }, { client }), /entre 1 y 90/)
+      await assert.rejects(savePromoBanner({ ...base, productId: cheap.id, discountPercent: 'abc' }, { client }), /entre 1 y 90/)
+      await assert.rejects(savePromoBanner({ ...base, productId: cheap.id }, { client }), /porcentaje/)
+      await assert.rejects(savePromoBanner({ ...base, discountPercent: 10 }, { client }), /Elige el producto/)
+      await assert.rejects(savePromoBanner({ ...base, productId: 999999999, discountPercent: 10 }, { client }), /no existe/)
+      await assert.rejects(savePromoBanner({ ...base, productId: cheap.id, discountPercent: 1 }, { client }), /no cambia el precio/)
+      await assert.rejects(savePromoBanner({ ...base, expiresAt: 'mañana' }, { client }), /fecha/)
+    })
+  })
 })

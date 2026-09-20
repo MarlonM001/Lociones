@@ -195,6 +195,12 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
               Fija un precio menor solo para este producto. Los clientes ven el precio normal tachado y pagan el de
               oferta. Déjalo vacío para quitarla.
             </p>
+            {product?.saleFromBanner && (
+              <p className="mt-2 rounded-lg border border-gold/30 bg-gold/10 px-3 py-2 text-xs text-ivory">
+                Esta oferta la puso la franja de <strong>Promociones</strong> y se quita sola cuando cambies de
+                promoción. Si la cambias aquí, pasa a ser una oferta manual.
+              </p>
+            )}
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="sale-price" className="mb-1 block text-sm text-ivory-dim">Precio en oferta (COP)</label>

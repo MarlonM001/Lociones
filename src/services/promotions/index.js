@@ -11,6 +11,9 @@ export const DEFAULT_BANNER = {
   linkLabel: '',
   linkTo: '',
   expiresAt: '', // 'YYYY-MM-DD', vacío = sin fecha de vencimiento
+  productId: null, // producto en promoción (recibe el descuento al guardar)
+  discountPercent: null,
+  product: null,
 }
 
 export async function getPromoBanner() {

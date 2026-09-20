@@ -282,3 +282,49 @@ test('referencias: rechaza formatos no permitidos y solo el dueño (o admin) pue
     }
   }
 })
+
+test('pedido de una cuenta: el detalle trae la foto y el sku de cada producto y los datos de la cuenta', async () => {
+  const { user, headers } = await registerTestUser('detalle')
+  const product = await firstProductWithStock()
+
+  const createRes = await postJson(
+    '/api/orders',
+    { ...guestOrder, items: [{ productId: product.id, quantity: 2 }] },
+    headers,
+  )
+  assert.equal(createRes.status, 201)
+  const created = await createRes.json()
+  try {
+    const detailRes = await fetch(`${baseUrl}/api/orders/${created.id}`, { headers })
+    assert.equal(detailRes.status, 200)
+    const detail = await detailRes.json()
+
+    assert.equal(detail.items.length, 1)
+    assert.equal(detail.items[0].quantity, 2)
+    assert.equal(detail.items[0].sku, product.sku)
+    assert.equal(detail.items[0].slug, product.slug)
+    assert.equal(detail.items[0].image, product.image)
+    assert.deepEqual(detail.account, { id: user.id, name: user.name, email: user.email, phone: '3001234567' })
+  } finally {
+    await removeOrder(created.id)
+    await removeTestUser(user.id)
+  }
+})
+
+test('pedido de invitado: el detalle no trae cuenta', async () => {
+  const { user, headers } = await registerTestUser('invitado')
+  const product = await firstProductWithStock()
+
+  const createRes = await postJson('/api/orders', { ...guestOrder, items: [{ productId: product.id, quantity: 1 }] })
+  assert.equal(createRes.status, 201)
+  const created = await createRes.json()
+  try {
+    assert.equal(created.account, null)
+    // Un pedido de invitado no tiene dueño: un cliente cualquiera no puede leerlo.
+    const otherRes = await fetch(`${baseUrl}/api/orders/${created.id}`, { headers })
+    assert.equal(otherRes.status, 403)
+  } finally {
+    await removeOrder(created.id)
+    await removeTestUser(user.id)
+  }
+})

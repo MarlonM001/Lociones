@@ -3,17 +3,12 @@ import { updateOrderStatus } from '@/services/orders'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_SEQUENCE } from '@/services/orders/statuses'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useToast } from '@/hooks/useToast'
+import { STATUS_BADGE_CLASSES } from './statusBadge'
 
-const STATUS_BADGE_CLASSES = {
-  PEDIDO_RECIBIDO: 'bg-gold/10 text-gold',
-  PREPARANDO_ENVIO: 'bg-sky-500/10 text-sky-400',
-  EN_CAMINO: 'bg-amber-500/10 text-amber-400',
-  ENTREGADO: 'bg-emerald-500/10 text-emerald-400',
-}
-
-export function OrderRow({ order, onStatusChanged, onDelete }) {
+export function OrderRow({ order, onStatusChanged, onView, onDelete }) {
   const { showToast } = useToast()
   const [updating, setUpdating] = useState(false)
+  const units = order.items.reduce((sum, item) => sum + item.quantity, 0)
 
   const handleChange = async (event) => {
     const status = event.target.value
@@ -38,7 +33,12 @@ export function OrderRow({ order, onStatusChanged, onDelete }) {
         {new Date(order.createdAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' })}
       </td>
       <td className="px-4 py-3 text-sm text-ivory-dim">
-        {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+        <div>
+          {order.items.length} {order.items.length === 1 ? 'referencia' : 'referencias'}
+        </div>
+        <div className="text-xs">
+          {units} {units === 1 ? 'unidad' : 'unidades'}
+        </div>
       </td>
       <td className="whitespace-nowrap px-4 py-3 text-sm text-ivory">{formatCurrency(order.total)}</td>
       <td className="px-4 py-3 text-sm text-ivory-dim">
@@ -65,7 +65,14 @@ export function OrderRow({ order, onStatusChanged, onDelete }) {
           ))}
         </select>
       </td>
-      <td className="px-4 py-3 text-right">
+      <td className="whitespace-nowrap px-4 py-3 text-right">
+        <button
+          type="button"
+          onClick={() => onView(order)}
+          className="mr-4 text-sm text-gold hover:underline"
+        >
+          Ver
+        </button>
         <button
           type="button"
           onClick={() => onDelete(order)}

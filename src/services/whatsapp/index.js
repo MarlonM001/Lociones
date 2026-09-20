@@ -1,4 +1,5 @@
 import { WHATSAPP_BASE_URL } from '@/config/whatsapp'
+import { STORE_CONFIG } from '@/config/store'
 import { formatCurrency } from '@/utils/formatCurrency'
 
 function formatOrderItemsBlock(items) {
@@ -75,4 +76,17 @@ export function generateWhatsAppProductInquiry(product, quantity = 1) {
   ].join('\n')
 
   return buildWhatsAppLink(message)
+}
+
+/**
+ * Para que el admin escriba al cliente de un pedido. Los teléfonos se guardan
+ * como los escribió el cliente (10 dígitos en Colombia), así que se les
+ * antepone el indicativo 57 si hace falta. Devuelve null si no hay número usable.
+ */
+export function generateWhatsAppToCustomer(order) {
+  const digits = String(order.customerPhone ?? '').replace(/\D/g, '')
+  if (digits.length < 7) return null
+  const international = digits.length === 10 ? `57${digits}` : digits
+  const message = `Hola ${order.customerName}, te escribimos de ${STORE_CONFIG.name} sobre tu pedido #${order.id}.`
+  return `https://wa.me/${international}?text=${encodeURIComponent(message)}`
 }

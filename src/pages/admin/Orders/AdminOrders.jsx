@@ -6,6 +6,7 @@ import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ConfirmModal } from '@/components/ui/Modal'
 import { OrderRow } from './OrderRow'
+import { OrderDetailModal } from './OrderDetailModal'
 
 export function AdminOrders() {
   const { showToast } = useToast()
@@ -13,6 +14,7 @@ export function AdminOrders() {
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState(null)
   const [deletingOrder, setDeletingOrder] = useState(null)
+  const [viewingOrderId, setViewingOrderId] = useState(null)
 
   const loadOrders = async () => {
     const items = await getOrders()
@@ -25,6 +27,7 @@ export function AdminOrders() {
     loadOrders()
   }, [])
 
+  const viewingOrder = orders.find((order) => order.id === viewingOrderId) ?? null
   const filteredOrders = statusFilter ? orders.filter((order) => order.status === statusFilter) : orders
 
   const handleDelete = async () => {
@@ -90,6 +93,7 @@ export function AdminOrders() {
                     key={order.id}
                     order={order}
                     onStatusChanged={loadOrders}
+                    onView={(selected) => setViewingOrderId(selected.id)}
                     onDelete={setDeletingOrder}
                   />
                 ))}
@@ -98,6 +102,8 @@ export function AdminOrders() {
           </div>
         )}
       </div>
+
+      <OrderDetailModal order={viewingOrder} onClose={() => setViewingOrderId(null)} />
 
       <ConfirmModal
         open={Boolean(deletingOrder)}

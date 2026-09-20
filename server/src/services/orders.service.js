@@ -13,6 +13,9 @@ function toPublicOrder(row, items) {
     items: items.map((item) => ({
       productId: item.product_id,
       name: item.name,
+      slug: item.slug,
+      sku: item.sku,
+      image: item.image,
       quantity: item.quantity,
       price: item.price,
       subtotal: item.subtotal,
@@ -24,16 +27,26 @@ function toPublicOrder(row, items) {
     neighborhood: row.neighborhood,
     address: row.address,
     status: row.status,
+    // Solo lo trae la consulta del panel admin (JOIN con users); para el resto queda en null.
+    account: row.account_email
+      ? { id: row.user_id, name: row.account_name, email: row.account_email, phone: row.account_phone }
+      : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
 }
 
+// Pedidos con los datos de la cuenta del cliente (si compró con sesión iniciada). Solo para el admin.
+const ORDERS_WITH_ACCOUNT_SQL = `
+  SELECT o.*, u.name AS account_name, u.email AS account_email, u.phone AS account_phone
+  FROM orders o
+  LEFT JOIN users u ON u.id = o.user_id`
+
 async function attachItems(orderRows, db = pool) {
   if (orderRows.length === 0) return []
   const ids = orderRows.map((row) => row.id)
   const { rows: itemRows } = await db.query(
-    `SELECT oi.*, p.name AS name
+    `SELECT oi.*, p.name AS name, p.slug AS slug, p.sku AS sku, p.image AS image
      FROM order_items oi
      JOIN products p ON p.id = oi.product_id
      WHERE oi.order_id = ANY($1)`,
@@ -178,7 +191,7 @@ export async function createOrder(payload) {
 }
 
 export async function getOrders() {
-  const { rows } = await pool.query('SELECT * FROM orders ORDER BY created_at DESC')
+  const { rows } = await pool.query(`${ORDERS_WITH_ACCOUNT_SQL} ORDER BY o.created_at DESC`)
   return attachItems(rows)
 }
 
@@ -191,7 +204,7 @@ export async function getOrdersByUser(userId) {
 }
 
 export async function getOrderById(id) {
-  const { rows } = await pool.query('SELECT * FROM orders WHERE id = $1', [id])
+  const { rows } = await pool.query(`${ORDERS_WITH_ACCOUNT_SQL} WHERE o.id = $1`, [id])
   if (!rows[0]) return null
   const [order] = await attachItems(rows)
   return order

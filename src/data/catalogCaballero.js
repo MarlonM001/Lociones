@@ -1,7 +1,7 @@
 /**
  * Catálogo real de lociones de caballero, transcrito del PDF "CATALOGO
  * CABALLEROS XPERFUMS" (proveedor mayorista). Precio = PVP (precio de venta al público: costo
- * mayorista / 0,45, redondeado a miles), igual que ARABIA y DAMA. Reemplaza los nombres genéricos que
+ * mayorista / 0,45, redondeado a miles), igual que Árabes y Dama. Reemplaza los nombres genéricos que
  * generaba generateProducts.js para la categoría "caballero".
  */
 export const CABALLERO_CATALOG = [

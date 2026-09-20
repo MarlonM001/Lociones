@@ -6,7 +6,7 @@ export const HERO_SLIDES = [
     titleHighlight: 'precede',
     titleAfter: 'tu presencia',
     description:
-      'Descubre nuestra selección de lociones ARABIA, para mujer y para caballero. Fragancias de alta fijación, curadas para quienes entienden que los detalles son los que se recuerdan.',
+      'Descubre nuestra selección de lociones árabes, para mujer y para caballero. Fragancias de alta fijación, curadas para quienes entienden que los detalles son los que se recuerdan.',
     primaryCta: { label: 'Comprar ahora', to: '/catalogo' },
     secondaryCta: { label: 'Ver catálogo', to: '/catalogo' },
     bottleColors: { from: '#e4c988', to: '#9c7c3d' },
@@ -16,16 +16,16 @@ export const HERO_SLIDES = [
   },
   {
     id: 'arabia',
-    eyebrow: 'Colección ARABIA',
+    eyebrow: 'Colección Árabes',
     titleBefore: 'Esencias de Oriente que',
     titleHighlight: 'perduran',
     titleAfter: '',
     description:
       'Oud, ámbar y almizcle en frascos de alta fijación — el sello de las lociones árabes más buscadas.',
-    primaryCta: { label: 'Ver colección ARABIA', to: '/productos/arabia' },
+    primaryCta: { label: 'Ver colección Árabes', to: '/productos/arabia' },
     secondaryCta: { label: 'Ver catálogo', to: '/catalogo' },
     bottleColors: { from: '#e4c988', to: '#9c7c3d' },
-    bottleLabel: 'ARABIA',
+    bottleLabel: 'Árabes',
     image: '/images/hero/arabia.png',
     background: '/images/hero/bg-arabia.webp',
   },

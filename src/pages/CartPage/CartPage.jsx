@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { createOrder } from '@/services/orders'
 import { generateWhatsAppOrder } from '@/services/whatsapp'
 import { isCityAvailable } from '@/config/shipping'
+import { PAYMENT_METHODS } from '@/config/payments'
 import { Price } from '@/components/ui/Price'
 import { toTitleCase } from '@/utils/formatName'
 import { CartItem } from '@/components/cart/CartItem'
@@ -193,7 +194,7 @@ export function CartPage() {
               >
                 ← Volver al carrito
               </button>
-              <CheckoutForm onSubmit={handleDetailsSubmit} defaultValues={defaultCheckoutValues} />
+              <CheckoutForm onSubmit={handleDetailsSubmit} defaultValues={checkoutData ?? defaultCheckoutValues} />
             </div>
           )}
 
@@ -220,12 +221,19 @@ export function CartPage() {
               </div>
 
               <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">
-                <h2 className="mb-3 font-display text-lg text-ivory">Pago</h2>
-                <p className="text-sm leading-relaxed text-ivory-dim">
-                  Este pedido no se cobra en línea. Al confirmar, se registra en nuestro sistema y te
-                  contactamos por WhatsApp para coordinar el pago (efectivo o transferencia contra entrega) y
-                  los últimos detalles de la entrega.
+                <h2 className="font-display text-lg text-ivory">Forma de pago</h2>
+                <p className="mt-1 text-sm leading-relaxed text-ivory-dim">
+                  No cobramos en línea. Al confirmar tu pedido te escribimos por WhatsApp para coordinar el pago y
+                  la entrega. Aceptamos:
                 </p>
+                <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {PAYMENT_METHODS.map((method) => (
+                    <li key={method.id} className="rounded-xl border border-gold/20 bg-ink/40 p-4">
+                      <p className="text-sm font-medium text-ivory">{method.label}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-ivory-dim">{method.description}</p>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               <div className="rounded-2xl border border-ivory/5 bg-charcoal p-6">

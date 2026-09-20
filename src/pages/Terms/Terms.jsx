@@ -1,5 +1,6 @@
 import { STORE_CONFIG } from '@/config/store'
 import { SHIPPING_CITY_NAMES } from '@/config/shipping'
+import { PAYMENT_METHODS_TEXT } from '@/config/payments'
 
 function Section({ title, children }) {
   return (
@@ -30,8 +31,8 @@ export function Terms() {
 
       <Section title="Pagos">
         <p>
-          El pago se coordina directamente por WhatsApp: efectivo o transferencia contra entrega, según lo que
-          acuerdes con quien te atienda. No pedimos ni almacenamos datos de tarjetas en el sitio.
+          El pago se coordina directamente por WhatsApp. Aceptamos {PAYMENT_METHODS_TEXT}, según lo que acuerdes
+          con quien te atienda. No pedimos ni almacenamos datos de tarjetas en el sitio.
         </p>
       </Section>
 

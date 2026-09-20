@@ -9,8 +9,8 @@ export function Home() {
   return (
     <>
       <HeroSection />
-      <BestsellersSection />
       <CollectionsCarousel />
+      <BestsellersSection />
       <FeaturedSection />
       <ReferencesTeaser />
       <TrustBar />

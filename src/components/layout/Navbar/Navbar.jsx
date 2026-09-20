@@ -4,6 +4,8 @@ import { STORE_CONFIG } from '@/config/store'
 import { useCart } from '@/hooks/useCart'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
+import { usePendingOrders } from '@/hooks/usePendingOrders'
+import { CountBadge } from '@/components/ui/CountBadge'
 import { NAV_LINKS } from './NavLinks'
 
 function CartIcon() {
@@ -59,7 +61,8 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
-
+  const isAdmin = user?.role === 'admin'
+  const { pending } = usePendingOrders()
 
   const handleLogout = () => {
     logout()
@@ -112,6 +115,15 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <div className="hidden items-center gap-3 sm:flex">
+              {isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className="flex items-center gap-2 rounded-full border border-gold/50 px-3 py-1.5 text-sm font-medium text-gold transition-colors hover:bg-gold/10"
+                >
+                  Panel
+                  <CountBadge count={pending} />
+                </NavLink>
+              )}
               <NavLink to="/perfil" className="text-sm text-ivory-dim hover:text-ivory">
                 Hola, <span className="text-ivory">{user.name.split(' ')[0]}</span>
               </NavLink>
@@ -159,10 +171,13 @@ export function Navbar() {
           <button
             type="button"
             aria-label="Abrir menú"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 lg:hidden"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
           >
             <MenuIcon open={mobileOpen} />
+            {isAdmin && pending > 0 && !mobileOpen && (
+              <span aria-hidden="true" className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-600" />
+            )}
           </button>
         </div>
       </nav>
@@ -183,6 +198,16 @@ export function Navbar() {
             ))}
             {isAuthenticated ? (
               <>
+                {isAdmin && (
+                  <NavLink
+                    to="/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-2 flex items-center justify-center gap-2 rounded-lg border border-gold/50 px-2 py-3 text-base font-medium text-gold hover:bg-gold/10"
+                  >
+                    Ir al panel de administración
+                    <CountBadge count={pending} />
+                  </NavLink>
+                )}
                 <NavLink to="/perfil" onClick={() => setMobileOpen(false)} className="flex items-center rounded-lg px-2 py-3 text-base text-ivory-dim hover:bg-ivory/5 hover:text-ivory">
                   Hola, <span className="ml-1 text-ivory">{user.name.split(' ')[0]}</span>
                 </NavLink>

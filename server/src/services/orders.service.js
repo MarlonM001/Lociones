@@ -197,6 +197,30 @@ export async function getOrders() {
   return attachItems(rows)
 }
 
+/**
+ * Resumen liviano para el aviso del panel (se consulta cada minuto): cuántos
+ * pedidos siguen sin atender y cuál es el más reciente. Usa el id y no el
+ * conteo para detectar pedidos nuevos, porque el conteo también baja cuando
+ * el admin despacha uno.
+ */
+export async function getPendingOrdersSummary() {
+  const { rows } = await pool.query(
+    `SELECT
+       (SELECT COUNT(*)::int FROM orders WHERE status = $1) AS pending,
+       latest.id AS latest_id, latest.customer_name, latest.total
+     FROM (SELECT 1) AS one
+     LEFT JOIN LATERAL (
+       SELECT id, customer_name, total FROM orders ORDER BY id DESC LIMIT 1
+     ) AS latest ON TRUE`,
+    [ORDER_STATUSES.PEDIDO_RECIBIDO],
+  )
+  const row = rows[0]
+  return {
+    pending: row.pending,
+    latest: row.latest_id ? { id: row.latest_id, customerName: row.customer_name, total: row.total } : null,
+  }
+}
+
 export async function getOrdersByUser(userId) {
   const { rows } = await pool.query(
     'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',

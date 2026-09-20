@@ -14,6 +14,11 @@ export async function getOrders() {
   return apiFetch('/api/orders')
 }
 
+/** Resumen liviano para el aviso del panel: { pending, latest: { id, customerName, total } | null }. */
+export async function getPendingOrdersSummary() {
+  return apiFetch('/api/orders/pending-summary')
+}
+
 export async function getOrdersByUser() {
   return apiFetch('/api/orders/mine')
 }

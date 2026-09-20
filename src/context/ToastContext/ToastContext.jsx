@@ -11,11 +11,11 @@ export function ToastProvider({ children }) {
     setToasts((current) => current.filter((toast) => toast.id !== id))
   }, [])
 
-  const showToast = useCallback((message, type = 'success') => {
+  const showToast = useCallback((message, type = 'success', duration = 3000) => {
     toastIdCounter += 1
     const id = toastIdCounter
     setToasts((current) => [...current, { id, message, type }])
-    setTimeout(() => dismissToast(id), 3000)
+    setTimeout(() => dismissToast(id), duration)
   }, [dismissToast])
 
   return (

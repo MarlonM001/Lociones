@@ -1,3 +1,6 @@
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
+import { hasLandedInAdmin } from '@/utils/adminLanding'
 import { HeroSection } from './HeroSection'
 import { TrustBar } from './TrustBar'
 import { CollectionsCarousel } from './CollectionsCarousel'
@@ -6,6 +9,13 @@ import { FeaturedSection } from './FeaturedSection'
 import { ReferencesTeaser } from './ReferencesTeaser'
 
 export function Home() {
+  const { isAdmin, initializing } = useAuth()
+
+  // Al abrir el sitio, el admin va directo al panel (una vez por pestaña; ver utils/adminLanding).
+  if (!initializing && isAdmin && !hasLandedInAdmin()) {
+    return <Navigate to="/admin" replace />
+  }
+
   return (
     <>
       <HeroSection />

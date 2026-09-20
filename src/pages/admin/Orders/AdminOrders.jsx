@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getOrders, deleteOrder } from '@/services/orders'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_SEQUENCE } from '@/services/orders/statuses'
 import { useToast } from '@/hooks/useToast'
+import { usePendingOrders } from '@/hooks/usePendingOrders'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ConfirmModal } from '@/components/ui/Modal'
@@ -10,6 +11,7 @@ import { OrderDetailModal } from './OrderDetailModal'
 
 export function AdminOrders() {
   const { showToast } = useToast()
+  const { refresh: refreshPending } = usePendingOrders()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState(null)
@@ -21,6 +23,8 @@ export function AdminOrders() {
     items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     setOrders(items)
     setLoading(false)
+    // La insignia del menú debe bajar al instante cuando el admin despacha o elimina un pedido.
+    refreshPending()
   }
 
   useEffect(() => {

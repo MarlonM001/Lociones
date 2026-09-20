@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { STORE_CONFIG } from '@/config/store'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
+import { usePendingOrders } from '@/hooks/usePendingOrders'
+import { markAdminLanded } from '@/utils/adminLanding'
+import { CountBadge } from '@/components/ui/CountBadge'
 import { ToastContainer } from '@/components/ui/Toast'
 import { ADMIN_NAV_LINKS } from './adminNavLinks'
 
@@ -31,9 +34,24 @@ function MenuIcon() {
   )
 }
 
+function SpeakerIcon({ muted }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z" strokeLinejoin="round" />
+      {muted ? (
+        <path d="M16 9.5l5 5M21 9.5l-5 5" strokeLinecap="round" />
+      ) : (
+        <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" strokeLinecap="round" />
+      )}
+    </svg>
+  )
+}
+
 function SidebarContent({ onNavigate }) {
+  const { pending } = usePendingOrders()
+  const badgeCounts = { pendingOrders: pending }
   const linkClasses = ({ isActive }) =>
-    `block rounded-lg px-4 py-2.5 text-sm transition-colors ${
+    `flex items-center justify-between rounded-lg px-4 py-2.5 text-sm transition-colors ${
       isActive ? 'bg-gold/10 text-gold' : 'text-ivory-dim hover:bg-ivory/5 hover:text-ivory'
     }`
 
@@ -42,6 +60,7 @@ function SidebarContent({ onNavigate }) {
       {ADMIN_NAV_LINKS.map((link) => (
         <NavLink key={link.to} to={link.to} end={link.end} className={linkClasses} onClick={onNavigate}>
           {link.label}
+          {link.badge && <CountBadge count={badgeCounts[link.badge]} />}
         </NavLink>
       ))}
     </nav>
@@ -52,7 +71,13 @@ export function AdminLayout() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { soundEnabled, toggleSound } = usePendingOrders()
   const navigate = useNavigate()
+
+  // Ya está en el panel: desde aquí "Ver tienda" y el logo llevan a la tienda sin rebotar de vuelta.
+  useEffect(() => {
+    markAdminLanded()
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -112,6 +137,18 @@ export function AdminLayout() {
               className="text-ivory transition-colors hover:text-gold"
             >
               {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
+            <button
+              type="button"
+              onClick={toggleSound}
+              aria-pressed={soundEnabled}
+              title={soundEnabled ? 'Sonido de pedidos nuevos: activado' : 'Sonido de pedidos nuevos: silenciado'}
+              className={`flex items-center gap-1.5 text-sm transition-colors hover:text-gold ${
+                soundEnabled ? 'text-ivory' : 'text-ivory-dim'
+              }`}
+            >
+              <SpeakerIcon muted={!soundEnabled} />
+              <span className="hidden sm:inline">{soundEnabled ? 'Sonido' : 'Silenciado'}</span>
             </button>
             <NavLink to="/" className="text-sm text-ivory-dim transition-colors hover:text-ivory">
               Ver tienda

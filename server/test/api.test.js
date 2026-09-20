@@ -4,7 +4,7 @@ import 'dotenv/config'
 import { createApp } from '../src/server.js'
 import { pool } from '../src/db/pool.js'
 import { removeUploadedFile } from '../src/middleware/upload.js'
-import { createOrder } from '../src/services/orders.service.js'
+import { createOrder, getPendingOrdersSummary } from '../src/services/orders.service.js'
 
 let baseUrl
 let server
@@ -340,4 +340,26 @@ test('pedido: el correo es obligatorio y debe tener formato válido', async () =
   await assert.rejects(createOrder({ ...withoutEmail, items }), /correo/i)
   await assert.rejects(createOrder({ ...guestOrder, customerEmail: '   ', items }), /correo/i)
   await assert.rejects(createOrder({ ...guestOrder, customerEmail: 'no-es-un-correo', items }), /correo/i)
+})
+
+test('resumen de pedidos pendientes: solo admin, y refleja un pedido recién creado', async () => {
+  // Sin sesión y con sesión de cliente no se puede consultar.
+  assert.equal((await fetch(`${baseUrl}/api/orders/pending-summary`)).status, 401)
+  const { user, headers } = await registerTestUser('resumen')
+  const customerRes = await fetch(`${baseUrl}/api/orders/pending-summary`, { headers })
+  assert.equal(customerRes.status, 403)
+  await removeTestUser(user.id)
+
+  const product = await firstProductWithStock()
+  const before = await getPendingOrdersSummary()
+  const created = await createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 1 }] })
+  try {
+    const after = await getPendingOrdersSummary()
+    assert.equal(after.pending, before.pending + 1)
+    assert.equal(after.latest.id, created.id)
+    assert.equal(after.latest.customerName, guestOrder.customerName)
+    assert.equal(after.latest.total, created.total)
+  } finally {
+    await removeOrder(created.id)
+  }
 })

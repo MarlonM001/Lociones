@@ -4,7 +4,7 @@ export const ADMIN_NAV_LINKS = [
   { label: 'Productos', to: '/admin/productos' },
   { label: 'Top ventas', to: '/admin/top-ventas' },
   { label: 'Subastas', to: '/admin/subastas' },
-  { label: 'Pedidos', to: '/admin/pedidos' },
+  { label: 'Pedidos', to: '/admin/pedidos', badge: 'pendingOrders' },
   { label: 'Referencias', to: '/admin/referencias' },
   { label: 'Promociones', to: '/admin/promociones' },
   { label: 'Celebración', to: '/admin/celebracion' },

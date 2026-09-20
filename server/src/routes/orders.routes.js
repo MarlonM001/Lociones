@@ -33,6 +33,16 @@ router.get(
   }),
 )
 
+// Antes de '/:id' para que "pending-summary" no se lea como un id de pedido.
+router.get(
+  '/pending-summary',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    res.json(await ordersService.getPendingOrdersSummary())
+  }),
+)
+
 router.get(
   '/mine',
   requireAuth,

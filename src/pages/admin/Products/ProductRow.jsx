@@ -24,12 +24,20 @@ export function ProductRow({ product, onEdit, onToggleActive, onDelete }) {
         <div className="text-xs text-ivory-dim">{product.sku}</div>
       </td>
       <td className="px-4 py-3 text-sm text-ivory-dim">{category?.name ?? product.categoryId}</td>
-      <td className="whitespace-nowrap px-4 py-3 text-sm text-ivory">{formatCurrency(product.price)}</td>
+      <td className="whitespace-nowrap px-4 py-3 text-sm text-ivory">
+        {formatCurrency(product.price)}
+        {product.onSale && (
+          <div className="text-xs">
+            <span className="text-ivory-dim line-through">{formatCurrency(product.regularPrice)}</span>{' '}
+            <span className="rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">OFERTA</span>
+          </div>
+        )}
+      </td>
       <td className="px-4 py-3 text-sm text-ivory-dim">{product.stock}</td>
       <td className="px-4 py-3">
         <span
           className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-            product.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-ivory/5 text-ivory-dim'
+            product.active ? 'bg-emerald-500/10 text-success' : 'bg-ivory/5 text-ivory-dim'
           }`}
         >
           {product.active ? 'Activo' : 'Inactivo'}
@@ -49,7 +57,7 @@ export function ProductRow({ product, onEdit, onToggleActive, onDelete }) {
         <button
           type="button"
           onClick={() => onDelete(product)}
-          className="ml-3 text-ivory-dim hover:text-red-400"
+          className="ml-3 text-ivory-dim hover:text-danger"
         >
           Eliminar
         </button>

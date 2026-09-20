@@ -17,9 +17,9 @@ import { AuctionBidsModal } from './AuctionBidsModal'
 
 const PHASE_LABELS = {
   scheduled: { label: 'Programada', className: 'bg-sky-500/10 text-sky-400' },
-  active: { label: 'En curso', className: 'bg-emerald-500/10 text-emerald-400' },
+  active: { label: 'En curso', className: 'bg-emerald-500/10 text-success' },
   closed: { label: 'Cerrada', className: 'bg-ivory/10 text-ivory-dim' },
-  cancelled: { label: 'Cancelada', className: 'bg-red-500/10 text-red-400' },
+  cancelled: { label: 'Cancelada', className: 'bg-red-500/10 text-danger' },
 }
 
 function PhaseBadge({ phase }) {
@@ -122,7 +122,7 @@ export function AdminAuctions() {
           />
           <span className="text-ivory">Activar el módulo "Subastas" en la tienda</span>
         </label>
-        <span className={`ml-auto text-xs ${config.enabled ? 'text-emerald-400' : 'text-ivory-dim'}`}>
+        <span className={`ml-auto text-xs ${config.enabled ? 'text-success' : 'text-ivory-dim'}`}>
           {config.enabled
             ? '● El enlace "Subastas" es visible para los clientes'
             : '○ El enlace "Subastas" está oculto — las subastas existentes siguen aquí, solo no se ven en la tienda'}
@@ -187,7 +187,7 @@ export function AdminAuctions() {
                         <button
                           type="button"
                           onClick={() => setCancellingAuction(auction)}
-                          className="ml-3 text-ivory-dim hover:text-red-400"
+                          className="ml-3 text-ivory-dim hover:text-danger"
                         >
                           Cancelar
                         </button>
@@ -195,7 +195,7 @@ export function AdminAuctions() {
                       <button
                         type="button"
                         onClick={() => setDeletingAuction(auction)}
-                        className="ml-3 text-ivory-dim hover:text-red-400"
+                        className="ml-3 text-ivory-dim hover:text-danger"
                       >
                         Eliminar
                       </button>

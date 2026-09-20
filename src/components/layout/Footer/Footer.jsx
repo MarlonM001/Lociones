@@ -16,7 +16,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div>
           <Link to="/" className="flex items-center gap-2 font-display text-2xl tracking-widest text-ivory">
-            <img src="/images/brand/logo-icon.png" alt="" className="h-9 w-auto" />
+            <img src="/images/brand/logo-icon-144.webp" alt="" width="32" height="36" className="h-9 w-auto" />
             {STORE_CONFIG.name}
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-ivory-dim">
@@ -38,6 +38,7 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            <li><Link to="/seguimiento" className="hover:text-ivory">Seguir mi pedido</Link></li>
             <li><Link to="/referencias" className="hover:text-ivory">Referencias de entrega</Link></li>
             <li><Link to="/terminos" className="hover:text-ivory">Términos y condiciones</Link></li>
             <li><Link to="/privacidad" className="hover:text-ivory">Política de privacidad</Link></li>
@@ -65,7 +66,7 @@ export function Footer() {
         <div>
           <h4 className="mb-4 text-xs uppercase tracking-widest-plus text-gold">Síguenos</h4>
           <ul className="space-y-2 text-sm text-ivory-dim">
-            {SOCIAL_LINKS.map((social) => (
+            {SOCIAL_LINKS.filter((social) => social.href).map((social) => (
               <li key={social.label}>
                 <a href={social.href} target="_blank" rel="noreferrer" className="hover:text-ivory">
                   {social.label}

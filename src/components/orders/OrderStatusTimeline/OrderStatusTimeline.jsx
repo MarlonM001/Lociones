@@ -17,6 +17,16 @@ export function OrderStatusTimeline({ status }) {
     return () => cancelAnimationFrame(frame)
   }, [targetPercent])
 
+  if (status === ORDER_STATUSES.CANCELADO) {
+    return (
+      <div className="pt-6">
+        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-danger">
+          Este pedido fue cancelado. Si tienes dudas, escríbenos por WhatsApp.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="pt-6">
       <div className="relative mx-2 mb-3 h-8">
@@ -43,7 +53,7 @@ export function OrderStatusTimeline({ status }) {
               <span
                 className={`mb-1.5 h-2 w-2 rounded-full ${done ? 'bg-gold' : 'bg-ivory/20'}`}
               />
-              <span className={`max-w-[5.5rem] text-[11px] leading-tight sm:text-xs ${
+              <span className={`max-w-[5.5rem] text-xs leading-tight ${
                 index === currentIndex ? 'text-gold' : done ? 'text-ivory' : 'text-ivory-dim'
               }`}>
                 {ORDER_STATUS_LABELS[step]}

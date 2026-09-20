@@ -41,7 +41,7 @@ export function AdminDashboard() {
       <p className="mt-1 text-sm text-ivory-dim">Resumen general de la tienda.</p>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total pedidos" value={orders.length} />
+        <StatCard label="Total pedidos" value={orders.filter((order) => order.status !== ORDER_STATUSES.CANCELADO).length} />
         <StatCard label="Ventas del mes" value={formatCurrency(monthSummary?.totalSales ?? 0)} />
         <StatCard label="Unidades vendidas (mes)" value={monthSummary?.totalUnits ?? 0} />
         <StatCard

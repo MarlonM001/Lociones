@@ -6,6 +6,7 @@ import path from 'node:path'
 import { uploadReferenceMedia, publicUploadUrl, removeUploadedFile, MAX_REFERENCE_IMAGE_BYTES } from '../middleware/upload.js'
 import { ApiError } from '../utils/ApiError.js'
 import { transcodeToH264 } from '../utils/transcodeVideo.js'
+import { detectFileKind, IMAGE_KINDS } from '../utils/fileSignature.js'
 import * as referencesService from '../services/references.service.js'
 
 const router = Router()
@@ -44,6 +45,18 @@ router.post(
     const isImage = req.file.mimetype.startsWith('image/')
     let storedFilename = req.file.filename
     try {
+      // El contenido real debe coincidir con lo que dice el archivo (foto o video), y la cuenta debe tener cupo,
+      // antes de gastar procesador en el video.
+      const kind = await detectFileKind(req.file.path)
+      if (isImage ? !IMAGE_KINDS.has(kind) : kind !== 'video') {
+        throw ApiError.badRequest('El archivo no es un video ni una foto válidos.')
+      }
+      await referencesService.assertCanUpload({
+        userId: req.user.id,
+        isAdmin: req.user.role === 'admin',
+        mediaType: isImage ? 'image' : 'video',
+      })
+
       if (isImage && req.file.size > MAX_REFERENCE_IMAGE_BYTES) {
         const maxMb = Math.round(MAX_REFERENCE_IMAGE_BYTES / 1024 / 1024)
         throw ApiError.badRequest(`La foto pesa demasiado (máx. ${maxMb} MB).`)

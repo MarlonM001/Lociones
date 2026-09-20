@@ -139,7 +139,7 @@ export function ChatWidget() {
         aria-hidden={hideLauncher && !open}
         tabIndex={hideLauncher && !open ? -1 : undefined}
         onClick={() => (open ? setOpen(false) : openChat())}
-        className={`fixed bottom-4 left-4 z-[150] flex h-12 w-12 items-center justify-center rounded-full bg-gold text-on-gold shadow-xl shadow-gold-dark/30 transition-all duration-200 hover:scale-110 hover:bg-gold-light sm:bottom-6 sm:left-6 sm:h-14 sm:w-14 ${
+        className={`fixed bottom-4 left-4 z-[150] flex h-12 w-12 items-center justify-center rounded-full bg-gold text-on-gold shadow-xl shadow-gold-dark/30 transition-all duration-200 hover:scale-110 hover:bg-gold-hover sm:bottom-6 sm:left-6 sm:h-14 sm:w-14 ${
           hideLauncher && !open ? 'pointer-events-none translate-y-4 opacity-0' : 'opacity-100'
         }`}
       >
@@ -151,7 +151,7 @@ export function ChatWidget() {
           <div className="flex items-center justify-between border-b border-ivory/5 px-4 py-3">
             <div>
               <h3 className="font-display text-base text-ivory">Chat con Essence Polar</h3>
-              <p className="text-[11px] text-ivory-dim">
+              <p className="text-xs text-ivory-dim">
                 {status === 'ready' && 'En línea'}
                 {status === 'connecting' && 'Conectando...'}
                 {status === 'error' && 'Sin conexión'}

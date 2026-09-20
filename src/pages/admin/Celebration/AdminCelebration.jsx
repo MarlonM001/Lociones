@@ -56,7 +56,7 @@ export function AdminCelebration() {
           <Button type="submit" variant="primary" disabled={saving}>
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </Button>
-          <span className={`text-xs ${values.enabled ? 'text-emerald-400' : 'text-ivory-dim'}`}>
+          <span className={`text-xs ${values.enabled ? 'text-success' : 'text-ivory-dim'}`}>
             {values.enabled ? '● Activo en la tienda' : '○ Desactivado'}
           </span>
         </div>

@@ -4,7 +4,18 @@ import 'dotenv/config'
 import { createApp } from '../src/server.js'
 import { pool } from '../src/db/pool.js'
 import { removeUploadedFile } from '../src/middleware/upload.js'
-import { createOrder, getPendingOrdersSummary } from '../src/services/orders.service.js'
+import {
+  createOrder,
+  getPendingOrdersSummary,
+  updateOrderStatus,
+  deleteOrder,
+  getOrderTracking,
+} from '../src/services/orders.service.js'
+import { createProduct, updateProduct, getProductBySlug, getProductById } from '../src/services/products.service.js'
+import { addMessage, findOrCreateConversation, isValidGuestId } from '../src/services/chat.service.js'
+import { assertCanUpload, addReference } from '../src/services/references.service.js'
+import { placeBid } from '../src/services/auctions.service.js'
+import { registerUser } from '../src/services/auth.service.js'
 
 let baseUrl
 let server
@@ -87,7 +98,15 @@ async function firstProductWithStock(minStock = 2) {
   return products.find((product) => product.stock >= minStock)
 }
 
+// Borra un pedido de prueba devolviendo antes el stock que descontó (salvo que ya estuviera cancelado,
+// que devuelve el stock por sí solo), para que las pruebas no vayan gastando el inventario real.
 async function removeOrder(id) {
+  await pool.query(
+    `UPDATE products p SET stock = p.stock + oi.quantity
+     FROM order_items oi JOIN orders o ON o.id = oi.order_id
+     WHERE oi.order_id = $1 AND oi.product_id = p.id AND o.status <> 'CANCELADO'`,
+    [id],
+  )
   await pool.query('DELETE FROM orders WHERE id = $1', [id])
 }
 
@@ -211,14 +230,15 @@ async function removeTestUser(userId) {
   await pool.query('DELETE FROM users WHERE id = $1', [userId])
 }
 
+// Crea la cuenta directo por el servicio (no por HTTP) para no gastar el límite de 10 registros por hora
+// por IP: el conjunto de pruebas crea más cuentas que eso.
 async function registerTestUser(label) {
-  const res = await postJson('/api/auth/register', {
+  const { user, token } = await registerUser({
     name: `Usuario ${label}`,
     email: `test-${label}-${Date.now()}@example.com`,
     phone: '3001234567',
     password: 'claveSegura123',
   })
-  const { user, token } = await res.json()
   return { user, headers: { Authorization: `Bearer ${token}` } }
 }
 
@@ -361,5 +381,240 @@ test('resumen de pedidos pendientes: solo admin, y refleja un pedido recién cre
     assert.equal(after.latest.total, created.total)
   } finally {
     await removeOrder(created.id)
+  }
+})
+
+// ---------------------------------------------------------------------------------------------
+// Ofertas, stock, cancelación y seguimiento de pedidos
+// ---------------------------------------------------------------------------------------------
+
+const TEST_PRODUCT_BASE = { name: 'Producto de Prueba Oferta', categoryId: 'caballero', price: 50000, stock: 5 }
+
+/** Crea un producto de prueba, corre `fn` con él y lo borra al final (con sus pedidos). */
+async function withTestProduct(overrides, fn) {
+  const product = await createProduct({ ...TEST_PRODUCT_BASE, ...overrides })
+  try {
+    return await fn(product)
+  } finally {
+    await pool.query('DELETE FROM orders WHERE id IN (SELECT order_id FROM order_items WHERE product_id = $1)', [product.id])
+    await pool.query('DELETE FROM products WHERE id = $1', [product.id])
+  }
+}
+
+test('oferta: el precio vigente es el de oferta, y el pedido cobra ese precio aunque el cliente mande otro', async () => {
+  await withTestProduct({}, async (product) => {
+    assert.equal(product.price, 50000)
+    assert.equal(product.onSale, false)
+
+    const onSale = await updateProduct(product.id, { salePrice: '40000' })
+    assert.equal(onSale.price, 40000)
+    assert.equal(onSale.regularPrice, 50000)
+    assert.equal(onSale.onSale, true)
+
+    const order = await createOrder({
+      ...guestOrder,
+      items: [{ productId: product.id, quantity: 2, price: 1 }],
+    })
+    assert.equal(order.items[0].price, 40000)
+    assert.equal(order.total, 80000)
+  })
+})
+
+test('oferta: vencida vuelve al precio normal y se puede quitar', async () => {
+  await withTestProduct({}, async (product) => {
+    const expired = await updateProduct(product.id, { salePrice: '30000', saleEndsOn: '2020-01-01' })
+    assert.equal(expired.onSale, false)
+    assert.equal(expired.price, 50000)
+
+    const active = await updateProduct(product.id, { saleEndsOn: '2999-12-31' })
+    assert.equal(active.onSale, true)
+    assert.equal(active.price, 30000)
+
+    const cleared = await updateProduct(product.id, { salePrice: '' })
+    assert.equal(cleared.onSale, false)
+    assert.equal(cleared.salePrice, null)
+    assert.equal(cleared.saleEndsOn, null)
+  })
+})
+
+test('productos: precios inválidos se rechazan (no se crean productos a $0 ni ofertas mayores al precio)', async () => {
+  await assert.rejects(createProduct({ ...TEST_PRODUCT_BASE, price: '0' }), /precio/i)
+  await assert.rejects(createProduct({ ...TEST_PRODUCT_BASE, price: 'abc' }), /precio/i)
+  await assert.rejects(createProduct({ ...TEST_PRODUCT_BASE, price: '-5' }), /precio/i)
+  await withTestProduct({}, async (product) => {
+    await assert.rejects(updateProduct(product.id, { salePrice: '50000' }), /menor al precio normal/i)
+    await assert.rejects(updateProduct(product.id, { salePrice: '60000' }), /menor al precio normal/i)
+    await assert.rejects(updateProduct(product.id, { salePrice: '40000', saleEndsOn: 'mañana' }), /fecha/i)
+    await updateProduct(product.id, { salePrice: '40000' })
+    await assert.rejects(updateProduct(product.id, { price: '30000' }), /menor al precio normal/i)
+  })
+})
+
+test('stock: el pedido lo descuenta, no deja vender de más y cancelar lo devuelve', async () => {
+  await withTestProduct({ stock: 3 }, async (product) => {
+    await assert.rejects(createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 4 }] }), /Solo quedan 3/)
+
+    const first = await createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 2 }] })
+    assert.equal((await getProductById(product.id)).stock, 1)
+    await assert.rejects(createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 2 }] }), /Solo quedan 1/)
+
+    const second = await createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 1 }] })
+    assert.equal((await getProductById(product.id)).stock, 0)
+    await assert.rejects(createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 1 }] }), /agotado/)
+
+    await updateOrderStatus(first.id, 'CANCELADO')
+    assert.equal((await getProductById(product.id)).stock, 2)
+    // Cancelar dos veces no devuelve el stock dos veces.
+    await updateOrderStatus(first.id, 'CANCELADO')
+    assert.equal((await getProductById(product.id)).stock, 2)
+    await updateOrderStatus(second.id, 'CANCELADO')
+    assert.equal((await getProductById(product.id)).stock, 3)
+  })
+})
+
+test('stock: varios pedidos a la vez por la última unidad, solo uno se la lleva', async () => {
+  await withTestProduct({ stock: 1 }, async (product) => {
+    const attempts = await Promise.allSettled([
+      createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 1 }] }),
+      createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 1 }] }),
+      createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 1 }] }),
+    ])
+    assert.equal(attempts.filter((attempt) => attempt.status === 'fulfilled').length, 1)
+    assert.equal((await getProductById(product.id)).stock, 0)
+  })
+})
+
+test('pedidos: solo se eliminan los cancelados y un cancelado no se reactiva', async () => {
+  await withTestProduct({}, async (product) => {
+    const order = await createOrder({ ...guestOrder, items: [{ productId: product.id, quantity: 1 }] })
+    await assert.rejects(deleteOrder(order.id), /Solo se pueden eliminar pedidos cancelados/)
+    await updateOrderStatus(order.id, 'ENTREGADO')
+    await assert.rejects(deleteOrder(order.id), /Solo se pueden eliminar pedidos cancelados/)
+
+    await updateOrderStatus(order.id, 'CANCELADO')
+    await assert.rejects(updateOrderStatus(order.id, 'PEDIDO_RECIBIDO'), /no se puede reactivar/)
+    await deleteOrder(order.id)
+    await assert.rejects(deleteOrder(order.id), /no encontrado/i)
+  })
+})
+
+test('seguimiento: con número de pedido y teléfono se ve el estado, con datos ajenos no', async () => {
+  await withTestProduct({}, async (product) => {
+    const order = await createOrder({ ...guestOrder, customerPhone: '3001234567', items: [{ productId: product.id, quantity: 1 }] })
+
+    for (const phone of ['3001234567', '300 123 4567', '+57 300 123 4567']) {
+      const tracking = await getOrderTracking({ orderId: order.id, phone })
+      assert.equal(tracking.status, 'PEDIDO_RECIBIDO')
+      assert.equal(tracking.items[0].name, product.name)
+      assert.equal(tracking.address, undefined, 'no debe exponer la dirección')
+      assert.equal(tracking.customerName, undefined, 'no debe exponer el nombre')
+      assert.equal(tracking.customerEmail, undefined, 'no debe exponer el correo')
+    }
+    await assert.rejects(getOrderTracking({ orderId: order.id, phone: '3009999999' }), /No encontramos un pedido/)
+    await assert.rejects(getOrderTracking({ orderId: 999999999, phone: '3001234567' }), /No encontramos un pedido/)
+    await assert.rejects(getOrderTracking({ orderId: 'abc', phone: '3001234567' }), /número de pedido/)
+    await assert.rejects(getOrderTracking({ orderId: order.id, phone: '123' }), /número de pedido/)
+
+    const res = await postJson('/api/orders/track', { orderId: order.id, phone: '3001234567' })
+    assert.equal(res.status, 200)
+    assert.equal((await res.json()).id, order.id)
+    assert.equal((await postJson('/api/orders/track', { orderId: order.id, phone: '3000000001' })).status, 404)
+  })
+})
+
+test('productos inactivos: no salen a quien no es admin ni con includeInactive', async () => {
+  await withTestProduct({}, async (product) => {
+    await updateProduct(product.id, { active: false })
+    const list = await (await fetch(`${baseUrl}/api/products?includeInactive=true`)).json()
+    assert.equal(list.some((item) => item.id === product.id), false)
+    assert.equal((await fetch(`${baseUrl}/api/products/${product.slug}`)).status, 404)
+    assert.ok(await getProductBySlug(product.slug, { includeInactive: true }), 'el admin sí lo ve')
+    assert.equal(await getProductBySlug(product.slug), null)
+  })
+})
+
+test('entradas mal formadas dan 400 (o se ignoran), no 500', async () => {
+  const broken = await fetch(`${baseUrl}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: '{"malformado',
+  })
+  assert.equal(broken.status, 400)
+  assert.match((await broken.json()).error, /JSON/)
+
+  for (const path of ['/api/products?search[]=a&search[]=b', '/api/products/featured?limit=abc', '/api/products/bestsellers?limit=-4']) {
+    assert.equal((await fetch(`${baseUrl}${path}`)).status, 200, path)
+  }
+  const capped = await (await fetch(`${baseUrl}/api/products/featured?limit=99999`)).json()
+  assert.ok(capped.length <= 100)
+
+  const prices = await (await fetch(`${baseUrl}/api/products/prices?ids=1,2,abc`)).json()
+  assert.deepEqual(prices.map((item) => item.id).sort(), [1, 2])
+  assert.ok(prices.every((item) => Number.isInteger(item.price) && 'onSale' in item && 'stock' in item))
+})
+
+test('token falsificado con algoritmo "none" no da acceso', async () => {
+  const b64 = (value) => Buffer.from(JSON.stringify(value)).toString('base64url')
+  const forged = `${b64({ alg: 'none', typ: 'JWT' })}.${b64({ sub: 1, role: 'admin' })}.`
+  const res = await fetch(`${baseUrl}/api/orders`, { headers: { Authorization: `Bearer ${forged}` } })
+  assert.equal(res.status, 401)
+})
+
+test('chat: mensajes y datos con límites, y solo identificadores de invitado sencillos', async () => {
+  assert.equal(isValidGuestId('0b13a684-909f-4e66-87fb-98fe939a2a6c'), true)
+  for (const bad of ['', 'a', "x'; DROP TABLE users;--", '../../etc/passwd', 'a'.repeat(100), null, 12345678, {}]) {
+    assert.equal(isValidGuestId(bad), false, String(bad))
+  }
+  await assert.rejects(findOrCreateConversation({ guestId: 'no valido!' }), /identificar la conversación/)
+  await assert.rejects(addMessage({ conversationId: 1, senderRole: 'customer', body: 'x'.repeat(1001) }), /demasiado largo/)
+  await assert.rejects(addMessage({ conversationId: 1, senderRole: 'customer', body: '   ' }), /vacío/)
+  await assert.rejects(addMessage({ conversationId: 1, senderRole: 'customer', body: { $ne: 1 } }), /vacío/)
+})
+
+test('pujas: solo montos enteros y con tope', async () => {
+  for (const amount of [1.5, 0, -10, 1e12, 'abc', null]) {
+    await assert.rejects(placeBid({ auctionId: 1, userId: 1, amount }), /monto de la puja/, String(amount))
+  }
+})
+
+test('referencias: archivos falsos se rechazan aunque el nombre y el tipo declarado parezcan válidos', async () => {
+  const { user, headers } = await registerTestUser('falsos')
+  try {
+    const fakeVideo = await uploadReference(headers, {
+      filename: 'video.mp4',
+      type: 'video/mp4',
+      content: Buffer.from('#EXTM3U\n#EXT-X-MEDIA-SEQUENCE:0\nfile:///etc/passwd\n'),
+    })
+    assert.equal(fakeVideo.status, 400)
+    assert.match((await fakeVideo.json()).error, /video ni una foto válidos/)
+
+    const svgAsPng = await uploadReference(headers, {
+      filename: 'foto.png',
+      type: 'image/png',
+      content: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'),
+    })
+    assert.equal(svgAsPng.status, 400)
+
+    assert.equal((await (await fetch(`${baseUrl}/api/references/mine`, { headers })).json()).length, 0, 'no debe quedar nada guardado')
+  } finally {
+    await removeTestUser(user.id)
+  }
+})
+
+test('referencias: cada cuenta tiene tope de videos, y el admin no', async () => {
+  const { user } = await registerTestUser('videos')
+  try {
+    for (let i = 0; i < 3; i += 1) {
+      await addReference({ title: `Video ${i}`, mediaUrl: `/uploads/references/prueba-${i}.mp4`, mediaType: 'video', createdBy: user.id })
+    }
+    await assert.rejects(assertCanUpload({ userId: user.id, isAdmin: false, mediaType: 'video' }), /máximo por cuenta/)
+    await assertCanUpload({ userId: user.id, isAdmin: true, mediaType: 'video' })
+    await assertCanUpload({ userId: user.id, isAdmin: false, mediaType: 'image' })
+    await assert.rejects(
+      addReference({ title: 'x'.repeat(121), mediaUrl: '/uploads/references/a.mp4', mediaType: 'video', createdBy: user.id }),
+      /demasiado largo/,
+    )
+  } finally {
+    await removeTestUser(user.id)
   }
 })

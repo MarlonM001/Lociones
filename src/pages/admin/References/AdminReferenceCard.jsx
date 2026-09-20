@@ -4,8 +4,8 @@ import { ReferenceMedia } from '@/components/references/ReferenceMedia'
 
 const STATUS_BADGE_CLASSES = {
   pending: 'bg-gold/10 text-gold',
-  approved: 'bg-emerald-500/10 text-emerald-400',
-  rejected: 'bg-red-500/10 text-red-400',
+  approved: 'bg-emerald-500/10 text-success',
+  rejected: 'bg-red-500/10 text-danger',
 }
 
 export function AdminReferenceCard({ reference, uploaderName, onApprove, onReject, onDelete }) {
@@ -21,7 +21,7 @@ export function AdminReferenceCard({ reference, uploaderName, onApprove, onRejec
           </span>
         </div>
         {reference.city && (
-          <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold/80">{reference.city}</p>
+          <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold">{reference.city}</p>
         )}
         {reference.description && <p className="mt-2 text-sm text-ivory-dim">{reference.description}</p>}
         <p className="mt-2 text-xs text-ivory-dim">
@@ -49,7 +49,7 @@ export function AdminReferenceCard({ reference, uploaderName, onApprove, onRejec
           <button
             type="button"
             onClick={() => onDelete(reference)}
-            className="ml-auto rounded-full border border-red-500/40 px-4 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10"
+            className="ml-auto rounded-full border border-red-500/40 px-4 py-1.5 text-sm text-danger transition-colors hover:bg-red-500/10"
           >
             Eliminar
           </button>

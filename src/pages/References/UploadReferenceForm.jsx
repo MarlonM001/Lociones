@@ -138,7 +138,7 @@ export function UploadReferenceForm({ onUploaded }) {
             placeholder="Ej. Entrega en Yopal"
             className={inputClass}
           />
-          {errors.title && <p className="mt-1 text-xs text-red-400">{errors.title}</p>}
+          {errors.title && <p className="mt-1 text-xs text-danger">{errors.title}</p>}
         </div>
 
         <div>
@@ -170,7 +170,7 @@ export function UploadReferenceForm({ onUploaded }) {
           />
           <p className="mt-1 text-xs text-ivory-dim">{KINDS[kind].hint}</p>
           {kind === 'image' && user && !isAdmin && (
-            <p className={`mt-1 text-xs ${photoLimitReached ? 'text-red-400' : 'text-gold'}`}>
+            <p className={`mt-1 text-xs ${photoLimitReached ? 'text-danger' : 'text-gold'}`}>
               {photoLimitReached
                 ? 'Ya subiste tus 2 fotos. Elimina una para subir otra.'
                 : imagesLeft === 1
@@ -178,7 +178,7 @@ export function UploadReferenceForm({ onUploaded }) {
                   : `Te quedan ${imagesLeft} fotos por subir.`}
             </p>
           )}
-          {fileError && <p className="mt-1 text-xs text-red-400">{fileError}</p>}
+          {fileError && <p className="mt-1 text-xs text-danger">{fileError}</p>}
         </div>
       </div>
 

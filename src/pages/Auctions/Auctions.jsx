@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { getAuctionConfig, getAuctions } from '@/services/auctions'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -8,6 +9,7 @@ import { AuctionCard } from './AuctionCard'
 const PHASE_ORDER = { active: 0, scheduled: 1, closed: 2, cancelled: 3 }
 
 export function Auctions() {
+  useDocumentMeta({ title: 'Subastas', description: 'Puja por lociones especiales y combos exclusivos de Essence Polar. Gana la oferta más alta cuando cierra el tiempo.' })
   const [enabled, setEnabled] = useState(null)
   const [auctions, setAuctions] = useState([])
   const [loading, setLoading] = useState(true)

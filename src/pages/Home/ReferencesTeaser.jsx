@@ -42,7 +42,7 @@ export function ReferencesTeaser() {
                 <div className="p-4">
                   <p className="font-display text-base text-ivory">{reference.title}</p>
                   {reference.city && (
-                    <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold/80">{reference.city}</p>
+                    <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold">{reference.city}</p>
                   )}
                 </div>
               </div>

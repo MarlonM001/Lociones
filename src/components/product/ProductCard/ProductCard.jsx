@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Price } from '@/components/ui/Price'
+import { PriceTag } from '@/components/ui/Price'
 import { getCategoryById } from '@/config/categories'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
@@ -29,7 +29,7 @@ export function ProductCard({ product, image }) {
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <span className="text-[11px] uppercase tracking-widest-plus text-gold/80">
+        <span className="text-xs uppercase tracking-widest-plus text-gold">
           {category?.name}
         </span>
         <Link to={`/producto/${product.slug}`}>
@@ -40,8 +40,8 @@ export function ProductCard({ product, image }) {
         <p className="line-clamp-2 text-sm text-ivory-dim">{product.shortDescription}</p>
 
         <div className="mt-1 flex items-center justify-between">
-          <Price value={product.price} className="text-lg text-gold" />
-          <span className={`text-xs ${inStock ? 'text-emerald-400' : 'text-red-400'}`}>
+          <PriceTag product={product} className="text-lg text-gold" />
+          <span className={`text-xs ${inStock ? 'text-success' : 'text-danger'}`}>
             {inStock ? 'Disponible' : 'Agotado'}
           </span>
         </div>

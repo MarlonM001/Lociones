@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 const VARIANT_CLASSES = {
-  primary: 'bg-gold text-on-gold hover:bg-gold-light shadow-lg shadow-gold-dark/20',
+  primary: 'bg-gold text-on-gold hover:bg-gold-hover shadow-lg shadow-gold-dark/20',
   secondary: 'border border-gold/60 text-ivory hover:border-gold hover:bg-gold/10',
   ghost: 'text-ivory hover:text-gold',
   whatsapp: 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-900/30',

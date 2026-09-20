@@ -10,6 +10,11 @@ export async function createOrder(payload) {
   return apiFetch('/api/orders', { method: 'POST', body: payload })
 }
 
+/** Seguimiento sin cuenta: número de pedido + teléfono con el que se hizo. */
+export async function trackOrder({ orderId, phone }) {
+  return apiFetch('/api/orders/track', { method: 'POST', body: { orderId, phone } })
+}
+
 export async function getOrders() {
   return apiFetch('/api/orders')
 }

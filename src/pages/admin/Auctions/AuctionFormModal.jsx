@@ -156,7 +156,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
     <Modal open={open} onClose={onClose} title={isEditing ? 'Editar subasta' : 'Nueva subasta'}>
       <form onSubmit={handleSubmit} className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1">
         {formError && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-danger">
             {formError}
           </div>
         )}
@@ -177,7 +177,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
             placeholder='Ej: "Subasta especial: Baccarat Rouge 540"'
             className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
           />
-          {errors.title && <p className="mt-1 text-xs text-red-400">{errors.title}</p>}
+          {errors.title && <p className="mt-1 text-xs text-danger">{errors.title}</p>}
         </div>
 
         <div>
@@ -272,7 +272,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(item.id)}
-                      className="text-xs text-ivory-dim hover:text-red-400"
+                      className="text-xs text-ivory-dim hover:text-danger"
                     >
                       Quitar
                     </button>
@@ -295,7 +295,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
               onChange={handleChange('startingPrice')}
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none disabled:opacity-50"
             />
-            {errors.startingPrice && <p className="mt-1 text-xs text-red-400">{errors.startingPrice}</p>}
+            {errors.startingPrice && <p className="mt-1 text-xs text-danger">{errors.startingPrice}</p>}
           </div>
           <div>
             <label className="mb-1 block text-sm text-ivory-dim">Incremento mínimo por puja (COP)</label>
@@ -307,7 +307,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
               onChange={handleChange('minIncrement')}
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none disabled:opacity-50"
             />
-            {errors.minIncrement && <p className="mt-1 text-xs text-red-400">{errors.minIncrement}</p>}
+            {errors.minIncrement && <p className="mt-1 text-xs text-danger">{errors.minIncrement}</p>}
           </div>
         </div>
 
@@ -321,7 +321,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
               onChange={handleChange('startsAt')}
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none disabled:opacity-50"
             />
-            {errors.startsAt && <p className="mt-1 text-xs text-red-400">{errors.startsAt}</p>}
+            {errors.startsAt && <p className="mt-1 text-xs text-danger">{errors.startsAt}</p>}
           </div>
           <div>
             <label className="mb-1 block text-sm text-ivory-dim">Cierra</label>
@@ -331,7 +331,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
               onChange={handleChange('endsAt')}
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.endsAt && <p className="mt-1 text-xs text-red-400">{errors.endsAt}</p>}
+            {errors.endsAt && <p className="mt-1 text-xs text-danger">{errors.endsAt}</p>}
           </div>
         </div>
 

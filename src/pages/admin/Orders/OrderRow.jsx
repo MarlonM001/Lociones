@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { updateOrderStatus } from '@/services/orders'
-import { ORDER_STATUS_LABELS, ORDER_STATUS_SEQUENCE } from '@/services/orders/statuses'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_ALL, ORDER_STATUSES } from '@/services/orders/statuses'
+import { ConfirmModal } from '@/components/ui/Modal'
 import { formatCurrency } from '@/utils/formatCurrency'
 import { useToast } from '@/hooks/useToast'
 import { STATUS_BADGE_CLASSES } from './statusBadge'
@@ -10,16 +11,27 @@ export function OrderRow({ order, onStatusChanged, onView, onDelete }) {
   const [updating, setUpdating] = useState(false)
   const units = order.items.reduce((sum, item) => sum + item.quantity, 0)
 
-  const handleChange = async (event) => {
-    const status = event.target.value
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const isCancelled = order.status === ORDER_STATUSES.CANCELADO
+
+  const applyStatus = async (status) => {
     setUpdating(true)
     try {
       await updateOrderStatus(order.id, status)
       showToast(`Pedido #${order.id} actualizado a "${ORDER_STATUS_LABELS[status]}"`)
-      onStatusChanged?.()
+    } catch (error) {
+      showToast(error.message || 'No pudimos cambiar el estado del pedido.', 'error')
     } finally {
       setUpdating(false)
+      onStatusChanged?.()
     }
+  }
+
+  const handleChange = (event) => {
+    const status = event.target.value
+    // Cancelar devuelve las unidades al inventario y no se puede deshacer: primero se confirma.
+    if (status === ORDER_STATUSES.CANCELADO) setConfirmingCancel(true)
+    else applyStatus(status)
   }
 
   return (
@@ -55,10 +67,10 @@ export function OrderRow({ order, onStatusChanged, onView, onDelete }) {
         <select
           value={order.status}
           onChange={handleChange}
-          disabled={updating}
+          disabled={updating || isCancelled}
           className="rounded-lg border border-ivory/10 bg-ink px-2 py-1.5 text-xs text-ivory focus:border-gold focus:outline-none disabled:opacity-50"
         >
-          {ORDER_STATUS_SEQUENCE.map((status) => (
+          {ORDER_STATUS_ALL.map((status) => (
             <option key={status} value={status}>
               {ORDER_STATUS_LABELS[status]}
             </option>
@@ -73,13 +85,31 @@ export function OrderRow({ order, onStatusChanged, onView, onDelete }) {
         >
           Ver
         </button>
-        <button
-          type="button"
-          onClick={() => onDelete(order)}
-          className="text-sm text-ivory-dim hover:text-red-400"
-        >
-          Eliminar
-        </button>
+        {isCancelled ? (
+          <button
+            type="button"
+            onClick={() => onDelete(order)}
+            className="text-sm text-ivory-dim hover:text-danger"
+          >
+            Eliminar
+          </button>
+        ) : (
+          <span className="text-xs text-ivory-dim" title="Para eliminar un pedido primero hay que cancelarlo">
+            —
+          </span>
+        )}
+        <ConfirmModal
+          open={confirmingCancel}
+          onClose={() => setConfirmingCancel(false)}
+          onConfirm={() => {
+            setConfirmingCancel(false)
+            applyStatus(ORDER_STATUSES.CANCELADO)
+          }}
+          title={`Cancelar el pedido #${order.id}`}
+          message="Las unidades del pedido vuelven al inventario, deja de contar en los reportes de ventas y el pedido no se podrá reactivar. ¿Seguro?"
+          confirmLabel="Cancelar pedido"
+          cancelLabel="Volver"
+        />
       </td>
     </tr>
   )

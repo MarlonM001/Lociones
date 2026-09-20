@@ -13,7 +13,7 @@ export const requireAuth = asyncHandler(async (req, res, next) => {
   if (!token) throw ApiError.unauthorized('Falta el token de sesión.')
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
     req.user = { id: payload.sub, role: payload.role }
     next()
   } catch {
@@ -27,7 +27,7 @@ export const attachUserIfPresent = asyncHandler(async (req, res, next) => {
   if (!token) return next()
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
     req.user = { id: payload.sub, role: payload.role }
   } catch {
     // Token inválido en una ruta opcional: se ignora, la request sigue como invitado.

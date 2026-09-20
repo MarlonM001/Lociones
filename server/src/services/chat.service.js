@@ -24,10 +24,23 @@ function toPublicMessage(row) {
   }
 }
 
+export const CHAT_LIMITS = { messageLength: 1000, name: 80, phone: 20 }
+
+// Identificador de invitado: el navegador genera un UUID; se aceptan solo caracteres simples y una longitud razonable.
+export function isValidGuestId(value) {
+  return typeof value === 'string' && /^[A-Za-z0-9-]{8,64}$/.test(value)
+}
+
+function cleanOptionalText(value, max) {
+  return typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null
+}
+
 export async function findOrCreateConversation({ userId, guestId, guestName, guestPhone }) {
-  if (!userId && !guestId) {
+  if (!userId && !isValidGuestId(guestId)) {
     throw ApiError.badRequest('Falta identificar la conversación (sesión o id de invitado).')
   }
+  guestName = cleanOptionalText(guestName, CHAT_LIMITS.name)
+  guestPhone = cleanOptionalText(guestPhone, CHAT_LIMITS.phone)
 
   const { rows: existingRows } = await pool.query(
     userId
@@ -71,7 +84,10 @@ export async function listMessages(conversationId) {
 }
 
 export async function addMessage({ conversationId, senderRole, body }) {
-  if (!body?.trim()) throw ApiError.badRequest('El mensaje no puede estar vacío.')
+  if (typeof body !== 'string' || !body.trim()) throw ApiError.badRequest('El mensaje no puede estar vacío.')
+  if (body.trim().length > CHAT_LIMITS.messageLength) {
+    throw ApiError.badRequest(`El mensaje es demasiado largo (máximo ${CHAT_LIMITS.messageLength} caracteres).`)
+  }
 
   const { rows } = await pool.query(
     `INSERT INTO chat_messages (conversation_id, sender_role, body, read_by_admin)

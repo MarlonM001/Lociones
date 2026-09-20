@@ -3,8 +3,8 @@ import { ReferenceMedia } from '@/components/references/ReferenceMedia'
 
 const STATUS_BADGE_CLASSES = {
   pending: 'bg-gold/10 text-gold',
-  approved: 'bg-emerald-500/10 text-emerald-400',
-  rejected: 'bg-red-500/10 text-red-400',
+  approved: 'bg-emerald-500/10 text-success',
+  rejected: 'bg-red-500/10 text-danger',
 }
 
 const STATUS_HINTS = {
@@ -26,7 +26,7 @@ export function MyReferenceCard({ reference }) {
             {REFERENCE_STATUS_LABELS[reference.status]}
           </span>
         </div>
-        {reference.city && <p className="mt-1 text-xs text-gold/80">{reference.city}</p>}
+        {reference.city && <p className="mt-1 text-xs text-gold">{reference.city}</p>}
         <p className="mt-1 text-xs text-ivory-dim">{STATUS_HINTS[reference.status]}</p>
       </div>
     </div>

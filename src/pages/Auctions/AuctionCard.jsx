@@ -4,7 +4,7 @@ import { useCountdown } from '@/hooks/useCountdown'
 
 const PHASE_LABELS = {
   scheduled: { label: 'Próximamente', className: 'bg-sky-500/10 text-sky-400' },
-  active: { label: 'En curso', className: 'bg-emerald-500/10 text-emerald-400' },
+  active: { label: 'En curso', className: 'bg-emerald-500/10 text-success' },
   closed: { label: 'Cerrada', className: 'bg-ivory/10 text-ivory-dim' },
 }
 

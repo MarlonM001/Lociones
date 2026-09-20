@@ -1,0 +1,53 @@
+name: Revisión automática
+
+# Corre en cada cambio que se sube a main y en cada pull request. Si algo falla, GitHub lo marca en rojo
+# antes de que llegue a la tienda publicada.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tienda:
+    name: Tienda (lint, compilación y seguridad)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar el código (lint)
+        run: npm run lint
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Buscar vulnerabilidades conocidas (solo las altas o críticas)
+        run: npm audit --omit=dev --audit-level=high
+
+  servidor-seguridad:
+    name: Servidor (vulnerabilidades conocidas)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Buscar vulnerabilidades conocidas (solo las altas o críticas)
+        run: npm audit --omit=dev --audit-level=high

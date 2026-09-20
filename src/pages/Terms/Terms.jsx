@@ -1,5 +1,7 @@
 import { STORE_CONFIG } from '@/config/store'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { PAYMENT_METHODS_TEXT } from '@/config/payments'
+import { formatWhatsAppNumber } from '@/utils/formatPhone'
 
 function Section({ title, children }) {
   return (
@@ -11,6 +13,7 @@ function Section({ title, children }) {
 }
 
 export function Terms() {
+  useDocumentMeta({ title: 'Términos y condiciones' })
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
       <span className="text-xs uppercase tracking-widest-plus text-gold">Legal</span>
@@ -19,6 +22,18 @@ export function Terms() {
         Estos términos aplican a las compras realizadas en {STORE_CONFIG.name}. Al confirmar un pedido, aceptas
         lo siguiente.
       </p>
+
+      <Section title="Quién vende">
+        <p>
+          {STORE_CONFIG.legal.businessName || STORE_CONFIG.name}
+          {STORE_CONFIG.legal.nit && <> — NIT {STORE_CONFIG.legal.nit}</>}
+          {STORE_CONFIG.legal.address && <> — {STORE_CONFIG.legal.address}</>}
+        </p>
+        <p>
+          Contacto: {STORE_CONFIG.email} · WhatsApp {formatWhatsAppNumber(STORE_CONFIG.whatsappNumber)} ·{' '}
+          {STORE_CONFIG.hours}
+        </p>
+      </Section>
 
       <Section title="Pedidos y confirmación">
         <p>
@@ -51,10 +66,31 @@ export function Terms() {
         </p>
       </Section>
 
-      <Section title="Cambios y devoluciones">
+      <Section title="Cambios, garantía y devoluciones">
         <p>
           Si recibes un producto en mal estado o distinto al que pediste, escríbenos por WhatsApp dentro de las
-          48 horas siguientes a la entrega para coordinar el cambio.
+          48 horas siguientes a la entrega para coordinar el cambio. Esto no limita los derechos que te da la ley
+          de protección al consumidor, incluida la garantía legal.
+        </p>
+      </Section>
+
+      <Section title="Derecho de retracto">
+        <p>
+          Como la compra se hace a distancia, puedes retractarte y pedir la devolución de tu dinero dentro de los
+          cinco (5) días hábiles siguientes a la entrega del producto (Ley 1480 de 2011, artículo 47).
+        </p>
+        <p>
+          Para hacerlo escríbenos por WhatsApp o a {STORE_CONFIG.email} indicando tu número de pedido. El producto
+          debe devolverse sin usar, con su empaque y sellos originales. Los costos de transporte de la devolución
+          los asume quien compra. Te devolvemos el dinero, por el mismo medio de pago o el que acordemos, dentro de
+          los treinta (30) días calendario siguientes al ejercicio del retracto.
+        </p>
+      </Section>
+
+      <Section title="Reclamos">
+        <p>
+          Si tienes una queja, escríbenos primero para resolverla. También puedes acudir a la Superintendencia de
+          Industria y Comercio (SIC), autoridad de protección al consumidor en Colombia.
         </p>
       </Section>
 

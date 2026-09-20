@@ -1,10 +1,12 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { Link } from 'react-router-dom'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
 import { useAuth } from '@/hooks/useAuth'
 import { createOrder } from '@/services/orders'
 import { generateWhatsAppOrder } from '@/services/whatsapp'
+import { saveLastOrder } from '@/utils/lastOrder'
 import { PAYMENT_METHODS } from '@/config/payments'
 import { Price } from '@/components/ui/Price'
 import { toTitleCase } from '@/utils/formatName'
@@ -63,7 +65,8 @@ function OrderSummary({ items, subtotal, showItems }) {
 }
 
 export function CartPage() {
-  const { items, subtotal, clearCart } = useCart()
+  useDocumentMeta({ title: 'Tu carrito', noindex: true })
+  const { items, subtotal, clearCart, refreshCart } = useCart()
   const { showToast } = useToast()
   const { user } = useAuth()
   const [step, setStep] = useState('cart') // 'cart' | 'details' | 'review'
@@ -73,6 +76,19 @@ export function CartPage() {
   const [submitting, setSubmitting] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
   const [whatsappLink, setWhatsappLink] = useState(null)
+
+  // Al abrir el carrito se ponen al día precios y stock con los del servidor (una oferta pudo empezar
+  // o terminar, o un producto agotarse desde que se agregó) y se le avisa al cliente si algo cambió.
+  const refreshedRef = useRef(false)
+  useEffect(() => {
+    if (refreshedRef.current) return
+    refreshedRef.current = true
+    refreshCart().then(({ priceChanged, removed, reduced }) => {
+      if (removed.length) showToast(`Ya no hay disponibilidad de: ${removed.join(', ')}. Lo sacamos del carrito.`, 'info', 6000)
+      if (reduced.length) showToast(`Ajustamos la cantidad de ${reduced.join(', ')} al stock disponible.`, 'info', 6000)
+      if (priceChanged) showToast('Actualizamos los precios de tu carrito.', 'info', 6000)
+    })
+  }, [refreshCart, showToast])
 
   const [firstName = '', ...restName] = (user?.name ?? '').split(' ')
   const defaultCheckoutValues = {
@@ -106,6 +122,7 @@ export function CartPage() {
       })
 
       const link = generateWhatsAppOrder(order)
+      saveLastOrder({ id: order.id, phone: order.customerPhone })
       setCompletedOrder(order)
       setWhatsappLink(link)
       clearCart()
@@ -130,6 +147,10 @@ export function CartPage() {
         </h1>
 
         <div className="mt-8 rounded-2xl border border-ivory/5 bg-charcoal p-6 text-left">
+          <div className="mb-3 flex items-baseline justify-between text-sm">
+            <span className="text-ivory-dim">Número de pedido</span>
+            <span className="font-display text-xl text-ivory">#{completedOrder.id}</span>
+          </div>
           <div className="flex items-baseline justify-between text-sm">
             <span className="text-ivory-dim">Total</span>
             <Price value={completedOrder.total} className="text-xl text-gold" />
@@ -139,6 +160,9 @@ export function CartPage() {
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Button href={whatsappLink} variant="whatsapp" target="_blank" rel="noreferrer">
             Abrir WhatsApp de nuevo
+          </Button>
+          <Button to={`/seguimiento?pedido=${completedOrder.id}`} variant="secondary">
+            Ver el estado de mi pedido
           </Button>
           <Button to="/catalogo" variant="secondary">
             Seguir comprando
@@ -180,7 +204,7 @@ export function CartPage() {
               <button
                 type="button"
                 onClick={clearCart}
-                className="mt-4 text-sm text-ivory-dim underline-offset-2 hover:text-red-400 hover:underline"
+                className="mt-4 text-sm text-ivory-dim underline-offset-2 hover:text-danger hover:underline"
               >
                 Vaciar carrito
               </button>

@@ -4,7 +4,9 @@ import { pool } from '../db/pool.js'
 import { ApiError } from '../utils/ApiError.js'
 import { isValidEmail, isValidPhone } from '../utils/validation.js'
 
-const SALT_ROUNDS = 10
+// Costo de bcrypt: 12 hace ~4 veces más lento adivinar contraseñas si alguien roba la base. Los hashes
+// antiguos (costo 10) siguen valiendo y no hace falta que nadie cambie su clave.
+const SALT_ROUNDS = 12
 
 function toPublicUser(row) {
   return {
@@ -22,6 +24,7 @@ function toPublicUser(row) {
 
 export function signToken(user) {
   return jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET, {
+    algorithm: 'HS256',
     expiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   })
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
@@ -25,6 +26,7 @@ const RULES = {
 }
 
 export function Register() {
+  useDocumentMeta({ title: 'Crear cuenta', noindex: true })
   const { register } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
@@ -74,7 +76,7 @@ export function Register() {
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
         {formError && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-danger">
             {formError}
           </div>
         )}
@@ -87,7 +89,7 @@ export function Register() {
             onChange={handleChange('name')}
             className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
           />
-          {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
+          {errors.name && <p className="mt-1 text-xs text-danger">{errors.name}</p>}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -99,7 +101,7 @@ export function Register() {
               onChange={handleChange('email')}
               className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+            {errors.email && <p className="mt-1 text-xs text-danger">{errors.email}</p>}
           </div>
 
           <div>
@@ -110,7 +112,7 @@ export function Register() {
               onChange={handleChange('phone')}
               className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.phone && <p className="mt-1 text-xs text-red-400">{errors.phone}</p>}
+            {errors.phone && <p className="mt-1 text-xs text-danger">{errors.phone}</p>}
           </div>
         </div>
 
@@ -123,7 +125,7 @@ export function Register() {
               onChange={handleChange('password')}
               className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
+            {errors.password && <p className="mt-1 text-xs text-danger">{errors.password}</p>}
           </div>
 
           <div>
@@ -134,7 +136,7 @@ export function Register() {
               onChange={handleChange('confirmPassword')}
               className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.confirmPassword && <p className="mt-1 text-xs text-red-400">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && <p className="mt-1 text-xs text-danger">{errors.confirmPassword}</p>}
           </div>
         </div>
 
@@ -148,7 +150,7 @@ export function Register() {
               placeholder="Ej. Bogotá"
               className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
             />
-            {errors.city && <p className="mt-1 text-xs text-red-400">{errors.city}</p>}
+            {errors.city && <p className="mt-1 text-xs text-danger">{errors.city}</p>}
           </div>
 
           <div>
@@ -159,7 +161,7 @@ export function Register() {
               onChange={handleChange('address')}
               className="w-full rounded-lg border border-ivory/10 bg-charcoal px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.address && <p className="mt-1 text-xs text-red-400">{errors.address}</p>}
+            {errors.address && <p className="mt-1 text-xs text-danger">{errors.address}</p>}
           </div>
         </div>
 

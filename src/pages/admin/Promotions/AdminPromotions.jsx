@@ -63,6 +63,12 @@ export function AdminPromotions() {
             maxLength={140}
             className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
           />
+          <p className="mt-2 text-xs text-ivory-dim">
+            Este aviso es solo un mensaje: no cambia ningún precio. Para que el descuento sea real, entra a{' '}
+            <strong className="text-ivory">Productos → Editar</strong> en el producto y escribe su{' '}
+            <strong className="text-ivory">Precio en oferta</strong>; los clientes verán el precio tachado y pagarán
+            el de oferta.
+          </p>
         </div>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -106,7 +112,7 @@ export function AdminPromotions() {
           <Button type="submit" variant="primary" disabled={saving}>
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </Button>
-          <span className={`text-xs ${previewActive ? 'text-emerald-400' : 'text-ivory-dim'}`}>
+          <span className={`text-xs ${previewActive ? 'text-success' : 'text-ivory-dim'}`}>
             {previewActive ? '● Se está mostrando ahora mismo en la tienda' : '○ No se está mostrando actualmente'}
           </span>
         </div>

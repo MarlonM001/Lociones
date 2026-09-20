@@ -64,7 +64,7 @@ export function BestsellerRow({ product, position, isFirst, isLast, onMoveUp, on
         <button
           type="button"
           onClick={() => onRemove(product)}
-          className="text-ivory-dim hover:text-red-400"
+          className="text-ivory-dim hover:text-danger"
         >
           Quitar
         </button>

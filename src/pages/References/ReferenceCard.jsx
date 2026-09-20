@@ -29,14 +29,14 @@ export function ReferenceCard({ reference, onDeleted }) {
             <button
               type="button"
               onClick={() => setConfirmOpen(true)}
-              className="shrink-0 text-xs text-ivory-dim hover:text-red-400"
+              className="shrink-0 text-xs text-ivory-dim hover:text-danger"
             >
               Eliminar
             </button>
           )}
         </div>
         {reference.city && (
-          <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold/80">{reference.city}</p>
+          <p className="mt-1 text-xs uppercase tracking-widest-plus text-gold">{reference.city}</p>
         )}
         {reference.description && (
           <p className="mt-2 text-sm text-ivory-dim">{reference.description}</p>

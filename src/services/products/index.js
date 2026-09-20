@@ -26,6 +26,15 @@ export async function getProducts({ categoryId, search, includeInactive = false,
   return onlyInStock ? publicProducts.filter((product) => product.stock > 0) : publicProducts
 }
 
+/**
+ * Precio vigente, stock y estado de varios productos (para refrescar el carrito, que guarda los
+ * precios de cuando se agregaron). Devuelve una lista de { id, price, regularPrice, onSale, stock, active }.
+ */
+export async function getProductPrices(ids) {
+  if (ids.length === 0) return []
+  return apiFetch(`/api/products/prices?ids=${ids.join(',')}`)
+}
+
 export async function getProductBySlug(slug) {
   try {
     const product = await apiFetch(`/api/products/${slug}`)
@@ -66,6 +75,8 @@ function toProductFormData({
   name,
   categoryId,
   price,
+  salePrice,
+  saleEndsOn,
   sku,
   stock,
   shortDescription,
@@ -80,6 +91,8 @@ function toProductFormData({
     name,
     categoryId,
     price,
+    salePrice,
+    saleEndsOn,
     sku,
     stock,
     shortDescription,

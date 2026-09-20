@@ -100,7 +100,7 @@ export function Navbar() {
           to="/"
           className="flex shrink-0 items-center gap-1.5 whitespace-nowrap py-2 font-display text-lg tracking-wide text-ivory sm:gap-2 sm:text-2xl sm:tracking-widest"
         >
-          <img src="/images/brand/logo-icon.png" alt="" className="h-7 w-auto sm:h-9" />
+          <img src="/images/brand/logo-icon-144.webp" alt="" width="32" height="36" className="h-7 w-auto sm:h-9" />
           {STORE_CONFIG.name}
         </NavLink>
 

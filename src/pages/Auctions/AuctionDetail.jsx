@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { useParams, Link } from 'react-router-dom'
 import { getAuctionBySlug, placeBid } from '@/services/auctions'
 import { formatCurrency } from '@/utils/formatCurrency'
@@ -29,6 +30,7 @@ function CountdownBlock({ targetDate, label }) {
 }
 
 export function AuctionDetail() {
+  useDocumentMeta({ title: 'Subasta' })
   const { slug } = useParams()
   const requireAuth = useRequireAuth()
   const { showToast } = useToast()
@@ -155,7 +157,7 @@ export function AuctionDetail() {
               <CountdownBlock targetDate={auction.endsAt} label="Cierra en" />
 
               {auction.isUserLeading && (
-                <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400">
+                <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-success">
                   Vas ganando esta subasta con tu última puja.
                 </p>
               )}
@@ -196,7 +198,7 @@ export function AuctionDetail() {
           )}
 
           {auction.phase === 'cancelled' && (
-            <p className="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <p className="mt-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-danger">
               Esta subasta fue cancelada.
             </p>
           )}

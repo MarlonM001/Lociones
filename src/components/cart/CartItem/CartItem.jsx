@@ -17,6 +17,11 @@ export function CartItem({ item }) {
         </Link>
         <p className="mt-1 text-sm text-ivory-dim">
           <Price value={item.price} className="font-semibold" />
+          {item.regularPrice > item.price && (
+            <span className="ml-2 text-xs line-through decoration-ivory-dim/60">
+              <Price value={item.regularPrice} />
+            </span>
+          )}
           {item.quantity > 1 && (
             <span className="sm:hidden">
               {' '}× {item.quantity} = <Price value={item.price * item.quantity} className="font-semibold text-gold" />
@@ -49,7 +54,7 @@ export function CartItem({ item }) {
           <button
             type="button"
             onClick={() => removeItem(item.productId)}
-            className="text-xs text-ivory-dim underline-offset-2 hover:text-red-400 hover:underline"
+            className="text-xs text-ivory-dim underline-offset-2 hover:text-danger hover:underline"
           >
             Eliminar
           </button>

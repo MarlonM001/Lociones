@@ -7,9 +7,19 @@ import { ProductCard } from '@/components/product/ProductCard'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Button } from '@/components/ui/Button'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 
 const PAGE_SIZE = 24
 const TOP_SELLERS_LIMIT = 100
+
+/** Los productos que todavía no tienen foto real (usan una ilustración de relleno) van al final de la lista. */
+function hasRealPhoto(product) {
+  return !/placeholder|\/products\/[a-z]+\.svg$/i.test(product.image ?? '')
+}
+
+function countLabel(total) {
+  return `${total} ${total === 1 ? 'producto disponible' : 'productos disponibles'}`
+}
 
 /** `topSellers`: en vez del catálogo completo, muestra solo las lociones de top ventas (ruta /top-ventas). */
 export function Catalog({ topSellers = false }) {
@@ -24,6 +34,26 @@ export function Catalog({ topSellers = false }) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  // Al pasar de una categoría, familia o "Top ventas" a otra, el texto de búsqueda no se arrastra.
+  const familyParam = searchParams.get('familia')
+  useEffect(() => {
+    setSearch('')
+  }, [categorySlug, familyParam, topSellers])
+
+  const pageTitle = topSellers
+    ? 'Top ventas'
+    : activeFamily
+      ? `Perfumes ${activeFamily.name.toLowerCase()}`
+      : activeCategory
+        ? `Lociones ${activeCategory.name}`
+        : 'Catálogo de lociones'
+  useDocumentMeta({
+    title: pageTitle,
+    description: activeCategory?.shortDescription
+      ? `${activeCategory.shortDescription} Envíos a toda Colombia, pedido confirmado por WhatsApp.`
+      : 'Explora todas las lociones de Essence Polar: árabes, para mujer y para caballero. Envíos a toda Colombia, pedido confirmado por WhatsApp.',
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -50,7 +80,8 @@ export function Catalog({ topSellers = false }) {
       const term = search.trim().toLowerCase()
       products = products.filter((product) => product.name.toLowerCase().includes(term))
     }
-    return products
+    // Orden estable: primero los que tienen foto real, después los que aún no.
+    return [...products.filter(hasRealPhoto), ...products.filter((product) => !hasRealPhoto(product))]
   }, [allProducts, activeFamily, search])
 
   const visibleProducts = filteredProducts.slice(0, visibleCount)
@@ -72,7 +103,7 @@ export function Catalog({ topSellers = false }) {
           <p className="mt-1 text-sm text-ivory-dim">
             {topSellers
               ? `Las ${filteredProducts.length} lociones favoritas de nuestros clientes`
-              : `${filteredProducts.length} productos disponibles`}
+              : countLabel(filteredProducts.length)}
           </p>
         </div>
 

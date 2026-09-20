@@ -1,6 +1,7 @@
 import { pool, withTransaction } from '../db/pool.js'
 import { ApiError } from '../utils/ApiError.js'
 import { ORDER_STATUSES, ORDER_STATUS_VALUES } from '../utils/orderStatuses.js'
+import { SALE_ACTIVE_SQL } from './products.service.js'
 
 function toPublicOrder(row, items) {
   return {
@@ -113,8 +114,11 @@ function normalizeRequestedLines(rawItems) {
  * que cada producto exista, esté activo y tenga stock suficiente.
  */
 async function priceLinesFromCatalog(lines, db) {
+  // FOR UPDATE: bloquea las filas hasta terminar la transacción, así dos pedidos a la vez
+  // no pueden llevarse la misma última unidad. Ordenado por id para no crear bloqueos cruzados.
   const { rows } = await db.query(
-    'SELECT id, name, price, stock, active FROM products WHERE id = ANY($1)',
+    `SELECT id, name, price, sale_price, stock, active, ${SALE_ACTIVE_SQL} AS sale_active
+     FROM products WHERE id = ANY($1) ORDER BY id FOR UPDATE`,
     [lines.map((line) => line.productId)],
   )
   const products = new Map(rows.map((row) => [row.id, row]))
@@ -133,7 +137,8 @@ async function priceLinesFromCatalog(lines, db) {
         : `${product.name} está agotado.`
       throw ApiError.badRequest(message)
     }
-    const price = Number(product.price)
+    // Se cobra el precio vigente del servidor (con oferta si hay una activa), nunca el que mande el cliente.
+    const price = Number(product.sale_active ? product.sale_price : product.price)
     return { productId, quantity, price, subtotal: price * quantity }
   })
 }
@@ -153,6 +158,15 @@ export async function createOrder(payload) {
 
   return withTransaction(async (client) => {
     const items = await priceLinesFromCatalog(lines, client)
+    for (const item of items) {
+      const { rowCount } = await client.query(
+        'UPDATE products SET stock = stock - $2, updated_at = NOW() WHERE id = $1 AND stock >= $2',
+        [item.productId, item.quantity],
+      )
+      if (rowCount !== 1) {
+        throw ApiError.badRequest('Uno de los productos se agotó mientras hacías el pedido. Actualiza tu carrito.')
+      }
+    }
     const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
     // El envío se acuerda por WhatsApp con cada cliente; el cliente no lo define.
     const shipping = 0
@@ -240,16 +254,72 @@ export async function updateOrderStatus(id, status) {
   if (!ORDER_STATUS_VALUES.includes(status)) {
     throw ApiError.badRequest('Estado de pedido inválido.')
   }
-  const { rows } = await pool.query(
-    `UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-    [status, id],
-  )
-  if (!rows[0]) throw ApiError.notFound('Pedido no encontrado.')
+
+  return withTransaction(async (client) => {
+    const { rows: current } = await client.query('SELECT status FROM orders WHERE id = $1 FOR UPDATE', [id])
+    if (!current[0]) throw ApiError.notFound('Pedido no encontrado.')
+    const previous = current[0].status
+
+    if (previous === ORDER_STATUSES.CANCELADO && status !== ORDER_STATUSES.CANCELADO) {
+      throw ApiError.conflict('Un pedido cancelado no se puede reactivar. Crea un pedido nuevo.')
+    }
+    if (previous !== ORDER_STATUSES.CANCELADO && status === ORDER_STATUSES.CANCELADO) {
+      // Al cancelar, las unidades vuelven al inventario.
+      await client.query(
+        `UPDATE products p SET stock = p.stock + oi.quantity, updated_at = NOW()
+         FROM order_items oi WHERE oi.order_id = $1 AND oi.product_id = p.id`,
+        [id],
+      )
+    }
+
+    const { rows } = await client.query(
+      'UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [status, id],
+    )
+    const [order] = await attachItems(rows, client)
+    return order
+  })
+}
+
+const TRACKING_NOT_FOUND = 'No encontramos un pedido con esos datos. Revisa el número y el teléfono.'
+
+/**
+ * Seguimiento para quien compró sin cuenta: número de pedido + el teléfono con el que lo hizo.
+ * Devuelve solo lo necesario para ver el estado (nada de dirección, correo ni nombre).
+ */
+export async function getOrderTracking({ orderId, phone }) {
+  const id = Number(orderId)
+  const digits = String(phone ?? '').replace(/\D/g, '')
+  if (!Number.isInteger(id) || id < 1 || digits.length < 7) {
+    throw ApiError.badRequest('Escribe el número de pedido y el teléfono con el que lo hiciste.')
+  }
+
+  const { rows } = await pool.query('SELECT * FROM orders WHERE id = $1', [id])
+  const orderDigits = String(rows[0]?.customer_phone ?? '').replace(/\D/g, '')
+  // Se comparan los últimos 10 dígitos para que valga con o sin el indicativo del país.
+  if (!rows[0] || orderDigits.length < 7 || orderDigits.slice(-10) !== digits.slice(-10)) {
+    throw ApiError.notFound(TRACKING_NOT_FOUND)
+  }
+
   const [order] = await attachItems(rows)
-  return order
+  return {
+    id: order.id,
+    status: order.status,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    total: order.total,
+    city: order.city,
+    items: order.items.map((item) => ({ name: item.name, quantity: item.quantity, image: item.image, slug: item.slug })),
+  }
 }
 
 export async function deleteOrder(id) {
-  const { rowCount } = await pool.query('DELETE FROM orders WHERE id = $1', [id])
-  if (rowCount === 0) throw ApiError.notFound('Pedido no encontrado.')
+  const { rows } = await pool.query('SELECT status FROM orders WHERE id = $1', [id])
+  if (!rows[0]) throw ApiError.notFound('Pedido no encontrado.')
+  // Borrar un pedido vigente alteraría los reportes de ventas y dejaría el stock sin devolver:
+  // primero se cancela, y solo los cancelados se pueden eliminar.
+  if (rows[0].status !== ORDER_STATUSES.CANCELADO) {
+    throw ApiError.conflict('Solo se pueden eliminar pedidos cancelados. Cancela el pedido primero.')
+  }
+  await pool.query('DELETE FROM orders WHERE id = $1', [id])
 }

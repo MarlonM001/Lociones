@@ -49,7 +49,7 @@ export function OrderDetailModal({ order, onClose }) {
               href={whatsappLink}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-full border border-emerald-500/40 px-4 py-2 text-sm text-emerald-400 hover:bg-emerald-500/10"
+              className="inline-flex items-center rounded-full border border-emerald-500/40 px-4 py-2 text-sm text-success hover:bg-emerald-500/10"
             >
               Escribir al cliente
             </a>

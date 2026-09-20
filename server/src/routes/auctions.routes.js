@@ -1,8 +1,20 @@
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler.js'
 import { requireAuth, requireAdmin, attachUserIfPresent } from '../middleware/auth.js'
-import { uploadAuctionImage, publicUploadUrl } from '../middleware/upload.js'
+import { uploadAuctionImage, verifyImageSignatures, publicUploadUrl } from '../middleware/upload.js'
+import { ApiError } from '../utils/ApiError.js'
 import * as auctionsService from '../services/auctions.service.js'
+
+/** La lista de productos llega como texto JSON dentro del formulario; si viene mal armada es un error 400. */
+function parseItems(raw) {
+  try {
+    const items = JSON.parse(raw)
+    if (Array.isArray(items)) return items
+  } catch {
+    // cae al error de abajo
+  }
+  throw ApiError.badRequest('La lista de productos de la subasta no es válida.')
+}
 
 const router = Router()
 
@@ -36,9 +48,10 @@ router.post(
   requireAuth,
   requireAdmin,
   uploadAuctionImage.single('image'),
+  verifyImageSignatures,
   asyncHandler(async (req, res) => {
     const imageUrl = req.file ? publicUploadUrl('auctions', req.file.filename) : undefined
-    const items = req.body.items ? JSON.parse(req.body.items) : []
+    const items = req.body.items ? parseItems(req.body.items) : []
     const auction = await auctionsService.createAuction({ ...req.body, imageUrl, items })
     res.status(201).json(auction)
   }),
@@ -81,10 +94,11 @@ router.patch(
   requireAuth,
   requireAdmin,
   uploadAuctionImage.single('image'),
+  verifyImageSignatures,
   asyncHandler(async (req, res) => {
     const updates = { ...req.body }
     if (req.file) updates.imageUrl = publicUploadUrl('auctions', req.file.filename)
-    if (updates.items) updates.items = JSON.parse(updates.items)
+    if (updates.items) updates.items = parseItems(updates.items)
     const auction = await auctionsService.updateAuction(Number(req.params.id), updates)
     res.json(auction)
   }),

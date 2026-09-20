@@ -10,6 +10,8 @@ const EMPTY_VALUES = {
   name: '',
   categoryId: CATEGORIES[0]?.id ?? '',
   price: '',
+  salePrice: '',
+  saleEndsOn: '',
   sku: '',
   stock: '',
   shortDescription: '',
@@ -23,6 +25,17 @@ const RULES = {
   categoryId: (value) => (!isNonEmpty(value) ? 'Selecciona una categoría' : null),
   price: (value) => (!value || Number(value) <= 0 ? 'Ingresa un precio válido' : null),
   stock: (value) => (value === '' || Number(value) < 0 ? 'Ingresa un stock válido' : null),
+}
+
+/** La oferta es opcional; si se escribe debe ser un precio válido y menor al precio normal. */
+function validateSale(values) {
+  const errors = {}
+  if (values.salePrice !== '') {
+    const sale = Number(values.salePrice)
+    if (!Number.isInteger(sale) || sale <= 0) errors.salePrice = 'Ingresa un precio de oferta válido'
+    else if (sale >= Number(values.price)) errors.salePrice = 'El precio de oferta debe ser menor al precio normal'
+  }
+  return errors
 }
 
 export function ProductFormModal({ open, product, onClose, onSaved }) {
@@ -47,7 +60,10 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
         ? {
             name: product.name,
             categoryId: product.categoryId,
-            price: String(product.price),
+            // `price` del producto es el precio de hoy (con oferta); el formulario edita el normal.
+            price: String(product.regularPrice ?? product.price),
+            salePrice: product.salePrice ? String(product.salePrice) : '',
+            saleEndsOn: product.saleEndsOn ?? '',
             sku: product.sku,
             stock: String(product.stock),
             shortDescription: product.shortDescription,
@@ -71,8 +87,9 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
     event.preventDefault()
     setFormError(null)
     const { valid, errors: fieldErrors } = validateFields(values, RULES)
-    setErrors(fieldErrors)
-    if (!valid) return
+    const saleErrors = isEditing ? validateSale(values) : {}
+    setErrors({ ...fieldErrors, ...saleErrors })
+    if (!valid || Object.keys(saleErrors).length > 0) return
 
     setSubmitting(true)
     try {
@@ -80,6 +97,8 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
       const bestsellerImageFile = bestsellerFileInputRef.current?.files?.[0] ?? null
       const payload = {
         ...values,
+        // Sin oferta se manda vacío a propósito: así el servidor la quita si el admin la borró.
+        ...(!isEditing && { salePrice: undefined, saleEndsOn: undefined }),
         ...(imageFile && { imageFile }),
         ...(bestsellerImageFile && { bestsellerImageFile }),
       }
@@ -103,7 +122,7 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
     <Modal open={open} onClose={onClose} title={isEditing ? 'Editar producto' : 'Nuevo producto'}>
       <form onSubmit={handleSubmit} className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1">
         {formError && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-danger">
             {formError}
           </div>
         )}
@@ -116,7 +135,7 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
             onChange={handleChange('name')}
             className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
           />
-          {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
+          {errors.name && <p className="mt-1 text-xs text-danger">{errors.name}</p>}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -154,7 +173,7 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
               onChange={handleChange('price')}
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.price && <p className="mt-1 text-xs text-red-400">{errors.price}</p>}
+            {errors.price && <p className="mt-1 text-xs text-danger">{errors.price}</p>}
           </div>
           <div>
             <label className="mb-1 block text-sm text-ivory-dim">Stock</label>
@@ -165,9 +184,45 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
               onChange={handleChange('stock')}
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"
             />
-            {errors.stock && <p className="mt-1 text-xs text-red-400">{errors.stock}</p>}
+            {errors.stock && <p className="mt-1 text-xs text-danger">{errors.stock}</p>}
           </div>
         </div>
+
+        {isEditing && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+            <p className="text-sm font-medium text-ivory">Oferta (opcional)</p>
+            <p className="mt-1 text-xs text-ivory-dim">
+              Fija un precio menor solo para este producto. Los clientes ven el precio normal tachado y pagan el de
+              oferta. Déjalo vacío para quitarla.
+            </p>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="sale-price" className="mb-1 block text-sm text-ivory-dim">Precio en oferta (COP)</label>
+                <input
+                  id="sale-price"
+                  type="number"
+                  min="0"
+                  value={values.salePrice}
+                  onChange={handleChange('salePrice')}
+                  placeholder="Ej. 89000"
+                  className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
+                />
+                {errors.salePrice && <p className="mt-1 text-xs text-danger">{errors.salePrice}</p>}
+              </div>
+              <div>
+                <label htmlFor="sale-ends" className="mb-1 block text-sm text-ivory-dim">Oferta válida hasta (opcional)</label>
+                <input
+                  id="sale-ends"
+                  type="date"
+                  value={values.saleEndsOn}
+                  onChange={handleChange('saleEndsOn')}
+                  disabled={values.salePrice === ''}
+                  className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none disabled:opacity-50"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="mb-1 block text-sm text-ivory-dim">Descripción corta</label>
@@ -196,7 +251,7 @@ export function ProductFormModal({ open, product, onClose, onSaved }) {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             className="w-full text-sm text-ivory-dim file:mr-4 file:rounded-full file:border-0 file:bg-gold file:px-4 file:py-2 file:text-sm file:font-medium file:text-on-gold"
           />
         </div>

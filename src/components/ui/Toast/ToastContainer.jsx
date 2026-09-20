@@ -2,7 +2,7 @@ import { useToast } from '@/hooks/useToast'
 
 const TYPE_CLASSES = {
   success: 'border-emerald-500/40 text-emerald-300',
-  error: 'border-red-500/40 text-red-300',
+  error: 'border-red-500/40 text-danger',
   info: 'border-gold/40 text-gold-light',
 }
 

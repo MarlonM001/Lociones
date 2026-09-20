@@ -24,6 +24,21 @@ router.post(
   }),
 )
 
+// Seguimiento sin cuenta: pedido + teléfono. El límite frena a quien intente adivinar teléfonos.
+const trackOrderLimiter = rateLimitByIp({
+  windowMs: 10 * 60 * 1000,
+  max: 20,
+  message: 'Demasiadas consultas seguidas. Espera unos minutos e intenta de nuevo.',
+})
+
+router.post(
+  '/track',
+  trackOrderLimiter,
+  asyncHandler(async (req, res) => {
+    res.json(await ordersService.getOrderTracking(req.body ?? {}))
+  }),
+)
+
 router.get(
   '/',
   requireAuth,

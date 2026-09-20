@@ -1,6 +1,7 @@
 import { getOrders } from '@/services/orders'
 import { getProductCategoryMap } from '@/services/products'
 import { CATEGORIES } from '@/config/categories'
+import { ORDER_STATUSES } from '@/services/orders/statuses'
 
 /**
  * Resumen de ventas de un mes calendario, cruzando pedidos con el catálogo
@@ -13,6 +14,8 @@ import { CATEGORIES } from '@/config/categories'
 export async function getMonthlySummary(year, month) {
   const [orders, categoryByProductId] = await Promise.all([getOrders(), getProductCategoryMap()])
   const monthOrders = orders.filter((order) => {
+    // Un pedido cancelado no es una venta: no suma ingresos, unidades ni ranking.
+    if (order.status === ORDER_STATUSES.CANCELADO) return false
     const date = new Date(order.createdAt)
     return date.getFullYear() === year && date.getMonth() + 1 === month
   })

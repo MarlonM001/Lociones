@@ -1,13 +1,15 @@
 import { ApiError } from '../utils/ApiError.js'
 
 /**
- * IP real del cliente. Detrás del túnel de Cloudflare la conexión siempre
- * llega desde el túnel, así que la IP verdadera viene en `CF-Connecting-IP`
- * (Cloudflare la sobrescribe, el cliente no puede falsearla porque el API solo
- * es alcanzable desde fuera a través del túnel).
+ * IP real del cliente. Detrás del túnel de Cloudflare la conexión siempre llega desde el
+ * túnel, así que la IP verdadera viene en `CF-Connecting-IP`. Esa cabecera solo es de fiar
+ * cuando el API únicamente es alcanzable a través de Cloudflare; si el servidor queda expuesto
+ * directo cualquiera podría falsearla y saltarse los límites. Por eso solo se usa si
+ * TRUST_CF_CONNECTING_IP=true en el .env. Sin eso se usa la IP de la conexión.
  */
 export function getClientIp(req) {
-  return req.headers['cf-connecting-ip'] || req.socket?.remoteAddress || 'unknown'
+  const trustCloudflare = process.env.TRUST_CF_CONNECTING_IP === 'true'
+  return (trustCloudflare && req.headers['cf-connecting-ip']) || req.socket?.remoteAddress || 'unknown'
 }
 
 /**

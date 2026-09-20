@@ -1,0 +1,12 @@
+# Essence Polar — reglas para buscadores.
+# Si la tienda cambia de dirección (dominio propio), actualiza la línea "Sitemap" y el archivo sitemap.xml.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /carrito
+Disallow: /perfil
+Disallow: /seguimiento
+Disallow: /login
+Disallow: /registro
+
+Sitemap: https://lociones-sable.vercel.app/sitemap.xml

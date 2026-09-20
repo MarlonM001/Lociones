@@ -16,7 +16,7 @@ function formatOrderItemsBlock(items) {
  */
 export function buildWhatsAppMessage(order) {
   return [
-    'Hola, quiero realizar el siguiente pedido:',
+    `Hola, quiero realizar el siguiente pedido (#${order.id}):`,
     '',
     `*Cliente:* ${order.customerName}`,
     `*Teléfono:* ${order.customerPhone}`,

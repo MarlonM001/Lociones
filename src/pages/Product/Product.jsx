@@ -3,7 +3,9 @@ import { useParams, Link } from 'react-router-dom'
 import { getProductBySlug, getRelatedProducts } from '@/services/products'
 import { getCategoryById } from '@/config/categories'
 import { generateWhatsAppProductInquiry } from '@/services/whatsapp'
-import { Price } from '@/components/ui/Price'
+import { PriceTag } from '@/components/ui/Price'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
+import { STORE_CONFIG } from '@/config/store'
 import { parseNotes } from '@/utils/parseNotes'
 import { useCart } from '@/hooks/useCart'
 import { useToast } from '@/hooks/useToast'
@@ -46,6 +48,35 @@ export function Product() {
       cancelled = true
     }
   }, [slug])
+
+  // Título, descripción y datos estructurados (Google los usa para mostrar precio y disponibilidad).
+  useDocumentMeta(
+    product
+      ? {
+          title: product.name,
+          description: `${product.name}: ${product.description}`.slice(0, 158),
+          image: product.image,
+          jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.name,
+            image: [product.image],
+            description: product.description,
+            sku: product.sku,
+            offers: {
+              '@type': 'Offer',
+              url: `${window.location.origin}/producto/${product.slug}`,
+              priceCurrency: STORE_CONFIG.currency,
+              price: product.price,
+              itemCondition: 'https://schema.org/NewCondition',
+              availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+              ...(product.onSale && product.saleEndsOn && { priceValidUntil: product.saleEndsOn }),
+              seller: { '@type': 'Organization', name: STORE_CONFIG.name },
+            },
+          },
+        }
+      : { title: loading ? 'Producto' : 'Producto no encontrado', noindex: !loading },
+  )
 
   if (loading) return <Loading fullScreen label="Cargando producto..." />
 
@@ -136,7 +167,7 @@ export function Product() {
                       />
                     ))}
                   </div>
-                  <span className="text-[9px] uppercase tracking-wide text-ivory-dim">Notas</span>
+                  <span className="text-[11px] uppercase tracking-wide text-ivory-dim">Notas</span>
                 </button>
               )}
             </div>
@@ -147,8 +178,14 @@ export function Product() {
           <span className="text-xs uppercase tracking-widest-plus text-gold">{category?.name}</span>
           <h1 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">{product.name}</h1>
           <p className="mt-4">
-            <Price value={product.price} className="text-2xl text-gold sm:text-3xl" />
+            <PriceTag product={product} className="text-2xl text-gold sm:text-3xl" />
           </p>
+          {product.onSale && product.saleEndsOn && (
+            <p className="mt-1 text-sm text-danger">
+              Oferta válida hasta el{' '}
+              {new Date(`${product.saleEndsOn}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}
+            </p>
+          )}
 
           <p className="mt-6 leading-relaxed text-ivory-dim">{product.description}</p>
 

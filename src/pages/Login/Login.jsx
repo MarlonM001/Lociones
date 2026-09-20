@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
@@ -13,6 +14,7 @@ const RULES = {
 }
 
 export function Login() {
+  useDocumentMeta({ title: 'Iniciar sesión', noindex: true })
   const { login } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
@@ -67,7 +69,7 @@ export function Login() {
         className="mt-8 flex flex-col gap-4 rounded-2xl border border-ivory/10 bg-charcoal p-6 sm:p-8"
       >
         {formError && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-danger">
             {formError}
           </div>
         )}
@@ -82,7 +84,7 @@ export function Login() {
             onChange={handleChange('email')}
             className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2.5 text-ivory focus:border-gold focus:outline-none"
           />
-          {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+          {errors.email && <p className="mt-1 text-xs text-danger">{errors.email}</p>}
         </div>
 
         <div>
@@ -95,7 +97,7 @@ export function Login() {
             onChange={handleChange('password')}
             className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2.5 text-ivory focus:border-gold focus:outline-none"
           />
-          {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
+          {errors.password && <p className="mt-1 text-xs text-danger">{errors.password}</p>}
         </div>
 
         <Button type="submit" variant="primary" size="lg" disabled={submitting} fullWidth>

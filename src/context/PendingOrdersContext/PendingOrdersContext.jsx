@@ -3,6 +3,7 @@ import { getPendingOrdersSummary } from '@/services/orders'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
 import { formatCurrency } from '@/utils/formatCurrency'
+import { setTitleBadge } from '@/utils/documentTitle'
 import {
   isAudioReady,
   onAudioReadyChange,
@@ -16,7 +17,6 @@ export const PendingOrdersContext = createContext(null)
 const POLL_INTERVAL_MS = 60_000
 const ALERT_TOAST_MS = 10_000
 const SOUND_PREFERENCE_KEY = 'essence_admin_sound'
-const ALERT_TITLE = '🔔 ¡Nuevo pedido!'
 // Eventos que el navegador reconoce como "el usuario interactuó" y con los que deja activar el audio.
 const GESTURE_EVENTS = ['pointerdown', 'pointerup', 'keydown', 'touchend', 'click']
 
@@ -105,28 +105,13 @@ export function PendingOrdersProvider({ children }) {
 
   const pending = isAdmin ? summary.pending : 0
 
-  // Con el panel en otra pestaña, el título avisa sin tener que mirarla: muestra el número de
-  // pedidos sin atender y, si llegó uno nuevo, parpadea con la campana hasta que vuelvas.
+  // Con el panel en otra pestaña, el título avisa sin tener que mirarla: muestra el número de pedidos sin
+  // atender y, si llegó uno nuevo, parpadea con la campana hasta que vuelvas. Se hace por documentTitle
+  // para convivir con los títulos propios de cada página.
   useEffect(() => {
     if (!isAdmin) return undefined
-    const baseTitle = document.title.replace(/^\(\d+\) /, '')
-    const counted = pending > 0 ? `(${pending}) ${baseTitle}` : baseTitle
-    if (!attention) {
-      document.title = counted
-      return () => {
-        document.title = baseTitle
-      }
-    }
-    let showAlert = true
-    document.title = ALERT_TITLE
-    const flashId = setInterval(() => {
-      showAlert = !showAlert
-      document.title = showAlert ? ALERT_TITLE : counted
-    }, 1000)
-    return () => {
-      clearInterval(flashId)
-      document.title = baseTitle
-    }
+    setTitleBadge({ pending, alert: attention })
+    return () => setTitleBadge({ pending: 0, alert: false })
   }, [isAdmin, pending, attention])
 
   const toggleSound = useCallback(() => {

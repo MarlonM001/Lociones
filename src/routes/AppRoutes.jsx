@@ -12,8 +12,9 @@ import { Register } from '@/pages/Register'
 import { References } from '@/pages/References'
 import { Profile } from '@/pages/Profile'
 import { Terms } from '@/pages/Terms'
+import { OrderTracking } from '@/pages/OrderTracking'
 import { Privacy } from '@/pages/Privacy'
-import { ComingSoon } from '@/pages/ComingSoon'
+import { NotFound } from '@/pages/NotFound'
 import { AdminDashboard } from '@/pages/admin/Dashboard'
 import { AdminProducts } from '@/pages/admin/Products'
 import { AdminBestsellers } from '@/pages/admin/Bestsellers'
@@ -58,6 +59,7 @@ export function AppRoutes() {
         <Route path="/subastas" element={<Auctions />} />
         <Route path="/subastas/:slug" element={<AuctionDetail />} />
         <Route path="/carrito" element={<CartPage />} />
+        <Route path="/seguimiento" element={<OrderTracking />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
         <Route path="/referencias" element={<References />} />
@@ -73,7 +75,7 @@ export function AppRoutes() {
         />
         <Route
           path="*"
-          element={<ComingSoon title="Página no encontrada" message="El contenido que buscas no existe o fue movido." />}
+          element={<NotFound />}
         />
       </Route>
     </Routes>

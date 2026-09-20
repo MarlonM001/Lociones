@@ -1,45 +1,56 @@
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler.js'
-import { requireAuth, requireAdmin } from '../middleware/auth.js'
-import { uploadProductImage, publicUploadUrl } from '../middleware/upload.js'
+import { requireAuth, requireAdmin, attachUserIfPresent } from '../middleware/auth.js'
+import { uploadProductImage, verifyImageSignatures, publicUploadUrl } from '../middleware/upload.js'
 import { ApiError } from '../utils/ApiError.js'
+import { parseLimit, queryText } from '../utils/validation.js'
 import * as productsService from '../services/products.service.js'
 
 const router = Router()
 
 router.get(
   '/',
+  attachUserIfPresent,
   asyncHandler(async (req, res) => {
     const { categoryId, search, includeInactive } = req.query
     const products = await productsService.getProducts({
-      categoryId: categoryId || undefined,
-      search: search || undefined,
-      includeInactive: includeInactive === 'true',
+      categoryId: queryText(categoryId),
+      search: queryText(search),
+      // Los productos ocultos solo los ve el admin; para el resto el parámetro se ignora.
+      includeInactive: includeInactive === 'true' && req.user?.role === 'admin',
     })
     res.json(products)
+  }),
+)
+
+// Precio vigente y stock de varios productos (refresca el carrito): /api/products/prices?ids=1,2,3
+router.get(
+  '/prices',
+  asyncHandler(async (req, res) => {
+    const ids = typeof req.query.ids === 'string' ? req.query.ids.split(',').map((id) => Number(id.trim())) : []
+    res.json(await productsService.getProductPrices(ids))
   }),
 )
 
 router.get(
   '/featured',
   asyncHandler(async (req, res) => {
-    const limit = req.query.limit ? Number(req.query.limit) : 8
-    res.json(await productsService.getFeaturedProducts(limit))
+    res.json(await productsService.getFeaturedProducts(parseLimit(req.query.limit, 8)))
   }),
 )
 
 router.get(
   '/bestsellers',
   asyncHandler(async (req, res) => {
-    const limit = req.query.limit ? Number(req.query.limit) : 8
-    res.json(await productsService.getBestsellerProducts(limit))
+    res.json(await productsService.getBestsellerProducts(parseLimit(req.query.limit, 8)))
   }),
 )
 
 router.get(
   '/:slug',
+  attachUserIfPresent,
   asyncHandler(async (req, res) => {
-    const product = await productsService.getProductBySlug(req.params.slug)
+    const product = await productsService.getProductBySlug(req.params.slug, { includeInactive: req.user?.role === 'admin' })
     if (!product) throw ApiError.notFound('Producto no encontrado.')
     res.json(product)
   }),
@@ -50,8 +61,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const product = await productsService.getProductBySlug(req.params.slug)
     if (!product) throw ApiError.notFound('Producto no encontrado.')
-    const limit = req.query.limit ? Number(req.query.limit) : 4
-    res.json(await productsService.getRelatedProducts(product, limit))
+    res.json(await productsService.getRelatedProducts(product, parseLimit(req.query.limit, 4, 24)))
   }),
 )
 
@@ -65,6 +75,7 @@ router.post(
   requireAuth,
   requireAdmin,
   uploadProductImages,
+  verifyImageSignatures,
   asyncHandler(async (req, res) => {
     const imageUrl = req.files?.image?.[0] ? publicUploadUrl('products', req.files.image[0].filename) : undefined
     const bestsellerImageUrl = req.files?.bestsellerImage?.[0]
@@ -85,6 +96,7 @@ router.patch(
   requireAuth,
   requireAdmin,
   uploadProductImages,
+  verifyImageSignatures,
   asyncHandler(async (req, res) => {
     const updates = { ...req.body }
     if (typeof updates.active === 'string') updates.active = updates.active === 'true'

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { getReferences } from '@/services/references'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -6,6 +7,7 @@ import { UploadReferenceForm } from './UploadReferenceForm'
 import { ReferenceCard } from './ReferenceCard'
 
 export function References() {
+  useDocumentMeta({ title: 'Referencias de entrega', description: 'Videos y fotos reales de las entregas de Essence Polar, compartidos por nuestros clientes.' })
   const [references, setReferences] = useState([])
   const [loading, setLoading] = useState(true)
 

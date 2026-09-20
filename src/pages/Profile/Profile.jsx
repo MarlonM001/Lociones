@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { useAuth } from '@/hooks/useAuth'
 import { getOrdersByUser } from '@/services/orders'
 import { getReferencesByUser } from '@/services/references'
@@ -9,6 +10,7 @@ import { OrderCard } from './OrderCard'
 import { MyReferenceCard } from './MyReferenceCard'
 
 export function Profile() {
+  useDocumentMeta({ title: 'Mi cuenta', noindex: true })
   const { user } = useAuth()
   const [orders, setOrders] = useState([])
   const [references, setReferences] = useState([])
@@ -30,19 +32,19 @@ export function Profile() {
 
       <div className="mt-6 grid gap-4 rounded-2xl border border-ivory/5 bg-charcoal p-6 sm:grid-cols-2">
         <div>
-          <p className="text-xs uppercase tracking-widest-plus text-gold/80">Nombre</p>
+          <p className="text-xs uppercase tracking-widest-plus text-gold">Nombre</p>
           <p className="mt-1 text-ivory">{user.name}</p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-widest-plus text-gold/80">Email</p>
+          <p className="text-xs uppercase tracking-widest-plus text-gold">Email</p>
           <p className="mt-1 text-ivory">{user.email}</p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-widest-plus text-gold/80">Teléfono</p>
+          <p className="text-xs uppercase tracking-widest-plus text-gold">Teléfono</p>
           <p className="mt-1 text-ivory">{user.phone}</p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-widest-plus text-gold/80">Ciudad</p>
+          <p className="text-xs uppercase tracking-widest-plus text-gold">Ciudad</p>
           <p className="mt-1 text-ivory">{user.city || '—'}</p>
         </div>
       </div>

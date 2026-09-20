@@ -96,7 +96,7 @@ export function AuctionBidsModal({ open, auction, onClose }) {
                             href={buildBidWhatsAppLink(auction, bid)}
                             target="_blank"
                             rel="noopener"
-                            className="text-emerald-400 hover:underline"
+                            className="text-success hover:underline"
                           >
                             {bid.bidder.phone}
                           </a>

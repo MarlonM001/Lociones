@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getOrders, deleteOrder } from '@/services/orders'
-import { ORDER_STATUS_LABELS, ORDER_STATUS_SEQUENCE } from '@/services/orders/statuses'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_ALL } from '@/services/orders/statuses'
 import { useToast } from '@/hooks/useToast'
 import { usePendingOrders } from '@/hooks/usePendingOrders'
 import { Loading } from '@/components/ui/Loading'
@@ -35,9 +35,14 @@ export function AdminOrders() {
   const filteredOrders = statusFilter ? orders.filter((order) => order.status === statusFilter) : orders
 
   const handleDelete = async () => {
-    await deleteOrder(deletingOrder.id)
-    showToast(`Pedido #${deletingOrder.id} eliminado`)
+    const order = deletingOrder
     setDeletingOrder(null)
+    try {
+      await deleteOrder(order.id)
+      showToast(`Pedido #${order.id} eliminado`)
+    } catch (error) {
+      showToast(error.message || 'No pudimos eliminar el pedido.', 'error')
+    }
     loadOrders()
   }
 
@@ -56,7 +61,7 @@ export function AdminOrders() {
         >
           Todos
         </button>
-        {ORDER_STATUS_SEQUENCE.map((status) => (
+        {ORDER_STATUS_ALL.map((status) => (
           <button
             key={status}
             type="button"

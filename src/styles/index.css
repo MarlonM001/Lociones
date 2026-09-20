@@ -15,10 +15,17 @@
   --color-gold: #c8a45c;
   --color-gold-light: #e4c988;
   --color-gold-dark: #9c7c3d;
+  /* Fondo de los botones dorados al pasar el ratón por encima. */
+  --color-gold-hover: #e4c988;
 
-  /* Texto sobre fondo dorado (botones primarios): siempre oscuro, en
-     ambos temas, porque el dorado no cambia de brillo entre tema claro/oscuro. */
+  /* Texto sobre fondo dorado (botones primarios). Oscuro sobre el dorado claro del tema oscuro; el tema
+     claro lo redefine porque allí el dorado es oscuro. */
   --color-on-gold: #0d0c0b;
+
+  /* Colores de estado (disponible, error...). Cada tema tiene su tono para que se lean bien: el verde y el
+     rojo claros que van bien sobre fondo oscuro casi desaparecen sobre fondo marfil. */
+  --color-success: #34d399;
+  --color-danger: #f87171;
 }
 
 :root[data-theme="light"] {
@@ -33,6 +40,11 @@
   --color-gold: #7d5f22;
   --color-gold-light: #c8a45c;
   --color-gold-dark: #63491a;
+  --color-gold-hover: #63491a;
+  /* El dorado del tema claro es oscuro (#7d5f22): con texto oscuro solo llegaba a 3,3:1; con texto claro llega a ~5,8:1. */
+  --color-on-gold: #fffdf9;
+  --color-success: #047857;
+  --color-danger: #b91c1c;
 }
 
 @layer base {

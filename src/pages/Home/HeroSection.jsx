@@ -112,6 +112,9 @@ export function HeroSection() {
         <div className="relative">
           {HERO_SLIDES.map((slide, slideIndex) => {
             const isActive = slideIndex === index
+            // Solo la diapositiva visible es el título H1 de la página; las otras usan un párrafo con el mismo
+            // aspecto (una página con cuatro H1 confunde a los buscadores y a los lectores de pantalla).
+            const Heading = isActive ? 'h1' : 'p'
             return (
               <div
                 key={slide.id}
@@ -126,9 +129,9 @@ export function HeroSection() {
                   <span className="h-1.5 w-1.5 rotate-45 bg-gold" />
                   <span className="h-px w-8 bg-gold/50" />
                 </div>
-                <h1 className="mt-4 font-display text-4xl leading-tight text-ivory text-balance sm:text-5xl lg:text-6xl">
+                <Heading className="mt-4 font-display text-4xl leading-tight text-ivory text-balance sm:text-5xl lg:text-6xl">
                   {slide.titleBefore} <span className="text-gold">{slide.titleHighlight}</span> {slide.titleAfter}
-                </h1>
+                </Heading>
                 <p className="mt-6 max-w-lg text-base leading-relaxed text-ivory-dim">{slide.description}</p>
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Button to={slide.primaryCta.to} variant="primary" size="lg">
@@ -199,10 +202,15 @@ export function HeroSection() {
               type="button"
               aria-label={`Ir a la diapositiva ${dotIndex + 1}`}
               onClick={() => goTo(dotIndex)}
-              className={`h-1.5 rounded-full transition-all ${
-                dotIndex === index ? 'w-6 bg-gold' : 'w-1.5 bg-ivory/30 hover:bg-ivory/50'
-              }`}
-            />
+              className="group flex h-11 items-center justify-center px-1"
+            >
+              {/* El punto se ve pequeño, pero el botón mide 44 px de alto para poder tocarlo bien en el celular. */}
+              <span
+                className={`block h-1.5 rounded-full transition-all ${
+                  dotIndex === index ? 'w-6 bg-gold' : 'w-1.5 bg-ivory/30 group-hover:bg-ivory/50'
+                }`}
+              />
+            </button>
           ))}
         </div>
 

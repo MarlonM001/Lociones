@@ -26,6 +26,10 @@ export function createApp() {
     res.setHeader('X-Frame-Options', 'DENY')
     res.setHeader('X-Content-Type-Options', 'nosniff')
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+    // Solo si la petición llegó por HTTPS (directo o vía el proxy/túnel), para no forzarlo en pruebas locales.
+    if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+    }
     next()
   })
 

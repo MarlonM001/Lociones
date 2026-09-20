@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useDocumentMeta } from '@/hooks/useDocumentMeta'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { STORE_CONFIG } from '@/config/store'
 import { useAuth } from '@/hooks/useAuth'
@@ -68,6 +69,7 @@ function SidebarContent({ onNavigate }) {
 }
 
 export function AdminLayout() {
+  useDocumentMeta({ title: 'Panel de administración', noindex: true })
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)

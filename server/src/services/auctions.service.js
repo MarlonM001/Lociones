@@ -268,9 +268,12 @@ export async function deleteAuction(id) {
   if (rowCount === 0) throw ApiError.notFound('Subasta no encontrada.')
 }
 
+// Tope de una puja: evita montos absurdos que desbordan la columna o arruinan la subasta por error.
+const MAX_BID_AMOUNT = 100_000_000
+
 export async function placeBid({ auctionId, userId, amount }) {
   const normalizedAmount = Number(amount)
-  if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+  if (!Number.isInteger(normalizedAmount) || normalizedAmount <= 0 || normalizedAmount > MAX_BID_AMOUNT) {
     throw ApiError.badRequest('El monto de la puja no es válido.')
   }
 

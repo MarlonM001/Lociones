@@ -1,6 +1,13 @@
 import { Server } from 'socket.io'
 import jwt from 'jsonwebtoken'
 import * as chatService from '../services/chat.service.js'
+import { createCounter, getClientIp } from '../middleware/rateLimit.js'
+
+// Frenos contra quien intente llenar la bandeja del admin: por IP (conversaciones nuevas y mensajes) y por conexión.
+const INIT_LIMIT = { windowMs: 10 * 60 * 1000, max: 20 }
+const MESSAGE_LIMIT_PER_IP = { windowMs: 10 * 60 * 1000, max: 80 }
+const MESSAGE_BURST = { windowMs: 60 * 1000, max: 15 }
+const TOO_FAST = 'Estás escribiendo muy rápido. Espera un momento.'
 
 /**
  * Chat en vivo. Un socket es "admin" (ve todo, se une a cada conversación que
@@ -15,14 +22,21 @@ export function attachChatSocket(httpServer) {
 
   const io = new Server(httpServer, {
     cors: { origin: allowedOrigins.length ? allowedOrigins : false },
+    // Un mensaje de chat son unos pocos cientos de bytes: lo demás es abuso.
+    maxHttpBufferSize: 20_000,
   })
+
+  const initsByIp = createCounter({ windowMs: INIT_LIMIT.windowMs })
+  const messagesByIp = createCounter({ windowMs: MESSAGE_LIMIT_PER_IP.windowMs })
 
   io.on('connection', (socket) => {
     const { token, guestId } = socket.handshake.auth ?? {}
+    const ip = getClientIp({ headers: socket.handshake.headers, socket: { remoteAddress: socket.handshake.address } })
+    const recentMessages = []
 
     if (token) {
       try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET)
+        const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] })
         socket.data.userId = payload.sub
         socket.data.isAdmin = payload.role === 'admin'
       } catch {
@@ -33,11 +47,12 @@ export function attachChatSocket(httpServer) {
     if (socket.data.isAdmin) {
       socket.join('admins')
     } else {
-      socket.data.guestId = guestId ?? null
+      socket.data.guestId = chatService.isValidGuestId(guestId) ? guestId : null
     }
 
     socket.on('chat:init', async ({ guestId: incomingGuestId, name, phone } = {}, ack) => {
       if (socket.data.isAdmin) return
+      if (initsByIp.hit(ip) > INIT_LIMIT.max) return ack?.({ ok: false, error: TOO_FAST })
       try {
         const conversation = await chatService.findOrCreateConversation({
           userId: socket.data.userId ?? null,
@@ -69,6 +84,14 @@ export function attachChatSocket(httpServer) {
     })
 
     socket.on('chat:message', async ({ conversationId, body } = {}, ack) => {
+      if (!socket.data.isAdmin) {
+        const now = Date.now()
+        while (recentMessages.length && now - recentMessages[0] > MESSAGE_BURST.windowMs) recentMessages.shift()
+        if (recentMessages.length >= MESSAGE_BURST.max || messagesByIp.hit(ip) > MESSAGE_LIMIT_PER_IP.max) {
+          return ack?.({ ok: false, error: TOO_FAST })
+        }
+        recentMessages.push(now)
+      }
       try {
         const targetId = socket.data.isAdmin ? Number(conversationId) : socket.data.conversationId
         if (!targetId) throw new Error('No hay una conversación activa.')

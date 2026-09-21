@@ -2,6 +2,7 @@ import { Server } from 'socket.io'
 import jwt from 'jsonwebtoken'
 import * as chatService from '../services/chat.service.js'
 import { createCounter, getClientIp } from '../middleware/rateLimit.js'
+import { AUCTION_ROOM, setRealtimeServer } from './liveEvents.js'
 
 // Frenos contra quien intente llenar la bandeja del admin: por IP (conversaciones nuevas y mensajes) y por conexión.
 const INIT_LIMIT = { windowMs: 10 * 60 * 1000, max: 20 }
@@ -26,6 +27,8 @@ export function attachChatSocket(httpServer) {
     maxHttpBufferSize: 20_000,
   })
 
+  setRealtimeServer(io)
+
   const initsByIp = createCounter({ windowMs: INIT_LIMIT.windowMs })
   const messagesByIp = createCounter({ windowMs: MESSAGE_LIMIT_PER_IP.windowMs })
 
@@ -43,6 +46,10 @@ export function attachChatSocket(httpServer) {
         // Token inválido: sigue como invitado.
       }
     }
+
+    // La sala de subasta es pública (solo lectura): cualquiera puede mirar las pujas, con o sin cuenta.
+    socket.on('auction:watch', () => socket.join(AUCTION_ROOM))
+    socket.on('auction:unwatch', () => socket.leave(AUCTION_ROOM))
 
     if (socket.data.isAdmin) {
       socket.join('admins')

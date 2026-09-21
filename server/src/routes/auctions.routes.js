@@ -4,6 +4,7 @@ import { requireAuth, requireAdmin, attachUserIfPresent } from '../middleware/au
 import { uploadAuctionImage, verifyImageSignatures, publicUploadUrl } from '../middleware/upload.js'
 import { ApiError } from '../utils/ApiError.js'
 import * as auctionsService from '../services/auctions.service.js'
+import { broadcastAuctionBid } from '../realtime/liveEvents.js'
 
 /** La lista de productos llega como texto JSON dentro del formulario; si viene mal armada es un error 400. */
 function parseItems(raw) {
@@ -67,6 +68,16 @@ router.get(
   }),
 )
 
+// Pujas visibles para todo el público (nombres abreviados). Las del admin, con contactos, van en /:id/bids.
+router.get(
+  '/:id/feed',
+  asyncHandler(async (req, res) => {
+    const auctionId = Number(req.params.id)
+    if (!Number.isInteger(auctionId)) throw ApiError.badRequest('Subasta no válida.')
+    res.json(await auctionsService.getPublicBidFeed(auctionId))
+  }),
+)
+
 router.get(
   '/:id/bids',
   requireAuth,
@@ -80,10 +91,17 @@ router.post(
   '/:id/bids',
   requireAuth,
   asyncHandler(async (req, res) => {
-    const auction = await auctionsService.placeBid({
+    const { lastBid, ...auction } = await auctionsService.placeBid({
       auctionId: Number(req.params.id),
       userId: req.user.id,
       amount: req.body.amount,
+    })
+    broadcastAuctionBid({
+      auctionId: auction.id,
+      bid: lastBid,
+      currentPrice: auction.currentPrice,
+      bidCount: auction.bidCount,
+      nextMinBid: auction.nextMinBid,
     })
     res.status(201).json(auction)
   }),

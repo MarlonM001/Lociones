@@ -21,7 +21,16 @@ import {
 import { savePromoBanner, discountedPrice } from '../src/services/promotions.service.js'
 import { addMessage, findOrCreateConversation, isValidGuestId } from '../src/services/chat.service.js'
 import { assertCanUpload, addReference } from '../src/services/references.service.js'
-import { placeBid } from '../src/services/auctions.service.js'
+import {
+  placeBid,
+  createAuction,
+  deleteAuction,
+  getAuctionConfig,
+  setAuctionConfig,
+  getPublicBidFeed,
+  maskBidderName,
+} from '../src/services/auctions.service.js'
+import { setRealtimeServer } from '../src/realtime/liveEvents.js'
 import { registerUser } from '../src/services/auth.service.js'
 
 let baseUrl
@@ -725,4 +734,69 @@ test('promoción: entradas inválidas se rechazan', async () => {
       await assert.rejects(savePromoBanner({ ...base, expiresAt: 'mañana' }, { client }), /fecha/)
     })
   })
+})
+
+test('sala de subasta: los nombres se abrevian y no se filtra ningún dato de contacto', () => {
+  assert.equal(maskBidderName('Ana Pérez Gómez'), 'Ana P.')
+  assert.equal(maskBidderName('  marlon   morales '), 'marlon M.')
+  assert.equal(maskBidderName('Ana'), 'Ana')
+  for (const empty of ['', '   ', null, undefined]) assert.equal(maskBidderName(empty), 'Participante')
+  assert.ok(maskBidderName('x'.repeat(200)).length <= 20)
+})
+
+test('sala de subasta: cada puja se anuncia en vivo y el feed público la muestra sin datos privados', async () => {
+  const product = await firstProductWithStock(1)
+  const { user, headers } = await registerTestUser('sala')
+  const wasEnabled = (await getAuctionConfig()).enabled
+  let auctionId
+  const announced = []
+  setRealtimeServer({ to: (room) => ({ emit: (event, payload) => announced.push({ room, event, payload }) }) })
+  try {
+    if (!wasEnabled) await setAuctionConfig(true)
+    const now = Date.now()
+    const auction = await createAuction({
+      title: 'Subasta de prueba sala',
+      startingPrice: 50000,
+      minIncrement: 5000,
+      startsAt: new Date(now - 60_000).toISOString(),
+      endsAt: new Date(now + 3_600_000).toISOString(),
+      items: [{ productId: product.id, quantity: 1 }],
+    })
+    auctionId = auction.id
+
+    const first = await postJson(`/api/auctions/${auctionId}/bids`, { amount: 50000 }, headers)
+    assert.equal(first.status, 201)
+    const body = await first.json()
+    assert.equal(body.lastBid, undefined, 'la respuesta no lleva el aviso interno')
+
+    assert.equal(announced.length, 1)
+    assert.equal(announced[0].room, 'auction-room')
+    assert.equal(announced[0].event, 'auction:bid')
+    assert.equal(announced[0].payload.auctionId, auctionId)
+    assert.equal(announced[0].payload.bid.amount, 50000)
+    assert.equal(announced[0].payload.bid.bidder, 'Usuario S.')
+    assert.equal(announced[0].payload.currentPrice, 50000)
+    assert.equal(announced[0].payload.nextMinBid, 55000)
+
+    // Una puja rechazada no se anuncia.
+    const rejected = await postJson(`/api/auctions/${auctionId}/bids`, { amount: 50001 }, headers)
+    assert.equal(rejected.status, 400)
+    assert.equal(announced.length, 1)
+
+    await postJson(`/api/auctions/${auctionId}/bids`, { amount: 55000 }, headers)
+    const feedRes = await fetch(`${baseUrl}/api/auctions/${auctionId}/feed`)
+    assert.equal(feedRes.status, 200)
+    const feed = await feedRes.json()
+    assert.deepEqual(feed.map((bid) => bid.amount), [55000, 50000], 'la más reciente primero')
+    assert.deepEqual(Object.keys(feed[0]).sort(), ['amount', 'bidder', 'createdAt', 'id'])
+    assert.ok(!JSON.stringify(feed).includes(user.email))
+
+    assert.equal((await getPublicBidFeed(auctionId)).length, 2)
+    assert.equal((await fetch(`${baseUrl}/api/auctions/abc/feed`)).status, 400)
+  } finally {
+    setRealtimeServer(null)
+    if (auctionId) await deleteAuction(auctionId)
+    if (!wasEnabled) await setAuctionConfig(false)
+    await removeTestUser(user.id)
+  }
 })

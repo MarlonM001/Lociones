@@ -299,14 +299,57 @@ export async function placeBid({ auctionId, userId, amount }) {
       throw ApiError.badRequest(`La puja mínima es ${minRequired}.`)
     }
 
-    await client.query(
-      'INSERT INTO auction_bids (auction_id, user_id, amount) VALUES ($1, $2, $3)',
+    const { rows: inserted } = await client.query(
+      'INSERT INTO auction_bids (auction_id, user_id, amount) VALUES ($1, $2, $3) RETURNING id, created_at',
       [auctionId, userId, normalizedAmount],
     )
+    const { rows: bidderRows } = await client.query('SELECT name FROM users WHERE id = $1', [userId])
 
     const [publicAuction] = await attachExtras([auction], userId, client)
-    return publicAuction
+    // `lastBid` es lo que se anuncia a los demás participantes: con el nombre abreviado, nunca datos de contacto.
+    return {
+      ...publicAuction,
+      lastBid: {
+        id: inserted[0].id,
+        bidder: maskBidderName(bidderRows[0]?.name),
+        amount: normalizedAmount,
+        createdAt: inserted[0].created_at,
+      },
+    }
   })
+}
+
+/**
+ * Nombre como lo ven los demás participantes: el nombre y la inicial del apellido ("Ana P."). Así se
+ * sabe que las pujas son de personas reales sin exponer su identidad completa ni ningún dato de contacto.
+ */
+export function maskBidderName(name) {
+  const parts = String(name ?? '').trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return 'Participante'
+  const first = parts[0].slice(0, 20)
+  const initial = parts[1]?.[0]
+  return initial ? `${first} ${initial.toUpperCase()}.` : first
+}
+
+const FEED_LIMIT = 30
+
+/** Últimas pujas de una subasta para mostrarlas a todo el público, de la más reciente a la más antigua. */
+export async function getPublicBidFeed(auctionId) {
+  const { rows } = await pool.query(
+    `SELECT ab.id, ab.amount, ab.created_at, u.name
+     FROM auction_bids ab
+     JOIN users u ON u.id = ab.user_id
+     WHERE ab.auction_id = $1
+     ORDER BY ab.id DESC
+     LIMIT $2`,
+    [auctionId, FEED_LIMIT],
+  )
+  return rows.map((row) => ({
+    id: row.id,
+    bidder: maskBidderName(row.name),
+    amount: row.amount,
+    createdAt: row.created_at,
+  }))
 }
 
 export async function getAuctionBidsAdmin(auctionId) {

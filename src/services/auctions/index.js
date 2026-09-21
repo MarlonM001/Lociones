@@ -43,6 +43,11 @@ export async function placeBid(auctionId, amount) {
   return toPublicAuction(auction)
 }
 
+/** Últimas pujas de una subasta, visibles para todos (nombres abreviados, sin datos de contacto). */
+export async function getAuctionFeed(auctionId) {
+  return apiFetch(`/api/auctions/${auctionId}/feed`)
+}
+
 export async function getAuctionBidsAdmin(auctionId) {
   return apiFetch(`/api/auctions/${auctionId}/bids`)
 }

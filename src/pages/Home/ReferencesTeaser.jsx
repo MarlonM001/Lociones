@@ -7,6 +7,13 @@ import { ReferenceMedia } from '@/components/references/ReferenceMedia'
 
 const REFERENCES_LIMIT = 3
 
+/** Solo suena un video de ejemplo a la vez: al darle play a uno se pausan los demás. */
+function pauseOtherExamples(event) {
+  document.querySelectorAll('video[data-example-video]').forEach((video) => {
+    if (video !== event.currentTarget) video.pause()
+  })
+}
+
 export function ReferencesTeaser() {
   const [references, setReferences] = useState([])
   const [loading, setLoading] = useState(true)
@@ -55,16 +62,40 @@ export function ReferencesTeaser() {
             <Reveal key={reference.id} delay={index * 100}>
               <div className="overflow-hidden rounded-2xl border border-ivory/5 bg-charcoal">
                 <div className="relative aspect-video w-full overflow-hidden bg-ink">
-                  <img src={reference.image} alt="Ejemplo de referencia de entrega" className="h-full w-full object-cover" />
-                  <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-[10px] uppercase tracking-widest-plus text-gold">
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={reference.poster}
+                    data-example-video
+                    aria-label={`Video de ejemplo: ${reference.title}`}
+                    onPlay={pauseOtherExamples}
+                    className="h-full w-full object-cover"
+                  >
+                    <source src={reference.video} type="video/mp4" />
+                  </video>
+                  <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-[10px] uppercase tracking-widest-plus text-gold">
                     Ejemplo
                   </span>
                 </div>
-                <p className="p-4 text-sm text-ivory-dim">{reference.caption}</p>
+                <div className="p-4">
+                  <p className="font-display text-base text-ivory">{reference.title}</p>
+                  <p className="mt-1 text-sm text-ivory-dim">{reference.caption}</p>
+                </div>
               </div>
             </Reveal>
           ))}
         </div>
+      )}
+
+      {!hasRealReferences && (
+        <p className="mt-6 text-center text-xs text-ivory-dim">
+          Videos de ejemplo de{' '}
+          <a href="https://mixkit.co" target="_blank" rel="noopener noreferrer" className="underline hover:text-ivory">
+            Mixkit
+          </a>
+          .
+        </p>
       )}
 
       <div className="mt-8 flex justify-center">

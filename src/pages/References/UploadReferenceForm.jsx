@@ -12,22 +12,8 @@ const RULES = {
   title: (value) => (!isNonEmpty(value) ? 'Ingresa un título' : null),
 }
 
-const KINDS = {
-  video: {
-    label: 'Video',
-    accept: 'video/*',
-    hint: 'Formatos de video comunes, máx. 100 MB.',
-    fileError: 'Selecciona un video',
-    done: '¡Gracias! Tu video quedó en revisión y se publicará cuando sea aprobado.',
-  },
-  image: {
-    label: 'Foto',
-    accept: 'image/jpeg,image/png,image/webp',
-    hint: `JPG, PNG o WEBP, máx. 8 MB. Hasta ${MAX_IMAGES_PER_USER} fotos por cuenta.`,
-    fileError: 'Selecciona una foto',
-    done: '¡Gracias! Tu foto quedó en revisión y se publicará cuando sea aprobada.',
-  },
-}
+const FILE_ACCEPT = 'image/jpeg,image/png,image/webp'
+const FILE_HINT = `JPG, PNG o WEBP, máx. 8 MB. Hasta ${MAX_IMAGES_PER_USER} fotos por cuenta.`
 
 const inputClass =
   'w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none'
@@ -38,7 +24,6 @@ export function UploadReferenceForm({ onUploaded }) {
   const { showToast } = useToast()
   const fileInputRef = useRef(null)
 
-  const [kind, setKind] = useState('video')
   const [values, setValues] = useState(INITIAL_VALUES)
   const [errors, setErrors] = useState({})
   const [fileError, setFileError] = useState(null)
@@ -47,7 +32,7 @@ export function UploadReferenceForm({ onUploaded }) {
 
   const isAdmin = user?.role === 'admin'
   const imagesLeft = MAX_IMAGES_PER_USER - imagesUsed
-  const photoLimitReached = kind === 'image' && !isAdmin && Boolean(user) && imagesLeft <= 0
+  const photoLimitReached = !isAdmin && Boolean(user) && imagesLeft <= 0
 
   const loadImagesUsed = useCallback(async () => {
     if (!user) {
@@ -66,17 +51,11 @@ export function UploadReferenceForm({ onUploaded }) {
     setValues((current) => ({ ...current, [field]: event.target.value }))
   }
 
-  const switchKind = (nextKind) => {
-    setKind(nextKind)
-    setFileError(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-
   const upload = async () => {
     const { valid, errors: fieldErrors } = validateFields(values, RULES)
     const file = fileInputRef.current?.files?.[0]
     setErrors(fieldErrors)
-    setFileError(!file ? KINDS[kind].fileError : null)
+    setFileError(!file ? 'Selecciona una foto' : null)
     if (!valid || !file) return
 
     setSubmitting(true)
@@ -84,7 +63,7 @@ export function UploadReferenceForm({ onUploaded }) {
       await addReference({ ...values, file })
       setValues(INITIAL_VALUES)
       if (fileInputRef.current) fileInputRef.current.value = ''
-      showToast(KINDS[kind].done)
+      showToast('¡Gracias! Tu foto quedó en revisión y se publicará cuando sea aprobada.')
       loadImagesUsed()
       onUploaded?.()
     } catch (error) {
@@ -105,27 +84,6 @@ export function UploadReferenceForm({ onUploaded }) {
       <p className="mt-1 text-sm text-ivory-dim">
         Necesitas iniciar sesión. Todo lo que subas pasa por revisión antes de aparecer en la galería.
       </p>
-
-      <div
-        className="mt-5 grid grid-cols-2 gap-1 rounded-full border border-ivory/10 bg-ink p-1"
-        role="tablist"
-        aria-label="Tipo de archivo"
-      >
-        {Object.entries(KINDS).map(([key, option]) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={kind === key}
-            onClick={() => switchKind(key)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              kind === key ? 'bg-gold text-on-gold' : 'text-ivory-dim hover:text-ivory'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
 
       <div className="mt-5 flex flex-col gap-4">
         <div>
@@ -158,18 +116,17 @@ export function UploadReferenceForm({ onUploaded }) {
         </div>
 
         <div>
-          <label htmlFor="reference-file" className="mb-1 block text-sm text-ivory-dim">{KINDS[kind].label}</label>
+          <label htmlFor="reference-file" className="mb-1 block text-sm text-ivory-dim">Foto</label>
           <input
             id="reference-file"
-            key={kind}
             ref={fileInputRef}
             type="file"
-            accept={KINDS[kind].accept}
+            accept={FILE_ACCEPT}
             disabled={photoLimitReached}
             className="w-full text-sm text-ivory-dim file:mr-4 file:rounded-full file:border-0 file:bg-gold file:px-4 file:py-2 file:text-sm file:font-medium file:text-on-gold disabled:opacity-50"
           />
-          <p className="mt-1 text-xs text-ivory-dim">{KINDS[kind].hint}</p>
-          {kind === 'image' && user && !isAdmin && (
+          <p className="mt-1 text-xs text-ivory-dim">{FILE_HINT}</p>
+          {user && !isAdmin && (
             <p className={`mt-1 text-xs ${photoLimitReached ? 'text-danger' : 'text-gold'}`}>
               {photoLimitReached
                 ? 'Ya subiste tus 2 fotos. Elimina una para subir otra.'
@@ -183,7 +140,7 @@ export function UploadReferenceForm({ onUploaded }) {
       </div>
 
       <Button type="submit" variant="primary" className="mt-6" fullWidth disabled={submitting || photoLimitReached}>
-        {submitting ? 'Subiendo...' : kind === 'image' ? 'Subir foto' : 'Subir video'}
+        {submitting ? 'Subiendo...' : 'Subir foto'}
       </Button>
     </form>
   )

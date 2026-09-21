@@ -35,8 +35,8 @@ export function ReferencesTeaser() {
         <h2 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">Referencias de entrega</h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-ivory-dim">
           {hasRealReferences
-            ? 'Videos y fotos reales de clientes que ya recibieron su pedido.'
-            : 'Muy pronto vas a poder ver aquí videos reales de nuestras entregas. Por ahora te mostramos un ejemplo de cómo se van a ver.'}
+            ? 'Fotos reales de clientes que ya recibieron su pedido.'
+            : 'Muy pronto vas a poder ver aquí fotos reales de nuestras entregas. Por ahora te mostramos un ejemplo de cómo se van a ver.'}
         </p>
       </div>
 

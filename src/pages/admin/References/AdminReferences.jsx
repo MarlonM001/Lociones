@@ -64,7 +64,7 @@ export function AdminReferences() {
     <div>
       <h1 className="font-display text-3xl text-ivory">Referencias</h1>
       <p className="mt-1 text-sm text-ivory-dim">
-        Revisa los videos y fotos subidos por clientes antes de que aparezcan en la galería pública.
+        Revisa las fotos subidas por clientes antes de que aparezcan en la galería pública.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">

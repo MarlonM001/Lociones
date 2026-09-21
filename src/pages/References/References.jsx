@@ -7,7 +7,7 @@ import { UploadReferenceForm } from './UploadReferenceForm'
 import { ReferenceCard } from './ReferenceCard'
 
 export function References() {
-  useDocumentMeta({ title: 'Referencias de entrega', description: 'Videos y fotos reales de las entregas de Essence Polar, compartidos por nuestros clientes.' })
+  useDocumentMeta({ title: 'Referencias de entrega', description: 'Fotos reales de las entregas de Essence Polar, compartidos por nuestros clientes.' })
   const [references, setReferences] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -27,8 +27,8 @@ export function References() {
         <span className="text-xs uppercase tracking-widest-plus text-gold">Confianza</span>
         <h1 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">Referencias de entrega</h1>
         <p className="mt-3 text-ivory-dim">
-          Videos y fotos reales de nuestros envíos entregados. Si ya eres cliente, comparte el video
-          o la foto de tu entrega para que otros compradores conozcan nuestro trabajo.
+          Fotos reales de nuestros envíos entregados. Si ya eres cliente, comparte la foto de tu
+          entrega para que otros compradores conozcan nuestro trabajo.
         </p>
       </div>
 
@@ -52,7 +52,7 @@ export function References() {
           ) : references.length === 0 ? (
             <EmptyState
               title="Aún no hay referencias"
-              message="Sé el primero en compartir el video o la foto de tu entrega."
+              message="Sé el primero en compartir la foto de tu entrega."
             />
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

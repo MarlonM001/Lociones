@@ -67,34 +67,21 @@ export const uploadAuctionImage = multer({
 })
 
 const REFERENCE_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp'])
-const REFERENCE_VIDEO_EXTENSIONS = new Set(['.mp4', '.mov', '.m4v', '.webm', '.mkv', '.avi', '.3gp'])
-
-export const MAX_REFERENCE_IMAGE_BYTES = Number(process.env.MAX_IMAGE_SIZE_MB ?? 8) * 1024 * 1024
 
 /**
- * Referencia de entrega: un video o una foto. Se exige que el tipo declarado
- * y la extensión coincidan (no se acepta cualquier archivo con nombre .html o
- * .svg). El tope de tamaño de las fotos se revisa en la ruta, porque multer
- * solo admite un límite y aquí manda el de los videos.
+ * Referencia de entrega: solo fotos (ya no se aceptan videos). Se exige que el
+ * tipo declarado y la extensión coincidan (no se acepta cualquier archivo con
+ * nombre .html o .svg); el contenido real se verifica después en la ruta.
  */
 export const uploadReferenceMedia = multer({
   storage: makeStorage('references'),
-  limits: { fileSize: Number(process.env.MAX_VIDEO_SIZE_MB ?? 100) * 1024 * 1024, files: 1, ...FORM_LIMITS },
+  limits: { fileSize: Number(process.env.MAX_IMAGE_SIZE_MB ?? 8) * 1024 * 1024, files: 1, ...FORM_LIMITS },
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase()
-    if (file.mimetype.startsWith('image/')) {
-      if (!REFERENCE_IMAGE_EXTENSIONS.has(ext) || !['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
-        return cb(ApiError.badRequest('Formatos de imagen permitidos: JPG, PNG o WEBP.'))
-      }
-      return cb(null, true)
+    if (!REFERENCE_IMAGE_EXTENSIONS.has(ext) || !IMAGE_EXTENSION_BY_MIME[file.mimetype]) {
+      return cb(ApiError.badRequest('Solo se aceptan fotos en formato JPG, PNG o WEBP.'))
     }
-    if (file.mimetype.startsWith('video/')) {
-      if (!REFERENCE_VIDEO_EXTENSIONS.has(ext)) {
-        return cb(ApiError.badRequest('Formato de video no admitido. Prueba con MP4 o MOV.'))
-      }
-      return cb(null, true)
-    }
-    cb(ApiError.badRequest('El archivo debe ser un video o una imagen (JPG, PNG o WEBP).'))
+    cb(null, true)
   },
 })
 

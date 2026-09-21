@@ -25,6 +25,7 @@ export function errorHandler(err, req, res, next) {
   }
 
   if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'El archivo pesa demasiado.' })
     return res.status(400).json({ error: `Error al subir el archivo: ${err.message}` })
   }
 

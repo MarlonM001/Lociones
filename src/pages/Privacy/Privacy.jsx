@@ -37,7 +37,7 @@ export function Privacy() {
         <p>
           Al crear una cuenta o al hacer un pedido, pedimos nombre, apellido, correo electrónico, teléfono,
           ciudad, barrio y dirección de entrega. También guardamos los mensajes que nos escribes por el chat y las
-          referencias (fotos o videos) que decidas compartir. Esta información es la necesaria para procesar tu
+          referencias (fotos) que decidas compartir. Esta información es la necesaria para procesar tu
           pedido, contactarte por WhatsApp y darte seguimiento. Por seguridad, el servidor registra de forma
           temporal la dirección IP desde la que se hacen los intentos de ingreso y los pedidos, para frenar abusos.
         </p>

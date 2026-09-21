@@ -1,7 +1,7 @@
 import { apiFetch, buildFormData, resolveMediaUrl } from '../api/client'
 
 /**
- * Capa de referencias (videos y fotos de entrega). Habla con la API real
+ * Capa de referencias (fotos de entrega). Habla con la API real
  * (`server/`); el archivo se sube como multipart y el backend devuelve la
  * URL pública ya servida desde `/uploads/references`.
  */

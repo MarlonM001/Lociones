@@ -19,34 +19,7 @@ function toPublicReference(row) {
 }
 
 export const MAX_IMAGES_PER_USER = 2
-export const MAX_VIDEOS_PER_USER = 3
 const TEXT_LIMITS = { title: 120, description: 600, city: 100 }
-
-async function countMediaByUser(userId, mediaType) {
-  const { rows } = await pool.query(
-    'SELECT COUNT(*)::int AS total FROM delivery_references WHERE created_by = $1 AND media_type = $2',
-    [userId, mediaType],
-  )
-  return rows[0].total
-}
-
-/**
- * Cuántas fotos y videos puede subir cada cuenta (el admin no tiene tope). Se revisa ANTES de procesar el
- * video, que es lo que gasta procesador. Para liberar cupo basta con eliminar una referencia propia.
- */
-export async function assertCanUpload({ userId, isAdmin, mediaType }) {
-  if (isAdmin) return
-  if (mediaType === 'image' && (await countMediaByUser(userId, 'image')) >= MAX_IMAGES_PER_USER) {
-    throw ApiError.conflict(
-      `Ya subiste ${MAX_IMAGES_PER_USER} fotos, que es el máximo por cuenta. Elimina una para subir otra.`,
-    )
-  }
-  if (mediaType === 'video' && (await countMediaByUser(userId, 'video')) >= MAX_VIDEOS_PER_USER) {
-    throw ApiError.conflict(
-      `Ya subiste ${MAX_VIDEOS_PER_USER} videos, que es el máximo por cuenta. Elimina uno para subir otro.`,
-    )
-  }
-}
 
 export async function countImagesByUser(userId) {
   const { rows } = await pool.query(
@@ -56,7 +29,20 @@ export async function countImagesByUser(userId) {
   return rows[0].total
 }
 
-export async function addReference({ title, description, city, mediaUrl, mediaType = 'video', createdBy, isAdmin = false }) {
+/**
+ * Cuántas fotos puede subir cada cuenta (el admin no tiene tope). Para liberar cupo basta con eliminar
+ * una referencia propia.
+ */
+export async function assertCanUpload({ userId, isAdmin }) {
+  if (isAdmin) return
+  if ((await countImagesByUser(userId)) >= MAX_IMAGES_PER_USER) {
+    throw ApiError.conflict(
+      `Ya subiste ${MAX_IMAGES_PER_USER} fotos, que es el máximo por cuenta. Elimina una para subir otra.`,
+    )
+  }
+}
+
+export async function addReference({ title, description, city, mediaUrl, createdBy, isAdmin = false }) {
   if (!title?.trim()) throw ApiError.badRequest('El título es obligatorio.')
   for (const [value, label, max] of [
     [title, 'El título', TEXT_LIMITS.title],
@@ -67,10 +53,9 @@ export async function addReference({ title, description, city, mediaUrl, mediaTy
       throw ApiError.badRequest(`${label} es demasiado largo (máximo ${max} caracteres).`)
     }
   }
-  if (!mediaUrl) throw ApiError.badRequest('Selecciona un video o una foto para subir.')
-  if (!['video', 'image'].includes(mediaType)) throw ApiError.badRequest('Tipo de archivo inválido.')
+  if (!mediaUrl) throw ApiError.badRequest('Selecciona una foto para subir.')
 
-  if (mediaType === 'image' && !isAdmin && (await countImagesByUser(createdBy)) >= MAX_IMAGES_PER_USER) {
+  if (!isAdmin && (await countImagesByUser(createdBy)) >= MAX_IMAGES_PER_USER) {
     throw ApiError.conflict(
       `Ya subiste ${MAX_IMAGES_PER_USER} fotos, que es el máximo por cuenta. Elimina una para subir otra.`,
     )
@@ -80,7 +65,7 @@ export async function addReference({ title, description, city, mediaUrl, mediaTy
     `INSERT INTO delivery_references (title, description, city, video_url, media_type, status, created_by)
      VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
-    [title.trim(), description?.trim() || '', city?.trim() || '', mediaUrl, mediaType, REFERENCE_STATUSES.PENDING, createdBy ?? null],
+    [title.trim(), description?.trim() || '', city?.trim() || '', mediaUrl, 'image', REFERENCE_STATUSES.PENDING, createdBy ?? null],
   )
   return toPublicReference(rows[0])
 }

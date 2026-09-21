@@ -73,8 +73,8 @@ export function Profile() {
         <Loading label="Cargando tus referencias..." />
       ) : references.length === 0 ? (
         <EmptyState
-          title="Todavía no has subido videos ni fotos"
-          message="Comparte el video o la foto de tu entrega en la página de Referencias."
+          title="Todavía no has subido fotos"
+          message="Comparte la foto de tu entrega en la página de Referencias."
           action={<Button to="/referencias">Subir referencia</Button>}
         />
       ) : (

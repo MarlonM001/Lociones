@@ -603,7 +603,7 @@ test('referencias: archivos falsos se rechazan aunque el nombre y el tipo declar
       content: Buffer.from('#EXTM3U\n#EXT-X-MEDIA-SEQUENCE:0\nfile:///etc/passwd\n'),
     })
     assert.equal(fakeVideo.status, 400)
-    assert.match((await fakeVideo.json()).error, /video ni una foto válidos/)
+    assert.match((await fakeVideo.json()).error, /Solo se aceptan fotos/)
 
     const svgAsPng = await uploadReference(headers, {
       filename: 'foto.png',
@@ -618,17 +618,22 @@ test('referencias: archivos falsos se rechazan aunque el nombre y el tipo declar
   }
 })
 
-test('referencias: cada cuenta tiene tope de videos, y el admin no', async () => {
-  const { user } = await registerTestUser('videos')
+test('referencias: los videos ya no se aceptan, ni siquiera el admin, ni disfrazados de foto', async () => {
+  const { user, headers } = await registerTestUser('videos')
   try {
-    for (let i = 0; i < 3; i += 1) {
-      await addReference({ title: `Video ${i}`, mediaUrl: `/uploads/references/prueba-${i}.mp4`, mediaType: 'video', createdBy: user.id })
+    const fakeMp4Header = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from('ftypmp42'), Buffer.alloc(16)])
+    for (const [filename, type] of [['clip.mp4', 'video/mp4'], ['clip.mov', 'video/quicktime'], ['clip.webm', 'video/webm']]) {
+      const res = await uploadReference(headers, { filename, type, content: fakeMp4Header })
+      assert.equal(res.status, 400, filename)
     }
-    await assert.rejects(assertCanUpload({ userId: user.id, isAdmin: false, mediaType: 'video' }), /máximo por cuenta/)
-    await assertCanUpload({ userId: user.id, isAdmin: true, mediaType: 'video' })
-    await assertCanUpload({ userId: user.id, isAdmin: false, mediaType: 'image' })
+    const disguised = await uploadReference(headers, { filename: 'foto.png', type: 'image/png', content: fakeMp4Header })
+    assert.equal(disguised.status, 400)
+    assert.equal((await (await fetch(`${baseUrl}/api/references/mine`, { headers })).json()).length, 0, 'no debe quedar nada guardado')
+
+    await assertCanUpload({ userId: user.id, isAdmin: false })
+    await assertCanUpload({ userId: user.id, isAdmin: true })
     await assert.rejects(
-      addReference({ title: 'x'.repeat(121), mediaUrl: '/uploads/references/a.mp4', mediaType: 'video', createdBy: user.id }),
+      addReference({ title: 'x'.repeat(121), mediaUrl: '/uploads/references/a.png', createdBy: user.id }),
       /demasiado largo/,
     )
   } finally {

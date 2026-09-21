@@ -83,7 +83,8 @@ async function attachExtras(auctionRows, currentUserId, db = pool) {
     const stats = statsByAuction.get(row.id)
     const bidCount = stats?.bid_count ?? 0
     const currentPrice = stats?.top_amount ?? row.starting_price
-    const nextMinBid = bidCount > 0 ? currentPrice + row.min_increment : row.starting_price
+    // Sin incremento fijo: cada quien puja lo que quiera mientras supere la puja más alta (pesos enteros).
+    const nextMinBid = bidCount > 0 ? currentPrice + 1 : row.starting_price
     const leader = leadingByAuction.get(row.id)
 
     return {
@@ -95,7 +96,6 @@ async function attachExtras(auctionRows, currentUserId, db = pool) {
       kind: row.kind,
       items: itemsByAuction.get(row.id) ?? [],
       startingPrice: row.starting_price,
-      minIncrement: row.min_increment,
       currentPrice,
       nextMinBid,
       bidCount,
@@ -129,13 +129,10 @@ export async function getAuctionById(id) {
   return auction
 }
 
-function validateAuctionPayload({ title, startingPrice, minIncrement, startsAt, endsAt, items }) {
+function validateAuctionPayload({ title, startingPrice, startsAt, endsAt, items }) {
   if (!title?.trim()) throw ApiError.badRequest('El título es obligatorio.')
   if (!Number.isFinite(startingPrice) || startingPrice < 0) {
     throw ApiError.badRequest('El precio inicial no es válido.')
-  }
-  if (!Number.isFinite(minIncrement) || minIncrement <= 0) {
-    throw ApiError.badRequest('El incremento mínimo debe ser mayor a 0.')
   }
   const start = new Date(startsAt)
   const end = new Date(endsAt)
@@ -153,7 +150,6 @@ export async function createAuction({
   imageUrl,
   kind,
   startingPrice,
-  minIncrement,
   startsAt,
   endsAt,
   items,
@@ -163,12 +159,10 @@ export async function createAuction({
     quantity: Number(item.quantity) || 1,
   }))
   const normalizedStartingPrice = Number(startingPrice)
-  const normalizedMinIncrement = Number(minIncrement)
 
   validateAuctionPayload({
     title,
     startingPrice: normalizedStartingPrice,
-    minIncrement: normalizedMinIncrement,
     startsAt,
     endsAt,
     items: normalizedItems,
@@ -176,8 +170,8 @@ export async function createAuction({
 
   return withTransaction(async (client) => {
     const { rows } = await client.query(
-      `INSERT INTO auctions (title, slug, description, image, kind, starting_price, min_increment, starts_at, ends_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO auctions (title, slug, description, image, kind, starting_price, starts_at, ends_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         title.trim(),
@@ -186,7 +180,6 @@ export async function createAuction({
         imageUrl ?? null,
         kind === 'combo' ? 'combo' : 'product',
         normalizedStartingPrice,
-        normalizedMinIncrement,
         startsAt,
         endsAt,
       ],
@@ -226,7 +219,6 @@ export async function updateAuction(id, updates) {
   if ('startsAt' in updates && !hasBids) set('starts_at', updates.startsAt)
   if ('endsAt' in updates) set('ends_at', updates.endsAt)
   if ('startingPrice' in updates && !hasBids) set('starting_price', Number(updates.startingPrice))
-  if ('minIncrement' in updates && !hasBids) set('min_increment', Number(updates.minIncrement))
 
   if (fields.length === 0) return existing
 
@@ -293,10 +285,16 @@ export async function placeBid({ auctionId, userId, amount }) {
       [auctionId],
     )
     const currentPrice = topRows[0]?.amount ?? auction.starting_price
-    const minRequired = topRows[0] ? currentPrice + auction.min_increment : auction.starting_price
+    // Sin incremento fijo: basta con superar la puja más alta (o igualar el precio inicial si es la primera).
+    const minRequired = topRows[0] ? currentPrice + 1 : auction.starting_price
 
     if (normalizedAmount < minRequired) {
-      throw ApiError.badRequest(`La puja mínima es ${minRequired}.`)
+      const cop = (value) => `${value.toLocaleString('es-CO')}`
+      throw ApiError.badRequest(
+        topRows[0]
+          ? `Tu puja debe ser mayor a la puja actual de ${cop(currentPrice)}.`
+          : `La puja mínima es ${cop(minRequired)}.`,
+      )
     }
 
     const { rows: inserted } = await client.query(

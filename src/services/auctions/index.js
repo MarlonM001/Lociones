@@ -70,13 +70,12 @@ export async function getAuctionBidsAdmin(auctionId) {
   return apiFetch(`/api/auctions/${auctionId}/bids`)
 }
 
-function toAuctionFormData({ title, description, kind, startingPrice, minIncrement, startsAt, endsAt, items, imageFile }) {
+function toAuctionFormData({ title, description, kind, startingPrice, startsAt, endsAt, items, imageFile }) {
   return buildFormData({
     title,
     description,
     kind,
     startingPrice,
-    minIncrement,
     startsAt,
     endsAt,
     items: JSON.stringify(items ?? []),

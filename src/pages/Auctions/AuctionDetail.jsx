@@ -166,7 +166,6 @@ export function AuctionDetail() {
                   <input
                     type="number"
                     min={auction.nextMinBid}
-                    step={auction.minIncrement}
                     value={amount}
                     onChange={(event) => setAmount(event.target.value)}
                     className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none"

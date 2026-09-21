@@ -13,7 +13,6 @@ const EMPTY_VALUES = {
   description: '',
   kind: 'product',
   startingPrice: '',
-  minIncrement: '5000',
   startsAt: '',
   endsAt: '',
 }
@@ -21,7 +20,6 @@ const EMPTY_VALUES = {
 const RULES = {
   title: (value) => (!isNonEmpty(value) ? 'Ingresa un título' : null),
   startingPrice: (value) => (!value || Number(value) < 0 ? 'Ingresa un precio inicial válido' : null),
-  minIncrement: (value) => (!value || Number(value) <= 0 ? 'Ingresa un incremento mínimo válido' : null),
   startsAt: (value) => (!isNonEmpty(value) ? 'Elige cuándo empieza' : null),
   endsAt: (value) => (!isNonEmpty(value) ? 'Elige cuándo cierra' : null),
 }
@@ -61,7 +59,6 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
         description: auction.description,
         kind: auction.kind,
         startingPrice: String(auction.startingPrice),
-        minIncrement: String(auction.minIncrement),
         startsAt: toDatetimeLocal(auction.startsAt),
         endsAt: toDatetimeLocal(auction.endsAt),
       })
@@ -162,8 +159,8 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
         )}
         {locked && (
           <div className="rounded-lg border border-gold/30 bg-gold/10 px-4 py-3 text-xs text-gold">
-            Esta subasta ya tiene pujas: no se pueden cambiar los productos, el precio inicial, el incremento
-            mínimo ni la fecha de inicio. Solo puedes ajustar el título, la descripción, la foto o adelantar/atrasar
+            Esta subasta ya tiene pujas: no se pueden cambiar los productos, el precio inicial
+            ni la fecha de inicio. Solo puedes ajustar el título, la descripción, la foto o adelantar/atrasar
             el cierre.
           </div>
         )}
@@ -284,7 +281,7 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4">
           <div>
             <label className="mb-1 block text-sm text-ivory-dim">Precio inicial (COP)</label>
             <input
@@ -296,18 +293,6 @@ export function AuctionFormModal({ open, auction, onClose, onSaved }) {
               className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none disabled:opacity-50"
             />
             {errors.startingPrice && <p className="mt-1 text-xs text-danger">{errors.startingPrice}</p>}
-          </div>
-          <div>
-            <label className="mb-1 block text-sm text-ivory-dim">Incremento mínimo por puja (COP)</label>
-            <input
-              type="number"
-              min="1"
-              disabled={locked}
-              value={values.minIncrement}
-              onChange={handleChange('minIncrement')}
-              className="w-full rounded-lg border border-ivory/10 bg-ink px-3 py-2 text-ivory focus:border-gold focus:outline-none disabled:opacity-50"
-            />
-            {errors.minIncrement && <p className="mt-1 text-xs text-danger">{errors.minIncrement}</p>}
           </div>
         </div>
 

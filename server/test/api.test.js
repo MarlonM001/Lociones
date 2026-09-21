@@ -758,7 +758,6 @@ test('sala de subasta: cada puja se anuncia en vivo y el feed público la muestr
     const auction = await createAuction({
       title: 'Subasta de prueba sala',
       startingPrice: 50000,
-      minIncrement: 5000,
       startsAt: new Date(now - 60_000).toISOString(),
       endsAt: new Date(now + 3_600_000).toISOString(),
       items: [{ productId: product.id, quantity: 1 }],
@@ -777,10 +776,10 @@ test('sala de subasta: cada puja se anuncia en vivo y el feed público la muestr
     assert.equal(announced[0].payload.bid.amount, 50000)
     assert.equal(announced[0].payload.bid.bidder, 'Usuario S.')
     assert.equal(announced[0].payload.currentPrice, 50000)
-    assert.equal(announced[0].payload.nextMinBid, 55000)
+    assert.equal(announced[0].payload.nextMinBid, 50001)
 
     // Una puja rechazada no se anuncia.
-    const rejected = await postJson(`/api/auctions/${auctionId}/bids`, { amount: 50001 }, headers)
+    const rejected = await postJson(`/api/auctions/${auctionId}/bids`, { amount: 50000 }, headers)
     assert.equal(rejected.status, 400)
     assert.equal(announced.length, 1)
 
@@ -814,7 +813,6 @@ async function withLiveAuction(run, { closed = false } = {}) {
     const auction = await createAuction({
       title: 'Subasta de prueba comentarios',
       startingPrice: 50000,
-      minIncrement: 5000,
       startsAt: new Date(now - (closed ? 7_200_000 : 60_000)).toISOString(),
       endsAt: new Date(now + (closed ? -3_600_000 : 3_600_000)).toISOString(),
       items: [{ productId: product.id, quantity: 1 }],
@@ -902,6 +900,36 @@ test('comentarios: texto invalido, subasta cerrada y limite de velocidad', async
     await withLiveAuction(async ({ auctionId }) => {
       await assert.rejects(addComment({ auctionId, userId: user.id, body: 'tarde' }), { status: 400 })
     }, { closed: true })
+  } finally {
+    await removeTestUser(user.id)
+  }
+})
+
+test('pujas: cada quien puja el monto que quiera, siempre que supere la puja actual', async () => {
+  const { user } = await registerTestUser('pujalibre')
+  try {
+    await withLiveAuction(async ({ auctionId }) => {
+      const bid = (amount) => placeBid({ auctionId, userId: user.id, amount })
+
+      // La primera puja no puede ser menor al precio inicial (50000).
+      await assert.rejects(bid(49999), { status: 400 })
+
+      const first = await bid(50000)
+      assert.equal(first.currentPrice, 50000)
+      assert.equal(first.nextMinBid, 50001, 'basta con superar la puja actual en un peso')
+      assert.equal('minIncrement' in first, false, 'ya no existe el incremento minimo')
+
+      // Igualar o quedar por debajo no cuenta.
+      await assert.rejects(bid(50000), /mayor a la puja actual/)
+      await assert.rejects(bid(40000), { status: 400 })
+
+      // Cualquier monto mayor sirve, sea un peso mas o un salto grande.
+      assert.equal((await bid(50001)).currentPrice, 50001)
+      const big = await bid(1_234_567)
+      assert.equal(big.currentPrice, 1_234_567)
+      assert.equal(big.nextMinBid, 1_234_568)
+      assert.equal(big.bidCount, 3)
+    })
   } finally {
     await removeTestUser(user.id)
   }

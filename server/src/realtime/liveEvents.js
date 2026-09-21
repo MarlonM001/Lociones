@@ -16,3 +16,13 @@ export function setRealtimeServer(server) {
 export function broadcastAuctionBid(event) {
   io?.to(AUCTION_ROOM).emit('auction:bid', event)
 }
+
+/** Avisa a la sala que hay un comentario nuevo. */
+export function broadcastAuctionComment(event) {
+  io?.to(AUCTION_ROOM).emit('auction:comment', event)
+}
+
+/** Avisa a la sala que el admin quitó un comentario, para que desaparezca en todas las pantallas. */
+export function broadcastAuctionCommentDeleted(event) {
+  io?.to(AUCTION_ROOM).emit('auction:comment-deleted', event)
+}

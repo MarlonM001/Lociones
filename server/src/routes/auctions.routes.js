@@ -4,7 +4,9 @@ import { requireAuth, requireAdmin, attachUserIfPresent } from '../middleware/au
 import { uploadAuctionImage, verifyImageSignatures, publicUploadUrl } from '../middleware/upload.js'
 import { ApiError } from '../utils/ApiError.js'
 import * as auctionsService from '../services/auctions.service.js'
-import { broadcastAuctionBid } from '../realtime/liveEvents.js'
+import { broadcastAuctionBid, broadcastAuctionComment, broadcastAuctionCommentDeleted } from '../realtime/liveEvents.js'
+import * as commentsService from '../services/auctionComments.service.js'
+import { createCounter, rateLimitByIp, tooManyRequests } from '../middleware/rateLimit.js'
 
 /** La lista de productos llega como texto JSON dentro del formulario; si viene mal armada es un error 400. */
 function parseItems(raw) {
@@ -18,6 +20,34 @@ function parseItems(raw) {
 }
 
 const router = Router()
+
+// Frenos al spam en los comentarios: ráfagas cortas y tope por hora para cada cuenta, y por IP como red de seguridad.
+// El admin no tiene límite.
+const commentBurst = createCounter({ windowMs: 30_000 })
+const commentHourly = createCounter({ windowMs: 60 * 60_000 })
+const commentIpLimiter = rateLimitByIp({
+  windowMs: 10 * 60_000,
+  max: 60,
+  message: 'Demasiados comentarios desde esta conexión. Intenta de nuevo más tarde.',
+})
+
+function limitCommentsPerUser(req, res, next) {
+  if (req.user.role === 'admin') return next()
+  const key = `user:${req.user.id}`
+  if (commentBurst.hit(key) > 4) {
+    return next(tooManyRequests(commentBurst.count(key).retryAfterMs, 'Estás comentando muy rápido. Espera unos segundos.'))
+  }
+  if (commentHourly.hit(key) > 40) {
+    return next(tooManyRequests(commentHourly.count(key).retryAfterMs, 'Llegaste al límite de comentarios por ahora.'))
+  }
+  next()
+}
+
+function parseAuctionId(req) {
+  const id = Number(req.params.id)
+  if (!Number.isInteger(id) || id <= 0) throw ApiError.badRequest('Subasta no válida.')
+  return id
+}
 
 router.get(
   '/config',
@@ -75,6 +105,49 @@ router.get(
     const auctionId = Number(req.params.id)
     if (!Number.isInteger(auctionId)) throw ApiError.badRequest('Subasta no válida.')
     res.json(await auctionsService.getPublicBidFeed(auctionId))
+  }),
+)
+
+router.get(
+  '/:id/comments',
+  asyncHandler(async (req, res) => {
+    res.json(await commentsService.listComments(parseAuctionId(req)))
+  }),
+)
+
+router.get(
+  '/:id/comments/admin',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    res.json(await commentsService.listCommentsAdmin(parseAuctionId(req)))
+  }),
+)
+
+router.post(
+  '/:id/comments',
+  commentIpLimiter,
+  requireAuth,
+  limitCommentsPerUser,
+  asyncHandler(async (req, res) => {
+    const auctionId = parseAuctionId(req)
+    const comment = await commentsService.addComment({ auctionId, userId: req.user.id, body: req.body?.body })
+    broadcastAuctionComment({ auctionId, comment })
+    res.status(201).json(comment)
+  }),
+)
+
+router.delete(
+  '/:id/comments/:commentId',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const auctionId = parseAuctionId(req)
+    const commentId = Number(req.params.commentId)
+    if (!Number.isInteger(commentId) || commentId <= 0) throw ApiError.badRequest('Comentario no válido.')
+    await commentsService.deleteComment(auctionId, commentId)
+    broadcastAuctionCommentDeleted({ auctionId, commentId })
+    res.status(204).end()
   }),
 )
 

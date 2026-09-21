@@ -130,16 +130,12 @@ export function AuctionDetail() {
             </div>
           )}
 
-          <dl className="mt-6 grid grid-cols-2 gap-4 rounded-xl border border-ivory/5 p-4 text-sm">
+          <dl className="mt-6 rounded-xl border border-ivory/5 p-4 text-sm">
             <div>
               <dt className="text-ivory-dim">{auction.bidCount > 0 ? 'Puja actual' : 'Precio inicial'}</dt>
               <dd>
                 <Price value={auction.currentPrice} className="text-2xl text-gold" />
               </dd>
-            </div>
-            <div>
-              <dt className="text-ivory-dim">Pujas realizadas</dt>
-              <dd className="text-ivory">{auction.bidCount}</dd>
             </div>
           </dl>
 

@@ -19,7 +19,7 @@ import { AdminDashboard } from '@/pages/admin/Dashboard'
 import { AdminProducts } from '@/pages/admin/Products'
 import { AdminBestsellers } from '@/pages/admin/Bestsellers'
 import { AdminAuctions } from '@/pages/admin/Auctions'
-import { AdminChat } from '@/pages/admin/Chat'
+import { AdminAuctionRoom } from '@/pages/admin/AuctionRoom'
 import { Auctions, AuctionDetail } from '@/pages/Auctions'
 import { AdminOrders } from '@/pages/admin/Orders'
 import { AdminReferences } from '@/pages/admin/References'
@@ -39,10 +39,10 @@ export function AppRoutes() {
         }
       >
         <Route index element={<AdminDashboard />} />
-        <Route path="chat" element={<AdminChat />} />
         <Route path="productos" element={<AdminProducts />} />
         <Route path="top-ventas" element={<AdminBestsellers />} />
         <Route path="subastas" element={<AdminAuctions />} />
+        <Route path="sala" element={<AdminAuctionRoom />} />
         <Route path="pedidos" element={<AdminOrders />} />
         <Route path="referencias" element={<AdminReferences />} />
         <Route path="promociones" element={<AdminPromotions />} />

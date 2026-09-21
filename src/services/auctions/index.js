@@ -48,6 +48,24 @@ export async function getAuctionFeed(auctionId) {
   return apiFetch(`/api/auctions/${auctionId}/feed`)
 }
 
+/** Comentarios de la sala, del más reciente al más antiguo (nombres abreviados). */
+export async function getAuctionComments(auctionId) {
+  return apiFetch(`/api/auctions/${auctionId}/comments`)
+}
+
+export async function postAuctionComment(auctionId, body) {
+  return apiFetch(`/api/auctions/${auctionId}/comments`, { method: 'POST', body: { body } })
+}
+
+/** Vista del admin: con nombre completo y teléfono de quien comentó. */
+export async function getAuctionCommentsAdmin(auctionId) {
+  return apiFetch(`/api/auctions/${auctionId}/comments/admin`)
+}
+
+export async function deleteAuctionComment(auctionId, commentId) {
+  await apiFetch(`/api/auctions/${auctionId}/comments/${commentId}`, { method: 'DELETE' })
+}
+
 export async function getAuctionBidsAdmin(auctionId) {
   return apiFetch(`/api/auctions/${auctionId}/bids`)
 }

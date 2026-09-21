@@ -9,7 +9,7 @@ import { slugify } from '../utils/slugify.js'
  * una subasta "se cierra sola" en el sentido de que, apenas alguien la
  * consulta después de `ends_at`, se le muestra como cerrada.
  */
-function computePhase(row, now = new Date()) {
+export function computePhase(row, now = new Date()) {
   if (row.status === 'cancelled') return 'cancelled'
   if (now < row.starts_at) return 'scheduled'
   if (now <= row.ends_at) return 'active'

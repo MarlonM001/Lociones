@@ -31,7 +31,8 @@ import {
   maskBidderName,
 } from '../src/services/auctions.service.js'
 import { setRealtimeServer } from '../src/realtime/liveEvents.js'
-import { registerUser } from '../src/services/auth.service.js'
+import { addComment } from '../src/services/auctionComments.service.js'
+import { registerUser, signToken } from '../src/services/auth.service.js'
 
 let baseUrl
 let server
@@ -797,6 +798,111 @@ test('sala de subasta: cada puja se anuncia en vivo y el feed público la muestr
     setRealtimeServer(null)
     if (auctionId) await deleteAuction(auctionId)
     if (!wasEnabled) await setAuctionConfig(false)
+    await removeTestUser(user.id)
+  }
+})
+
+async function withLiveAuction(run, { closed = false } = {}) {
+  const product = await firstProductWithStock(1)
+  const wasEnabled = (await getAuctionConfig()).enabled
+  const announced = []
+  setRealtimeServer({ to: (room) => ({ emit: (event, payload) => announced.push({ room, event, payload }) }) })
+  let auctionId
+  try {
+    if (!wasEnabled) await setAuctionConfig(true)
+    const now = Date.now()
+    const auction = await createAuction({
+      title: 'Subasta de prueba comentarios',
+      startingPrice: 50000,
+      minIncrement: 5000,
+      startsAt: new Date(now - (closed ? 7_200_000 : 60_000)).toISOString(),
+      endsAt: new Date(now + (closed ? -3_600_000 : 3_600_000)).toISOString(),
+      items: [{ productId: product.id, quantity: 1 }],
+    })
+    auctionId = auction.id
+    await run({ auctionId, announced })
+  } finally {
+    setRealtimeServer(null)
+    if (auctionId) await deleteAuction(auctionId)
+    if (!wasEnabled) await setAuctionConfig(false)
+  }
+}
+
+test('comentarios: sin sesion no se comenta, el publico ve nombres abreviados y el admin sale como la tienda', async () => {
+  const { user, headers } = await registerTestUser('coment')
+  const admin = await registerTestUser('admincoment')
+  await pool.query("UPDATE users SET role = 'admin' WHERE id = $1", [admin.user.id])
+  const adminHeaders = { Authorization: `Bearer ${signToken({ id: admin.user.id, role: 'admin' })}` }
+  try {
+    await withLiveAuction(async ({ auctionId, announced }) => {
+      const url = `/api/auctions/${auctionId}/comments`
+      assert.equal((await postJson(url, { body: 'hola' })).status, 401)
+
+      const mine = await postJson(url, { body: '  Ojalá   gano   esta  ' }, headers)
+      assert.equal(mine.status, 201)
+      const created = await mine.json()
+      assert.equal(created.body, 'Ojalá gano esta', 'se limpian los espacios')
+      assert.equal(created.author, 'Usuario C.')
+      assert.equal(created.isAdmin, false)
+      assert.equal(announced.at(-1).event, 'auction:comment')
+      assert.equal(announced.at(-1).payload.comment.id, created.id)
+
+      // Un desconocido no puede meter enlaces; el admin si.
+      assert.equal((await postJson(url, { body: 'entra a www.estafa.com' }, headers)).status, 400)
+      const promo = await postJson(url, { body: 'Mas info en https://essencepolar.com' }, adminHeaders)
+      assert.equal(promo.status, 201)
+      const promoBody = await promo.json()
+      assert.equal(promoBody.author, 'Essence Polar')
+      assert.equal(promoBody.isAdmin, true)
+
+      const list = await (await fetch(`${baseUrl}${url}`)).json()
+      assert.deepEqual(list.map((c) => c.id), [promoBody.id, created.id], 'el mas reciente primero')
+      assert.deepEqual(Object.keys(list[0]).sort(), ['author', 'body', 'createdAt', 'id', 'isAdmin'])
+      assert.ok(!JSON.stringify(list).includes(user.email))
+
+      // Solo el admin ve nombre completo y contacto.
+      assert.equal((await fetch(`${baseUrl}${url}/admin`)).status, 401)
+      assert.equal((await fetch(`${baseUrl}${url}/admin`, { headers })).status, 403)
+      const full = await (await fetch(`${baseUrl}${url}/admin`, { headers: adminHeaders })).json()
+      assert.equal(full.find((c) => c.id === created.id).author.email, user.email)
+
+      // Borrar: solo el admin, se avisa a la sala y desaparece.
+      const del = (id, h) => fetch(`${baseUrl}${url}/${id}`, { method: 'DELETE', headers: h })
+      assert.equal((await del(created.id, headers)).status, 403)
+      assert.equal((await del(created.id, adminHeaders)).status, 204)
+      assert.equal(announced.at(-1).event, 'auction:comment-deleted')
+      assert.equal(announced.at(-1).payload.commentId, created.id)
+      assert.equal((await del(created.id, adminHeaders)).status, 404)
+      assert.equal((await (await fetch(`${baseUrl}${url}`)).json()).length, 1)
+      assert.equal((await fetch(`${baseUrl}/api/auctions/abc/comments`)).status, 400)
+    })
+  } finally {
+    await removeTestUser(user.id)
+    await removeTestUser(admin.user.id)
+  }
+})
+
+test('comentarios: texto invalido, subasta cerrada y limite de velocidad', async () => {
+  const { user, headers } = await registerTestUser('comentlim')
+  try {
+    await withLiveAuction(async ({ auctionId }) => {
+      for (const bad of [undefined, null, '', '   ', String.fromCharCode(10, 9), 12345, {}, 'x'.repeat(301), 'x'.repeat(2001)]) {
+        await assert.rejects(addComment({ auctionId, userId: user.id, body: bad }), { status: 400 }, String(bad).slice(0, 20))
+      }
+      await assert.rejects(addComment({ auctionId: 999999, userId: user.id, body: 'hola' }), { status: 404 })
+
+      // Cinco comentarios seguidos: el quinto se frena.
+      const statuses = []
+      for (let i = 0; i < 5; i += 1) {
+        statuses.push((await postJson(`/api/auctions/${auctionId}/comments`, { body: `mensaje ${i}` }, headers)).status)
+      }
+      assert.deepEqual(statuses, [201, 201, 201, 201, 429])
+    })
+
+    await withLiveAuction(async ({ auctionId }) => {
+      await assert.rejects(addComment({ auctionId, userId: user.id, body: 'tarde' }), { status: 400 })
+    }, { closed: true })
+  } finally {
     await removeTestUser(user.id)
   }
 })

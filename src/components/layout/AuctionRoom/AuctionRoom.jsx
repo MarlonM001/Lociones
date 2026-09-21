@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
-import { getAuctions, getAuctionFeed } from '@/services/auctions'
-import { getChatSocket } from '@/services/chat/socket'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { getAuctions, getAuctionFeed, getAuctionComments, postAuctionComment } from '@/services/auctions'
+import { getRealtimeSocket } from '@/services/realtime/socket'
+import { useAuth } from '@/hooks/useAuth'
 import { useCountdown } from '@/hooks/useCountdown'
 import { useHideNearFooter } from '@/hooks/useHideNearFooter'
 import { Button } from '@/components/ui/Button'
@@ -8,6 +10,9 @@ import { Price } from '@/components/ui/Price'
 
 /** Cada cuánto se revisa si hay (o dejó de haber) una subasta activa mientras el sitio sigue abierto. */
 const AUCTION_POLL_MS = 60000
+const MAX_COMMENT_LENGTH = 300
+const KEEP_BIDS = 30
+const KEEP_COMMENTS = 50
 
 function GavelIcon() {
   return (
@@ -24,6 +29,14 @@ function CloseIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M5 5l14 14M19 5L5 19" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function SendIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 20V4l19 8Zm2-3 11.85-5L5 7v3.5l7 1.5-7 1.5Z" />
     </svg>
   )
 }
@@ -75,19 +88,62 @@ function BidRow({ bid, isTop, now }) {
   )
 }
 
+function CommentRow({ comment, now }) {
+  return (
+    <li
+      className={`animate-fade-up rounded-xl px-3 py-2 ${
+        comment.isAdmin ? 'border border-gold/30 bg-gold/10' : 'bg-ink'
+      }`}
+    >
+      <p className="flex items-center gap-2 text-xs">
+        <span className={`font-medium ${comment.isAdmin ? 'text-gold' : 'text-ivory'}`}>{comment.author}</span>
+        <span className="text-ivory-dim">{timeAgo(comment.createdAt, now)}</span>
+      </p>
+      <p className="mt-0.5 break-words text-sm text-ivory">{comment.body}</p>
+    </li>
+  )
+}
+
+function TabButton({ active, onClick, children, dot }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative flex-1 border-b-2 px-3 py-2 text-xs uppercase tracking-widest-plus transition-colors ${
+        active ? 'border-gold text-gold' : 'border-transparent text-ivory-dim hover:text-ivory'
+      }`}
+    >
+      {children}
+      {dot && <span className="absolute right-4 top-2 h-2 w-2 rounded-full bg-emerald-500" />}
+    </button>
+  )
+}
+
 /**
  * Sala de la subasta en vivo (botón flotante). Solo aparece cuando hay una subasta en curso. Muestra el
- * producto que se subasta, la puja actual, cuánto falta para que cierre y las pujas de los demás
- * participantes en el momento en que ocurren. Es de solo lectura: para pujar se va a la página de la subasta.
+ * producto que se subasta, la puja actual, cuánto falta para que cierre, las pujas de los demás
+ * participantes y los comentarios, todo en el momento en que ocurre. Para pujar se va a la página de la
+ * subasta; para comentar hace falta tener sesión iniciada.
  */
 export function AuctionRoom() {
+  const { isAuthenticated } = useAuth()
+  const location = useLocation()
   const [open, setOpen] = useState(false)
   const [auctions, setAuctions] = useState([])
   const [selectedId, setSelectedId] = useState(null)
+  const [tab, setTab] = useState('bids')
   const [feed, setFeed] = useState([])
+  const [comments, setComments] = useState([])
+  const [unreadComments, setUnreadComments] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [sending, setSending] = useState(false)
+  const [commentError, setCommentError] = useState(null)
   const [connection, setConnection] = useState('connecting')
   const [now, setNow] = useState(() => Date.now())
   const hideLauncher = useHideNearFooter()
+  const commentsEndRef = useRef(null)
+  const tabRef = useRef(tab)
+  tabRef.current = tab
 
   useEffect(() => {
     let cancelled = false
@@ -118,12 +174,19 @@ export function AuctionRoom() {
   useEffect(() => {
     if (!open || !activeId) return undefined
     let cancelled = false
-    const socket = getChatSocket()
+    const socket = getRealtimeSocket()
 
     const loadFeed = () => {
       getAuctionFeed(activeId)
         .then((bids) => {
           if (!cancelled) setFeed(bids)
+        })
+        .catch(() => {})
+    }
+    const loadComments = () => {
+      getAuctionComments(activeId)
+        .then((items) => {
+          if (!cancelled) setComments(items.slice().reverse())
         })
         .catch(() => {})
     }
@@ -133,6 +196,7 @@ export function AuctionRoom() {
       setConnection('live')
       socket.emit('auction:watch')
       loadFeed()
+      loadComments()
     }
     const handleDisconnect = () => setConnection('offline')
 
@@ -141,13 +205,27 @@ export function AuctionRoom() {
         current.map((auction) => (auction.id === auctionId ? { ...auction, currentPrice, bidCount, nextMinBid } : auction)),
       )
       if (auctionId !== activeId) return
-      setFeed((current) => (current.some((existing) => existing.id === bid.id) ? current : [bid, ...current].slice(0, 30)))
+      setFeed((current) => (current.some((existing) => existing.id === bid.id) ? current : [bid, ...current].slice(0, KEEP_BIDS)))
+    }
+    const handleComment = ({ auctionId, comment }) => {
+      if (auctionId !== activeId) return
+      setComments((current) =>
+        current.some((existing) => existing.id === comment.id) ? current : [...current, comment].slice(-KEEP_COMMENTS),
+      )
+      if (tabRef.current !== 'comments') setUnreadComments(true)
+    }
+    const handleCommentDeleted = ({ auctionId, commentId }) => {
+      if (auctionId !== activeId) return
+      setComments((current) => current.filter((comment) => comment.id !== commentId))
     }
 
     setFeed([])
+    setComments([])
     socket.on('connect', handleConnect)
     socket.on('disconnect', handleDisconnect)
     socket.on('auction:bid', handleBid)
+    socket.on('auction:comment', handleComment)
+    socket.on('auction:comment-deleted', handleCommentDeleted)
     if (socket.connected) {
       handleConnect()
     } else {
@@ -160,9 +238,39 @@ export function AuctionRoom() {
       socket.off('connect', handleConnect)
       socket.off('disconnect', handleDisconnect)
       socket.off('auction:bid', handleBid)
+      socket.off('auction:comment', handleComment)
+      socket.off('auction:comment-deleted', handleCommentDeleted)
       if (socket.connected) socket.emit('auction:unwatch')
     }
   }, [open, activeId])
+
+  useEffect(() => {
+    if (open && tab === 'comments') commentsEndRef.current?.scrollIntoView({ block: 'end' })
+  }, [open, tab, comments])
+
+  const showTab = (next) => {
+    setTab(next)
+    if (next === 'comments') setUnreadComments(false)
+  }
+
+  const handleSendComment = async (event) => {
+    event.preventDefault()
+    const body = draft.trim()
+    if (!body || sending) return
+    setSending(true)
+    setCommentError(null)
+    try {
+      const comment = await postAuctionComment(activeId, body)
+      setDraft('')
+      setComments((current) =>
+        current.some((existing) => existing.id === comment.id) ? current : [...current, comment].slice(-KEEP_COMMENTS),
+      )
+    } catch (error) {
+      setCommentError(error.message)
+    } finally {
+      setSending(false)
+    }
+  }
 
   // Sin una subasta en curso no se muestra. El contacto general va por el botón de WhatsApp (siempre visible).
   if (!selected) return null
@@ -189,7 +297,7 @@ export function AuctionRoom() {
       </button>
 
       {open && (
-        <div className="animate-fade-up fixed bottom-24 left-5 z-[150] flex h-[32rem] max-h-[calc(100dvh-8rem)] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-gold/20 bg-charcoal shadow-2xl shadow-black/50 sm:bottom-28 sm:left-6">
+        <div className="animate-fade-up fixed bottom-24 left-5 z-[150] flex h-[34rem] max-h-[calc(100dvh-8rem)] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-2xl border border-gold/20 bg-charcoal shadow-2xl shadow-black/50 sm:bottom-28 sm:left-6">
           <div className="flex items-center justify-between border-b border-ivory/5 px-4 py-3">
             <div>
               <h3 className="font-display text-base text-ivory">Subasta en vivo</h3>
@@ -246,26 +354,83 @@ export function AuctionRoom() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between px-4 pb-1 pt-3 text-xs uppercase tracking-widest-plus text-ivory-dim">
-            <span>Pujas</span>
-            <span>{selected.bidCount}</span>
+          <div className="flex border-b border-ivory/5">
+            <TabButton active={tab === 'bids'} onClick={() => showTab('bids')}>
+              Pujas
+            </TabButton>
+            <TabButton active={tab === 'comments'} onClick={() => showTab('comments')} dot={unreadComments}>
+              Comentarios
+            </TabButton>
           </div>
 
-          <ul aria-live="polite" className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 pb-3">
-            {feed.length === 0 ? (
-              <li className="m-auto text-center text-sm text-ivory-dim">
-                {selected.bidCount > 0 ? 'Cargando pujas...' : 'Aún no hay pujas. ¡Sé el primero en pujar!'}
-              </li>
-            ) : (
-              feed.map((bid, index) => <BidRow key={bid.id} bid={bid} isTop={index === 0} now={now} />)
-            )}
-          </ul>
+          {tab === 'bids' ? (
+            <>
+              <ul aria-live="polite" className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-3">
+                {feed.length === 0 ? (
+                  <li className="m-auto text-center text-sm text-ivory-dim">
+                    {selected.bidCount > 0 ? 'Cargando pujas...' : 'Aún no hay pujas. ¡Sé el primero en pujar!'}
+                  </li>
+                ) : (
+                  feed.map((bid, index) => <BidRow key={bid.id} bid={bid} isTop={index === 0} now={now} />)
+                )}
+              </ul>
 
-          <div className="border-t border-ivory/5 p-3">
-            <Button to={`/subastas/${selected.slug}`} variant="primary" size="sm" fullWidth onClick={() => setOpen(false)}>
-              Pujar en esta subasta
-            </Button>
-          </div>
+              <div className="border-t border-ivory/5 p-3">
+                <Button to={`/subastas/${selected.slug}`} variant="primary" size="sm" fullWidth onClick={() => setOpen(false)}>
+                  Pujar en esta subasta
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <ul aria-live="polite" className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-3">
+                {comments.length === 0 ? (
+                  <li className="m-auto text-center text-sm text-ivory-dim">Aún no hay comentarios. ¡Escribe el primero!</li>
+                ) : (
+                  comments.map((comment) => <CommentRow key={comment.id} comment={comment} now={now} />)
+                )}
+                <li ref={commentsEndRef} aria-hidden="true" />
+              </ul>
+
+              {isAuthenticated ? (
+                <form onSubmit={handleSendComment} className="border-t border-ivory/5 p-3">
+                  {commentError && <p className="mb-2 text-xs text-danger">{commentError}</p>}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={draft}
+                      maxLength={MAX_COMMENT_LENGTH}
+                      onChange={(event) => setDraft(event.target.value)}
+                      placeholder="Escribe un comentario..."
+                      aria-label="Escribe un comentario"
+                      className="min-w-0 flex-1 rounded-full border border-ivory/10 bg-ink px-4 py-2 text-sm text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      aria-label="Enviar comentario"
+                      disabled={sending || !draft.trim()}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-on-gold transition-transform hover:scale-105 disabled:opacity-40"
+                    >
+                      <SendIcon />
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="border-t border-ivory/5 p-3">
+                  <Button
+                    to="/login"
+                    state={{ from: location.pathname }}
+                    variant="secondary"
+                    size="sm"
+                    fullWidth
+                    onClick={() => setOpen(false)}
+                  >
+                    Inicia sesión para comentar
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
     </>

@@ -158,7 +158,7 @@ export function AdminPromotions() {
           {product ? (
             <div className="mt-4 flex items-center gap-3 rounded-lg border border-ivory/10 bg-ink p-3">
               {product.image && (
-                <img src={product.image} alt="" className="h-12 w-12 shrink-0 rounded-md bg-white object-contain p-1" />
+                <img src={product.image} alt="" loading="lazy" decoding="async" className="h-12 w-12 shrink-0 rounded-md bg-white object-contain p-1" />
               )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-ivory">{product.name}</p>

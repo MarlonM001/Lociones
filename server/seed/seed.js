@@ -59,8 +59,8 @@ function resolveProductImage(categoryId, name) {
  * ficha de producto.
  */
 const SECOND_ANGLE_IMAGES = {
-  arabia: { 'Amber Oud Gold Edition': 'amber-oud-gold-edition-caja.png' },
-  caballero: { 'Xerjoff Erba Pura': 'xerjoff-erba-pura-caja.png' },
+  arabia: { 'Amber Oud Gold Edition': 'amber-oud-gold-edition-caja.webp' },
+  caballero: { 'Xerjoff Erba Pura': 'xerjoff-erba-pura-caja.webp' },
 }
 
 function resolveProductImages(categoryId, name, mainImage) {

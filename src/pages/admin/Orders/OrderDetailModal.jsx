@@ -112,7 +112,7 @@ export function OrderDetailModal({ order, onClose }) {
             {order.items.map((item) => (
               <li key={item.productId} className="flex items-center gap-3 py-3">
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white p-1">
-                  {item.image && <img src={item.image} alt="" className="h-full w-full object-contain" />}
+                  {item.image && <img src={item.image} alt="" loading="lazy" decoding="async" className="h-full w-full object-contain" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-ivory">{item.name}</p>

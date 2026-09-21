@@ -131,6 +131,8 @@ export function Product() {
               <img
                 src={product.images[activeImage] ?? product.image}
                 alt={product.name}
+                fetchPriority="high"
+                decoding="async"
                 className="h-full w-full object-contain object-center"
               />
             )}
@@ -146,7 +148,7 @@ export function Product() {
                     activeImage === index ? 'border-gold' : 'border-ivory/10'
                   }`}
                 >
-                  <img src={image} alt="" className="h-full w-full object-contain object-center" />
+                  <img src={image} alt="" loading="lazy" decoding="async" className="h-full w-full object-contain object-center" />
                 </button>
               ))}
               {notes.length > 0 && (

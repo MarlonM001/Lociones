@@ -27,6 +27,7 @@ export function AuctionCard({ auction }) {
           src={image}
           alt={auction.title}
           loading="lazy"
+          decoding="async"
           className="h-full w-full object-contain object-center transition-transform duration-500 group-hover:scale-110"
         />
         <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-wide ${phaseInfo.className}`}>

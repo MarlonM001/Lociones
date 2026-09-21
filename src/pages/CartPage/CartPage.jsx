@@ -36,7 +36,7 @@ function OrderSummary({ items, subtotal, showItems }) {
           {items.map((item) => (
             <div key={item.productId} className="flex items-center gap-3">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white p-1">
-                <img src={item.image} alt={item.name} className="h-full w-full object-contain object-center" />
+                <img src={item.image} alt={item.name} loading="lazy" decoding="async" className="h-full w-full object-contain object-center" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-ivory">{item.name}</p>

@@ -159,7 +159,7 @@ export function AdminBestsellers() {
                   onClick={() => handleAdd(product)}
                   className="flex w-full items-center gap-3 border-b border-ivory/5 px-4 py-3 text-left transition-colors last:border-0 hover:bg-ivory/5 disabled:opacity-50"
                 >
-                  <img src={product.image} alt="" className="h-10 w-10 rounded-lg bg-white object-contain p-1" />
+                  <img src={product.image} alt="" loading="lazy" decoding="async" className="h-10 w-10 rounded-lg bg-white object-contain p-1" />
                   <span className="flex-1">
                     <span className="block text-sm text-ivory">{product.name}</span>
                     <span className="block text-xs text-ivory-dim">

@@ -156,6 +156,8 @@ export function AdminAuctions() {
                       <img
                         src={auction.image || auction.items[0]?.product.image}
                         alt={auction.title}
+                        loading="lazy"
+                        decoding="async"
                         className="h-12 w-12 rounded-lg bg-white object-contain p-1"
                       />
                     </td>

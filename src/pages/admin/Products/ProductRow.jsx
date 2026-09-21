@@ -7,7 +7,7 @@ export function ProductRow({ product, onEdit, onToggleActive, onDelete }) {
   return (
     <tr className="border-b border-ivory/5 last:border-0">
       <td className="px-4 py-3">
-        <img src={product.image} alt={product.name} className="h-12 w-12 rounded-lg bg-white object-contain p-1" />
+        <img src={product.image} alt={product.name} loading="lazy" decoding="async" className="h-12 w-12 rounded-lg bg-white object-contain p-1" />
       </td>
       <td className="px-4 py-3 text-sm text-ivory">
         <div className="flex items-center gap-2">

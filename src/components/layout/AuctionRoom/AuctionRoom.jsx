@@ -341,7 +341,7 @@ export function AuctionRoom() {
 
           <div className="flex items-center gap-3 border-b border-ivory/5 px-4 py-3">
             {image && (
-              <img src={image} alt="" className="h-16 w-16 shrink-0 rounded-lg bg-white object-contain object-center p-1" />
+              <img src={image} alt="" loading="lazy" decoding="async" className="h-16 w-16 shrink-0 rounded-lg bg-white object-contain object-center p-1" />
             )}
             <div className="min-w-0 flex-1">
               <p className="line-clamp-2 text-sm text-ivory">{selected.title}</p>

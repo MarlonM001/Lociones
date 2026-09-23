@@ -77,9 +77,9 @@ router.post(
   uploadProductImages,
   verifyImageSignatures,
   asyncHandler(async (req, res) => {
-    const imageUrl = req.files?.image?.[0] ? publicUploadUrl('products', req.files.image[0].filename) : undefined
+    const imageUrl = req.files?.image?.[0] ? await publicUploadUrl('product-images', 'products', req.files.image[0]) : undefined
     const bestsellerImageUrl = req.files?.bestsellerImage?.[0]
-      ? publicUploadUrl('products', req.files.bestsellerImage[0].filename)
+      ? await publicUploadUrl('product-images', 'products', req.files.bestsellerImage[0])
       : undefined
     const product = await productsService.createProduct({
       ...req.body,
@@ -101,9 +101,9 @@ router.patch(
     const updates = { ...req.body }
     if (typeof updates.active === 'string') updates.active = updates.active === 'true'
     if (typeof updates.isBestseller === 'string') updates.isBestseller = updates.isBestseller === 'true'
-    if (req.files?.image?.[0]) updates.imageUrl = publicUploadUrl('products', req.files.image[0].filename)
+    if (req.files?.image?.[0]) updates.imageUrl = await publicUploadUrl('product-images', 'products', req.files.image[0])
     if (req.files?.bestsellerImage?.[0]) {
-      updates.bestsellerImageUrl = publicUploadUrl('products', req.files.bestsellerImage[0].filename)
+      updates.bestsellerImageUrl = await publicUploadUrl('product-images', 'products', req.files.bestsellerImage[0])
     }
     const product = await productsService.updateProduct(Number(req.params.id), updates)
     res.json(product)

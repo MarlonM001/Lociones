@@ -4,7 +4,6 @@ import { requireAuth, requireAdmin, attachUserIfPresent } from '../middleware/au
 import { uploadAuctionImage, verifyImageSignatures, publicUploadUrl } from '../middleware/upload.js'
 import { ApiError } from '../utils/ApiError.js'
 import * as auctionsService from '../services/auctions.service.js'
-import { broadcastAuctionBid, broadcastAuctionComment, broadcastAuctionCommentDeleted } from '../realtime/liveEvents.js'
 import * as commentsService from '../services/auctionComments.service.js'
 import { createCounter, rateLimitByIp, tooManyRequests } from '../middleware/rateLimit.js'
 
@@ -81,7 +80,7 @@ router.post(
   uploadAuctionImage.single('image'),
   verifyImageSignatures,
   asyncHandler(async (req, res) => {
-    const imageUrl = req.file ? publicUploadUrl('auctions', req.file.filename) : undefined
+    const imageUrl = req.file ? await publicUploadUrl('product-images', 'auctions', req.file) : undefined
     const items = req.body.items ? parseItems(req.body.items) : []
     const auction = await auctionsService.createAuction({ ...req.body, imageUrl, items })
     res.status(201).json(auction)
@@ -132,7 +131,6 @@ router.post(
   asyncHandler(async (req, res) => {
     const auctionId = parseAuctionId(req)
     const comment = await commentsService.addComment({ auctionId, userId: req.user.id, body: req.body?.body })
-    broadcastAuctionComment({ auctionId, comment })
     res.status(201).json(comment)
   }),
 )
@@ -146,7 +144,6 @@ router.delete(
     const commentId = Number(req.params.commentId)
     if (!Number.isInteger(commentId) || commentId <= 0) throw ApiError.badRequest('Comentario no válido.')
     await commentsService.deleteComment(auctionId, commentId)
-    broadcastAuctionCommentDeleted({ auctionId, commentId })
     res.status(204).end()
   }),
 )
@@ -164,17 +161,10 @@ router.post(
   '/:id/bids',
   requireAuth,
   asyncHandler(async (req, res) => {
-    const { lastBid, ...auction } = await auctionsService.placeBid({
+    const { lastBid: _lastBid, ...auction } = await auctionsService.placeBid({
       auctionId: Number(req.params.id),
       userId: req.user.id,
       amount: req.body.amount,
-    })
-    broadcastAuctionBid({
-      auctionId: auction.id,
-      bid: lastBid,
-      currentPrice: auction.currentPrice,
-      bidCount: auction.bidCount,
-      nextMinBid: auction.nextMinBid,
     })
     res.status(201).json(auction)
   }),
@@ -188,7 +178,7 @@ router.patch(
   verifyImageSignatures,
   asyncHandler(async (req, res) => {
     const updates = { ...req.body }
-    if (req.file) updates.imageUrl = publicUploadUrl('auctions', req.file.filename)
+    if (req.file) updates.imageUrl = await publicUploadUrl('product-images', 'auctions', req.file)
     if (updates.items) updates.items = parseItems(updates.items)
     const auction = await auctionsService.updateAuction(Number(req.params.id), updates)
     res.json(auction)

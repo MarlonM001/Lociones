@@ -9,4 +9,4 @@ Disallow: /seguimiento
 Disallow: /login
 Disallow: /registro
 
-Sitemap: https://lociones-sable.vercel.app/sitemap.xml
+Sitemap: https://essencepolar.com/sitemap.xml

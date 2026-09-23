@@ -32,14 +32,16 @@ export function Catalog({ topSellers = false }) {
 
   const [allProducts, setAllProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(() => searchParams.get('q') ?? '')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
-  // Al pasar de una categoría, familia o "Top ventas" a otra, el texto de búsqueda no se arrastra.
+  // Al pasar de una categoría, familia o "Top ventas" a otra, el texto de búsqueda se retoma de la URL
+  // (?q=...), por ejemplo cuando llega desde el buscador de la barra de navegación.
   const familyParam = searchParams.get('familia')
+  const queryParam = searchParams.get('q') ?? ''
   useEffect(() => {
-    setSearch('')
-  }, [categorySlug, familyParam, topSellers])
+    setSearch(queryParam)
+  }, [categorySlug, familyParam, topSellers, queryParam])
 
   const pageTitle = topSellers
     ? 'Top ventas'

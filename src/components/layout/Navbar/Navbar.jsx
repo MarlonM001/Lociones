@@ -42,6 +42,15 @@ function MoonIcon() {
   )
 }
 
+function SearchIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function MenuIcon({ open }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -57,6 +66,7 @@ function MenuIcon({ open }) {
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const { totalItems } = useCart()
   const { user, isAuthenticated, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
@@ -68,6 +78,13 @@ export function Navbar() {
     logout()
     setMobileOpen(false)
     navigate('/')
+  }
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault()
+    const term = search.trim()
+    navigate(term ? `/catalogo?q=${encodeURIComponent(term)}` : '/catalogo')
+    setMobileOpen(false)
   }
 
   useEffect(() => {
@@ -111,6 +128,20 @@ export function Navbar() {
             </NavLink>
           ))}
         </div>
+
+        <form onSubmit={handleSearchSubmit} className="relative hidden md:block">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ivory-dim/60">
+            <SearchIcon />
+          </span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar loción..."
+            aria-label="Buscar loción"
+            className="w-40 rounded-full border border-ivory/10 bg-charcoal py-2 pl-9 pr-4 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none lg:w-52"
+          />
+        </form>
 
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
@@ -184,6 +215,19 @@ export function Navbar() {
 
       {mobileOpen && (
         <div className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-t border-gold/10 bg-ink/98 px-4 pb-6 pt-2 backdrop-blur-md lg:hidden">
+          <form onSubmit={handleSearchSubmit} className="relative pt-2 md:hidden">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ivory-dim/60">
+              <SearchIcon />
+            </span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar loción..."
+              aria-label="Buscar loción"
+              className="w-full rounded-full border border-ivory/10 bg-charcoal py-2.5 pl-9 pr-4 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none"
+            />
+          </form>
           <div className="flex flex-col gap-1 pt-2">
             {NAV_LINKS.map((link) => (
               <NavLink

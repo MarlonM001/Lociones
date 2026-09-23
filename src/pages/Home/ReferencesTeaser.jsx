@@ -88,16 +88,6 @@ export function ReferencesTeaser() {
         </div>
       )}
 
-      {!hasRealReferences && (
-        <p className="mt-6 text-center text-xs text-ivory-dim">
-          Videos de ejemplo de{' '}
-          <a href="https://mixkit.co" target="_blank" rel="noopener noreferrer" className="underline hover:text-ivory">
-            Mixkit
-          </a>
-          .
-        </p>
-      )}
-
       <div className="mt-8 flex justify-center">
         <Button to="/referencias" variant="secondary">
           Ver todas las referencias

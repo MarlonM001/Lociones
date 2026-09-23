@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { STORE_CONFIG } from '@/config/store'
 import { useCart } from '@/hooks/useCart'
 import { useAuth } from '@/hooks/useAuth'
@@ -71,6 +71,7 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
+  const location = useLocation()
   const isAdmin = user?.role === 'admin'
   const { pending } = usePendingOrders()
 
@@ -80,10 +81,24 @@ export function Navbar() {
     navigate('/')
   }
 
+  // Ya estando en el catálogo, reemplaza la entrada del historial (no una por cada letra);
+  // si aún no estás ahí, la primera letra sí navega para que veas los resultados.
+  const goToSearch = (term) => {
+    const trimmed = term.trim()
+    const path = trimmed ? `/catalogo?q=${encodeURIComponent(trimmed)}` : '/catalogo'
+    navigate(path, { replace: location.pathname === '/catalogo' })
+  }
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value
+    setSearch(value)
+    goToSearch(value)
+  }
+
   const handleSearchSubmit = (event) => {
     event.preventDefault()
-    const term = search.trim()
-    navigate(term ? `/catalogo?q=${encodeURIComponent(term)}` : '/catalogo')
+    goToSearch(search)
+    setSearch('')
     setMobileOpen(false)
   }
 
@@ -136,7 +151,7 @@ export function Navbar() {
           <input
             type="search"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={handleSearchChange}
             placeholder="Buscar loción..."
             aria-label="Buscar loción"
             className="w-40 rounded-full border border-ivory/10 bg-charcoal py-2 pl-9 pr-4 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none lg:w-52"
@@ -222,7 +237,7 @@ export function Navbar() {
             <input
               type="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={handleSearchChange}
               placeholder="Buscar loción..."
               aria-label="Buscar loción"
               className="w-full rounded-full border border-ivory/10 bg-charcoal py-2.5 pl-9 pr-4 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none"

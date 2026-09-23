@@ -90,33 +90,22 @@ export function Catalog({ topSellers = false }) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <span className="text-xs uppercase tracking-widest-plus text-gold">Catálogo</span>
-          <h1 className="mt-1 font-display text-3xl text-ivory sm:text-4xl">
-            {topSellers
-              ? 'Top ventas'
-              : activeFamily
-                ? `Perfumes ${activeFamily.name.toLowerCase()}`
-                : activeCategory
-                  ? activeCategory.name
-                  : 'Todas las lociones'}
-          </h1>
-          <p className="mt-1 text-sm text-ivory-dim">
-            {topSellers
-              ? `Las ${filteredProducts.length} lociones favoritas de nuestros clientes`
-              : countLabel(filteredProducts.length)}
-          </p>
-        </div>
-
-        <input
-          type="search"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Buscar loción..."
-          aria-label="Buscar loción"
-          className="w-full rounded-full border border-ivory/10 bg-charcoal px-4 py-2 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none sm:w-64"
-        />
+      <div className="mb-8">
+        <span className="text-xs uppercase tracking-widest-plus text-gold">Catálogo</span>
+        <h1 className="mt-1 font-display text-3xl text-ivory sm:text-4xl">
+          {topSellers
+            ? 'Top ventas'
+            : activeFamily
+              ? `Perfumes ${activeFamily.name.toLowerCase()}`
+              : activeCategory
+                ? activeCategory.name
+                : 'Todas las lociones'}
+        </h1>
+        <p className="mt-1 text-sm text-ivory-dim">
+          {topSellers
+            ? `Las ${filteredProducts.length} lociones favoritas de nuestros clientes`
+            : countLabel(filteredProducts.length)}
+        </p>
       </div>
 
       <div className="mb-8 flex flex-wrap gap-2">

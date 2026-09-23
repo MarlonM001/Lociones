@@ -3,7 +3,6 @@ import express from 'express'
 import cors from 'cors'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { UPLOAD_DIR } from './middleware/upload.js'
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js'
 import authRoutes from './routes/auth.routes.js'
 import productsRoutes from './routes/products.routes.js'
@@ -13,9 +12,6 @@ import promotionsRoutes from './routes/promotions.routes.js'
 import celebrationRoutes from './routes/celebration.routes.js'
 import auctionsRoutes from './routes/auctions.routes.js'
 import chatRoutes from './routes/chat.routes.js'
-import { attachChatSocket } from './realtime/chatSocket.js'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export function createApp() {
   const app = express()
@@ -41,7 +37,6 @@ export function createApp() {
   )
 
   app.use(express.json({ limit: '100kb' }))
-  app.use('/uploads', express.static(UPLOAD_DIR))
 
   app.get('/api/health', (req, res) => res.json({ ok: true }))
 
@@ -65,6 +60,5 @@ const isMainModule = process.argv[1] && fileURLToPath(import.meta.url) === path.
 if (isMainModule) {
   const app = createApp()
   const port = process.env.PORT ?? 4000
-  const server = app.listen(port, () => console.log(`API escuchando en http://localhost:${port}`))
-  attachChatSocket(server)
+  app.listen(port, () => console.log(`API escuchando en http://localhost:${port}`))
 }

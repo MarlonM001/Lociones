@@ -6,8 +6,10 @@ import {
   postAuctionComment,
   deleteAuctionComment,
 } from '@/services/auctions'
-import { getRealtimeSocket } from '@/services/realtime/socket'
 import { formatCurrency } from '@/utils/formatCurrency'
+
+/** Cada cuánto se refresca la sala mientras está abierta. */
+const ROOM_POLL_MS = 4000
 import { useToast } from '@/hooks/useToast'
 import { Loading } from '@/components/ui/Loading'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -77,7 +79,6 @@ export function AdminAuctionRoom() {
   useEffect(() => {
     if (!selectedId) return undefined
     let cancelled = false
-    const socket = getRealtimeSocket()
 
     const loadBids = () =>
       getAuctionBidsAdmin(selectedId)
@@ -88,40 +89,20 @@ export function AdminAuctionRoom() {
         .then((items) => !cancelled && setComments(items.slice().reverse()))
         .catch(() => {})
 
-    const handleConnect = () => {
-      socket.emit('auction:watch')
-      loadBids()
-      loadComments()
-    }
-    const handleBid = ({ auctionId }) => {
-      if (auctionId !== selectedId) return
-      loadBids()
-      loadAuctions().catch(() => {})
-    }
-    const handleCommentChange = ({ auctionId }) => {
-      if (auctionId === selectedId) loadComments()
-    }
-
     setBids([])
     setComments([])
-    socket.on('connect', handleConnect)
-    socket.on('auction:bid', handleBid)
-    socket.on('auction:comment', handleCommentChange)
-    socket.on('auction:comment-deleted', handleCommentChange)
-    if (socket.connected) handleConnect()
-    else {
+    loadBids()
+    loadComments()
+
+    const interval = setInterval(() => {
       loadBids()
       loadComments()
-      socket.connect()
-    }
+      loadAuctions().catch(() => {})
+    }, ROOM_POLL_MS)
 
     return () => {
       cancelled = true
-      socket.off('connect', handleConnect)
-      socket.off('auction:bid', handleBid)
-      socket.off('auction:comment', handleCommentChange)
-      socket.off('auction:comment-deleted', handleCommentChange)
-      if (socket.connected) socket.emit('auction:unwatch')
+      clearInterval(interval)
     }
   }, [selectedId, loadAuctions])
 

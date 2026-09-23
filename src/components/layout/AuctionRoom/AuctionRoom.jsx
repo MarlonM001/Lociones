@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { getAuctions, getAuctionFeed, getAuctionComments, postAuctionComment } from '@/services/auctions'
-import { getRealtimeSocket } from '@/services/realtime/socket'
 import { useAuth } from '@/hooks/useAuth'
 import { useCountdown } from '@/hooks/useCountdown'
 import { useHideNearFooter } from '@/hooks/useHideNearFooter'
@@ -10,6 +9,8 @@ import { Price } from '@/components/ui/Price'
 
 /** Cada cuánto se revisa si hay (o dejó de haber) una subasta activa mientras el sitio sigue abierto. */
 const AUCTION_POLL_MS = 60000
+/** Con la sala abierta se refresca más seguido: pujas, comentarios y precio casi al instante. */
+const ROOM_POLL_MS = 4000
 const MAX_COMMENT_LENGTH = 300
 const KEEP_BIDS = 30
 const KEEP_COMMENTS = 50
@@ -174,73 +175,51 @@ export function AuctionRoom() {
   useEffect(() => {
     if (!open || !activeId) return undefined
     let cancelled = false
-    const socket = getRealtimeSocket()
 
     const loadFeed = () => {
       getAuctionFeed(activeId)
         .then((bids) => {
-          if (!cancelled) setFeed(bids)
+          if (!cancelled) setFeed(bids.slice(0, KEEP_BIDS))
         })
         .catch(() => {})
     }
     const loadComments = () => {
       getAuctionComments(activeId)
         .then((items) => {
-          if (!cancelled) setComments(items.slice().reverse())
+          if (cancelled) return
+          const sorted = items.slice().reverse().slice(-KEEP_COMMENTS)
+          setComments((current) => {
+            if (sorted.length > current.length && tabRef.current !== 'comments') setUnreadComments(true)
+            return sorted
+          })
+        })
+        .catch(() => {})
+    }
+    // El precio/conteo de la subasta activa se refresca junto con la sala, más seguido que el poll de fondo.
+    const loadAuctions = () => {
+      getAuctions()
+        .then((all) => {
+          if (!cancelled) setAuctions(all.filter((auction) => auction.phase === 'active'))
         })
         .catch(() => {})
     }
 
-    // Al (re)conectar se pide el historial otra vez: así no se pierde lo que pasó mientras se cayó la conexión.
-    const handleConnect = () => {
-      setConnection('live')
-      socket.emit('auction:watch')
-      loadFeed()
-      loadComments()
-    }
-    const handleDisconnect = () => setConnection('offline')
-
-    const handleBid = ({ auctionId, bid, currentPrice, bidCount, nextMinBid }) => {
-      setAuctions((current) =>
-        current.map((auction) => (auction.id === auctionId ? { ...auction, currentPrice, bidCount, nextMinBid } : auction)),
-      )
-      if (auctionId !== activeId) return
-      setFeed((current) => (current.some((existing) => existing.id === bid.id) ? current : [bid, ...current].slice(0, KEEP_BIDS)))
-    }
-    const handleComment = ({ auctionId, comment }) => {
-      if (auctionId !== activeId) return
-      setComments((current) =>
-        current.some((existing) => existing.id === comment.id) ? current : [...current, comment].slice(-KEEP_COMMENTS),
-      )
-      if (tabRef.current !== 'comments') setUnreadComments(true)
-    }
-    const handleCommentDeleted = ({ auctionId, commentId }) => {
-      if (auctionId !== activeId) return
-      setComments((current) => current.filter((comment) => comment.id !== commentId))
-    }
-
     setFeed([])
     setComments([])
-    socket.on('connect', handleConnect)
-    socket.on('disconnect', handleDisconnect)
-    socket.on('auction:bid', handleBid)
-    socket.on('auction:comment', handleComment)
-    socket.on('auction:comment-deleted', handleCommentDeleted)
-    if (socket.connected) {
-      handleConnect()
-    } else {
-      setConnection('connecting')
-      socket.connect()
-    }
+    setConnection('connecting')
+    loadFeed()
+    loadComments()
+    setConnection('live')
+
+    const interval = setInterval(() => {
+      loadFeed()
+      loadComments()
+      loadAuctions()
+    }, ROOM_POLL_MS)
 
     return () => {
       cancelled = true
-      socket.off('connect', handleConnect)
-      socket.off('disconnect', handleDisconnect)
-      socket.off('auction:bid', handleBid)
-      socket.off('auction:comment', handleComment)
-      socket.off('auction:comment-deleted', handleCommentDeleted)
-      if (socket.connected) socket.emit('auction:unwatch')
+      clearInterval(interval)
     }
   }, [open, activeId])
 

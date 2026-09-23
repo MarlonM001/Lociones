@@ -1,4 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000'
+// Sin VITE_API_URL, las peticiones van al mismo origen (/api/...): así funciona en producción,
+// donde frontend y backend son el mismo deploy de Vercel. Para desarrollo local con el backend
+// aparte (server/npm run dev en otro puerto) sí hace falta poner VITE_API_URL en .env.local.
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? ''
 const TOKEN_KEY = 'essence_auth_token'
 
 export function getToken() {

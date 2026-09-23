@@ -1,7 +1,6 @@
 import { Router } from 'express'
 import { asyncHandler } from '../middleware/errorHandler.js'
 import { requireAuth, requireAdmin } from '../middleware/auth.js'
-import fs from 'node:fs/promises'
 import { uploadReferenceMedia, verifyImageSignatures, publicUploadUrl, removeUploadedFile } from '../middleware/upload.js'
 import { ApiError } from '../utils/ApiError.js'
 import * as referencesService from '../services/references.service.js'
@@ -40,20 +39,15 @@ router.post(
   asyncHandler(async (req, res) => {
     if (!req.file) throw ApiError.badRequest('Selecciona una foto para subir.')
 
-    try {
-      await referencesService.assertCanUpload({ userId: req.user.id, isAdmin: req.user.role === 'admin' })
-      const reference = await referencesService.addReference({
-        ...req.body,
-        mediaUrl: publicUploadUrl('references', req.file.filename),
-        createdBy: req.user.id,
-        isAdmin: req.user.role === 'admin',
-      })
-      res.status(201).json(reference)
-    } catch (error) {
-      // No dejar el archivo huérfano si la referencia no se llegó a guardar.
-      await fs.unlink(req.file.path).catch(() => {})
-      throw error
-    }
+    await referencesService.assertCanUpload({ userId: req.user.id, isAdmin: req.user.role === 'admin' })
+    const mediaUrl = await publicUploadUrl('reference-media', 'references', req.file)
+    const reference = await referencesService.addReference({
+      ...req.body,
+      mediaUrl,
+      createdBy: req.user.id,
+      isAdmin: req.user.role === 'admin',
+    })
+    res.status(201).json(reference)
   }),
 )
 

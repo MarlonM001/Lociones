@@ -1,15 +1,15 @@
 import { ApiError } from '../utils/ApiError.js'
 
 /**
- * IP real del cliente. Detrás del túnel de Cloudflare la conexión siempre llega desde el
- * túnel, así que la IP verdadera viene en `CF-Connecting-IP`. Esa cabecera solo es de fiar
- * cuando el API únicamente es alcanzable a través de Cloudflare; si el servidor queda expuesto
- * directo cualquiera podría falsearla y saltarse los límites. Por eso solo se usa si
- * TRUST_CF_CONNECTING_IP=true en el .env. Sin eso se usa la IP de la conexión.
+ * IP real del cliente. En Vercel las funciones corren detrás de su propio proxy, que pone la IP
+ * real del visitante en `X-Forwarded-For` (primer valor de la lista); esa cabecera no se puede
+ * falsear desde fuera porque Vercel la sobrescribe. Si no está presente (ej. corriendo local),
+ * se usa la IP de la conexión.
  */
 export function getClientIp(req) {
-  const trustCloudflare = process.env.TRUST_CF_CONNECTING_IP === 'true'
-  return (trustCloudflare && req.headers['cf-connecting-ip']) || req.socket?.remoteAddress || 'unknown'
+  const forwardedFor = req.headers['x-forwarded-for']
+  const first = (Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor)?.split(',')[0]?.trim()
+  return first || req.socket?.remoteAddress || 'unknown'
 }
 
 /**

@@ -51,6 +51,15 @@ function SearchIcon() {
   )
 }
 
+function LogoutIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function MenuIcon({ open }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -109,6 +118,12 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Al salir del catálogo (por ejemplo, al abrir el producto que encontraste) el buscador
+  // vuelve a quedar vacío, listo para una nueva búsqueda.
+  useEffect(() => {
+    if (location.pathname !== '/catalogo') setSearch('')
+  }, [location.pathname])
+
   const linkClasses = ({ isActive }) =>
     `text-sm tracking-wide transition-colors duration-200 ${
       isActive ? 'text-gold' : 'text-ivory-dim hover:text-ivory'
@@ -127,7 +142,7 @@ export function Navbar() {
           : 'bg-ink/60 backdrop-blur-sm border-b border-transparent'
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-6 lg:px-8">
         <NavLink
           to="/"
           className="flex shrink-0 items-center gap-1.5 whitespace-nowrap py-2 font-display text-lg tracking-wide text-ivory sm:gap-2 sm:text-2xl sm:tracking-widest"
@@ -136,7 +151,7 @@ export function Navbar() {
           {STORE_CONFIG.name}
         </NavLink>
 
-        <div className="hidden items-center gap-7 lg:flex">
+        <div className="hidden shrink-0 items-center gap-5 lg:flex">
           {NAV_LINKS.map((link) => (
             <NavLink key={link.to} to={link.to} className={linkClasses} end={link.to === '/'}>
               {link.label}
@@ -144,87 +159,94 @@ export function Navbar() {
           ))}
         </div>
 
-        <form onSubmit={handleSearchSubmit} className="relative hidden md:block">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ivory-dim/60">
-            <SearchIcon />
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Buscar loción..."
-            aria-label="Buscar loción"
-            className="w-40 rounded-full border border-ivory/10 bg-charcoal py-2 pl-9 pr-4 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none lg:w-52"
-          />
-        </form>
+        {/* Todo lo de la derecha vive en un solo bloque con `ml-auto`: así el espacio entre
+            secciones (buscador, cuenta/admin, íconos) se mantiene fijo con `gap-3` sin importar
+            cuánto contenido haya (invitado, cliente con sesión o administrador). */}
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          <form onSubmit={handleSearchSubmit} className="relative hidden shrink-0 md:block">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ivory-dim/60">
+              <SearchIcon />
+            </span>
+            <input
+              type="search"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Buscar loción..."
+              aria-label="Buscar loción"
+              className="w-32 rounded-full border border-ivory/10 bg-charcoal py-2 pl-9 pr-4 text-sm text-ivory placeholder:text-ivory-dim/60 focus:border-gold focus:outline-none lg:w-40"
+            />
+          </form>
 
-        <div className="flex items-center gap-4">
           {isAuthenticated ? (
-            <div className="hidden items-center gap-3 sm:flex">
+            <div className="hidden shrink-0 items-center gap-2 whitespace-nowrap border-r border-ivory/10 pr-3 sm:flex">
               {isAdmin && (
                 <NavLink
                   to="/admin"
-                  className="flex items-center gap-2 rounded-full border border-gold/50 px-3 py-1.5 text-sm font-medium text-gold transition-colors hover:bg-gold/10"
+                  className="flex items-center gap-1.5 rounded-full border border-gold/50 px-3 py-1.5 text-sm font-medium text-gold transition-colors hover:bg-gold/10"
                 >
                   Panel
                   <CountBadge count={pending} />
                 </NavLink>
               )}
               <NavLink to="/perfil" className="text-sm text-ivory-dim hover:text-ivory">
-                Hola, <span className="text-ivory">{user.name.split(' ')[0]}</span>
+                {user.name.split(' ')[0]}
               </NavLink>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-sm text-ivory-dim transition-colors hover:text-gold"
+                aria-label="Cerrar sesión"
+                title="Cerrar sesión"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-ivory-dim transition-colors hover:bg-ivory/5 hover:text-gold"
               >
-                Cerrar sesión
+                <LogoutIcon />
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="hidden text-sm text-ivory-dim transition-colors hover:text-ivory sm:inline-block"
+              className="hidden shrink-0 whitespace-nowrap border-r border-ivory/10 pr-3 text-sm text-ivory-dim transition-colors hover:text-ivory sm:inline-block"
             >
               Iniciar sesión
             </button>
           )}
 
-          <button
-            type="button"
-            aria-label={theme === 'dark' ? 'Cambiar a modo día' : 'Cambiar a modo noche'}
-            onClick={toggleTheme}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 hover:text-gold"
-          >
-            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              aria-label={theme === 'dark' ? 'Cambiar a modo día' : 'Cambiar a modo noche'}
+              onClick={toggleTheme}
+              className="flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 hover:text-gold"
+            >
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
 
-          <button
-            type="button"
-            aria-label="Ver carrito"
-            onClick={() => navigate('/carrito')}
-            className="relative flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 hover:text-gold"
-          >
-            <CartIcon />
-            {totalItems > 0 && (
-              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-semibold text-on-gold">
-                {totalItems > 9 ? '9+' : totalItems}
-              </span>
-            )}
-          </button>
+            <button
+              type="button"
+              aria-label="Ver carrito"
+              onClick={() => navigate('/carrito')}
+              className="relative flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 hover:text-gold"
+            >
+              <CartIcon />
+              {totalItems > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[10px] font-semibold text-on-gold">
+                  {totalItems > 9 ? '9+' : totalItems}
+                </span>
+              )}
+            </button>
 
-          <button
-            type="button"
-            aria-label="Abrir menú"
-            className="relative flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 lg:hidden"
-            onClick={() => setMobileOpen((open) => !open)}
-          >
-            <MenuIcon open={mobileOpen} />
-            {isAdmin && pending > 0 && !mobileOpen && (
-              <span aria-hidden="true" className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-600" />
-            )}
-          </button>
+            <button
+              type="button"
+              aria-label="Abrir menú"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full text-ivory transition-colors hover:bg-ivory/5 lg:hidden"
+              onClick={() => setMobileOpen((open) => !open)}
+            >
+              <MenuIcon open={mobileOpen} />
+              {isAdmin && pending > 0 && !mobileOpen && (
+                <span aria-hidden="true" className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-600" />
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 

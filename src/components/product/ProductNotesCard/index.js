@@ -1,1 +1,1 @@
-export { ProductNotesCard } from './ProductNotesCard'
+export { ProductNotesCard, CHIP_COLORS } from './ProductNotesCard'

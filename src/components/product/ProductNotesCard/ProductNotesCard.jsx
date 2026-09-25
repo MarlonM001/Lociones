@@ -1,4 +1,4 @@
-const CHIP_COLORS = [
+export const CHIP_COLORS = [
   '#c8a45c', // gold
   '#c88a8a', // rosa
   '#8fa6b3', // azul grisáceo

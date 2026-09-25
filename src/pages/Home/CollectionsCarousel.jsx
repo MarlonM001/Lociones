@@ -56,15 +56,12 @@ function CollectionCard({ collection }) {
       />
       <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
-      <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
-        <span className="min-w-0">
+      <span className="absolute inset-x-0 bottom-0 p-4">
+        <span className="block min-w-0">
           <span className="block text-sm font-medium text-white/90">Perfumes</span>
           <span className="block truncate font-display text-2xl uppercase tracking-wide text-white sm:text-3xl">
             {collection.name}
           </span>
-        </span>
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold text-on-gold shadow-lg transition-transform duration-300 group-hover:translate-x-1">
-          <ArrowIcon size={18} />
         </span>
       </span>
     </Link>

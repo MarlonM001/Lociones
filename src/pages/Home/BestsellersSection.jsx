@@ -7,6 +7,9 @@ import { Reveal } from '@/components/ui/Reveal'
 
 const ITEMS_PER_SLIDE = 3
 const AUTO_ADVANCE_MS = 5000
+// Mismo límite que /top-ventas: sin esto, agregar más de 12 productos en el panel
+// de administración no los mostraba aquí porque los nuevos siempre quedan al final.
+const BESTSELLERS_LIMIT = 100
 
 function chunk(items, size) {
   const groups = []
@@ -43,7 +46,7 @@ export function BestsellersSection() {
 
   useEffect(() => {
     let cancelled = false
-    getBestsellerProducts(12).then((items) => {
+    getBestsellerProducts(BESTSELLERS_LIMIT).then((items) => {
       if (!cancelled) {
         setProducts(items)
         setLoading(false)

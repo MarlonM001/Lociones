@@ -142,7 +142,7 @@ export function Navbar() {
           : 'bg-ink/60 backdrop-blur-sm border-b border-transparent'
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-6 lg:gap-8 lg:px-8">
         <NavLink
           to="/"
           className="flex shrink-0 items-center gap-1.5 whitespace-nowrap py-2 font-display text-lg tracking-wide text-ivory sm:gap-2 sm:text-2xl sm:tracking-widest"
